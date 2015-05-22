@@ -111,6 +111,41 @@
 //===============================================
 
 
+//===============================================
+// Input Capture interrupts priorities and subpriorities
+//===============================================
+#define IC1_INTERRUPT_PRIORITY          6           // Used in ChinookLib function
+#define IC1_INT_PRIORITY                ipl6auto    // Used in ISR
+#define IC2_INTERRUPT_PRIORITY          4           // Used in ChinookLib function
+#define IC2_INT_PRIORITY                ipl4auto    // Used in ISR
+#define IC3_INTERRUPT_PRIORITY          3           // Used in ChinookLib function
+#define IC3_INT_PRIORITY                ipl3auto    // Used in ISR
+#define IC4_INTERRUPT_PRIORITY          5           // Used in ChinookLib function
+#define IC4_INT_PRIORITY                ipl5auto    // Used in ISR
+#define IC5_INTERRUPT_PRIORITY          5           // Used in ChinookLib function
+#define IC5_INT_PRIORITY                ipl5auto    // Used in ISR
+
+#define IC1_INTERRUPT_SUBPRIORITY       3           // Highest subpriority
+#define IC2_INTERRUPT_SUBPRIORITY       1
+#define IC3_INTERRUPT_SUBPRIORITY       3           // Highest subpriority
+#define IC4_INTERRUPT_SUBPRIORITY       0           // Lowest subpriority
+#define IC5_INTERRUPT_SUBPRIORITY       1           // Lowest subpriority
+//===============================================
+
+
+//===============================================
+// CAN interrupts priorities and subpriorities
+//===============================================
+#define CAN1_INTERRUPT_PRIORITY          4           // Used in ChinookLib function
+#define CAN1_INT_PRIORITY                ipl4auto    // Used in ISR
+#define CAN2_INTERRUPT_PRIORITY          4           // Used in ChinookLib function
+#define CAN2_INT_PRIORITY                ipl4auto    // Used in ISR
+
+#define CAN1_INTERRUPT_SUBPRIORITY       3           // Highest subpriority
+#define CAN2_INTERRUPT_SUBPRIORITY       1
+//===============================================
+
+
 //==============================================================================
 // VARIABLES
 //==============================================================================

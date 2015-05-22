@@ -59,19 +59,19 @@ void InitTimer(void)
 //	Open timers
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%
   timerCounterValue = Timer.Open(TIMER_1, 500, SCALE_US);   // Open Timer 1 with a period of 500 ms
-  timerCounterValue = Timer.Open(TIMER_2, 500, SCALE_US);   // Open Timer 2 with a period of 500 us
-  timerCounterValue = Timer.Open(TIMER_3, 50, SCALE_US);   // Open Timer 3 with a period of 500 ms
-  timerCounterValue = Timer.Open(TIMER_4, 500, SCALE_MS);   // Open Timer 4 with a period of 500 ms
-  timerCounterValue = Timer.Open(TIMER_5, 500, SCALE_US);   // Open Timer 5 with a period of 500 us
+//  timerCounterValue = Timer.Open(TIMER_2, 500, SCALE_US);   // Open Timer 2 with a period of 500 us
+//  timerCounterValue = Timer.Open(TIMER_3, 50, SCALE_US);   // Open Timer 3 with a period of 500 ms
+//  timerCounterValue = Timer.Open(TIMER_4, 500, SCALE_MS);   // Open Timer 4 with a period of 500 ms
+//  timerCounterValue = Timer.Open(TIMER_5, 500, SCALE_US);   // Open Timer 5 with a period of 500 us
   
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //	Configure timer interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   Timer.ConfigInterrupt(TIMER_1, TIMER1_INTERRUPT_PRIORITY, TIMER1_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_1 to the values specified in Interrupt.h
-  Timer.ConfigInterrupt(TIMER_2, TIMER2_INTERRUPT_PRIORITY, TIMER2_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_2 to the values specified in Interrupt.h
-  Timer.ConfigInterrupt(TIMER_3, TIMER3_INTERRUPT_PRIORITY, TIMER3_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_3 to the values specified in Interrupt.h
-  Timer.ConfigInterrupt(TIMER_4, TIMER4_INTERRUPT_PRIORITY, TIMER4_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_4 to the values specified in Interrupt.h
-  Timer.ConfigInterrupt(TIMER_5, TIMER5_INTERRUPT_PRIORITY, TIMER5_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_5 to the values specified in Interrupt.h
+//  Timer.ConfigInterrupt(TIMER_2, TIMER2_INTERRUPT_PRIORITY, TIMER2_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_2 to the values specified in Interrupt.h
+//  Timer.ConfigInterrupt(TIMER_3, TIMER3_INTERRUPT_PRIORITY, TIMER3_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_3 to the values specified in Interrupt.h
+//  Timer.ConfigInterrupt(TIMER_4, TIMER4_INTERRUPT_PRIORITY, TIMER4_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_4 to the values specified in Interrupt.h
+//  Timer.ConfigInterrupt(TIMER_5, TIMER5_INTERRUPT_PRIORITY, TIMER5_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_5 to the values specified in Interrupt.h
 
 }
 
@@ -92,13 +92,13 @@ void InitSpi(void)
   SpiOpenFlags_t oMasterFlags =   SPI_MASTER_MODE
                                 | SPI_16_BITS_CHAR
                                 | SPI_ENHANCED_BUFFER_MODE
-                                | SPI_TX_EVENT_BUFFER_EMPTY
+                                | SPI_TX_EVENT_BUFFER_SR_EMPTY
                                 | SPI_RX_EVENT_BUFFER_NOT_EMPTY
                 ;
   err = Spi.Open(SPI4, oMasterFlags, 5e5);   // Open the SPI4 as a master at a bitrate of 5 MHz
   if (err < 0)                // Check for errors
   {
-    Port.C.SetBits(BIT_1);    // Turn on the LD5 on MAX32
+    
   }
 
   // SPI interrupts not functionnal as of yet
@@ -256,18 +256,17 @@ void InitUart (void)
 //===========================
 void InitCan(void)
 {
-  return;
+  Can.Initialize(CAN1, FALSE);
+  Can.Initialize(CAN2, FALSE);
 }
 
 
 //===========================
 //	INIT I2C
 //===========================
-void InitI2C(void)
+void InitI2c(void)
 {
   I2c.Open(I2C4, I2C_FREQ_400K);
-
-  return;
 }
 
 
@@ -276,7 +275,7 @@ void InitI2C(void)
 //===========================
 void InitWdt(void)
 {
-  return;
+  Wdt.Enable();
 }
 
 
@@ -339,7 +338,17 @@ void InitAdc(void)
 //===========================
 void InitInputCapture(void)
 {
-  return;
+  // Capture every rising edge, 1 interrupt each capture, use the 16 bits Timer 2, capture the first rising edge, Input Capture ON
+  UINT16 config = IC_EVERY_RISE_EDGE | IC_INT_1CAPTURE | IC_TIMER2_SRC | IC_CAP_16BIT | IC_FEDGE_RISE | IC_ON;
+
+  // Capture every rising edge, 1 interrupt each capture, use the 32 bits Timer 23, capture the first rising edge, Input Capture ON
+//  UINT16 config = IC_EVERY_RISE_EDGE | IC_INT_1CAPTURE | IC_CAP_32BIT | IC_FEDGE_RISE | IC_ON;
+
+  InputCapture.Open(IC1, config);
+  InputCapture.Open(IC3, config);
+
+  InputCapture.ConfigInterrupt(IC1, IC1_INTERRUPT_PRIORITY, IC1_INTERRUPT_SUBPRIORITY);
+  InputCapture.ConfigInterrupt(IC3, IC3_INTERRUPT_PRIORITY, IC3_INTERRUPT_SUBPRIORITY);
 }
 
 
@@ -362,23 +371,8 @@ void StartInterrupts(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable UART interrupts             // Not functionnal yet
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//  Uart.EnableRxInterrupts(UART1);   // Enable RX Interrupts for UART1
-//  Uart.EnableTxInterrupts(UART1);   // Enable TX Interrupts for UART1
-//
-//  Uart.EnableRxInterrupts(UART2);   // Enable RX Interrupts for UART2
-//  Uart.EnableTxInterrupts(UART2);   // Enable TX Interrupts for UART2
-//
-//  Uart.EnableRxInterrupts(UART3);   // Enable RX Interrupts for UART3
-//  Uart.EnableTxInterrupts(UART3);   // Enable TX Interrupts for UART3
-//
-//  Uart.EnableRxInterrupts(UART4);   // Enable RX Interrupts for UART4
-//  Uart.EnableTxInterrupts(UART4);   // Enable TX Interrupts for UART4
-//
-//  Uart.EnableRxInterrupts(UART5);   // Enable RX Interrupts for UART5
-//  Uart.EnableTxInterrupts(UART5);   // Enable TX Interrupts for UART5
-//
-//  Uart.EnableRxInterrupts(UART6);   // Enable RX Interrupts for UART6
-//  Uart.EnableTxInterrupts(UART6);   // Enable TX Interrupts for UART6
+  Uart.EnableRxInterrupts (UART6);  // Enable RX Interrupts for UART6
+  Uart.DisableTxInterrupts(UART6);  // Disable TX Interrupts for UART6
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -403,6 +397,13 @@ void StartInterrupts(void)
 // Enable ADC interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //  Adc.EnableInterrupts();   // Works only when not in manual mode
+
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Enable InputCapture interrupts
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//  InputCapture.EnableInterrupt(IC1);
+//  InputCapture.EnableInterrupt(IC3);
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -49,7 +49,7 @@ void InitPorts        (void);
 void InitCan          (void);
 void InitSpi          (void);
 void InitUart         (void);
-void InitI2C          (void);
+void InitI2c          (void);
 void InitSkadi        (void);
 void InitWdt          (void);
 void InitAdc          (void);
@@ -66,7 +66,7 @@ void StartInterrupts  (void);
 #define INIT_CAN            InitCan()
 #define INIT_SPI            InitSpi()
 #define INIT_UART           InitUart()
-#define INIT_I2C            InitI2C()
+#define INIT_I2C            InitI2c()
 #define INIT_SKADI          InitSkadi()
 #define INIT_WDT            InitWdt()
 #define INIT_ADC            InitAdc()

@@ -30,6 +30,7 @@
 #include "..\headers\HardwareProfile.h"
 #include "..\headers\DRV8711_Para.h"
 #include "..\headers\SkadiFunctions.h"
+#include "..\headers\StateFunctions.h"
 
 
 //==============================================================================
@@ -65,12 +66,12 @@ void main(void)
   memcpy( &Chinook.Pwm   , &Pwm   , sizeof ( struct sChinookPwm   ) );
   memcpy( &Chinook.Timer , &Timer , sizeof ( struct sChinookTimer ) );
   memcpy( &Chinook.Spi   , &Port  , sizeof ( struct sChinookSpi   ) );
-//  memcpy( &Chinook.Wdt   , &Wdt   , sizeof ( struct sChinookWdt   ) );
+  memcpy( &Chinook.Wdt   , &Wdt   , sizeof ( struct sChinookWdt   ) );
   memcpy( &Chinook.Adc   , &Adc   , sizeof ( struct sChinookAdc   ) );
-//  memcpy( &Chinook.Can   , &Can   , sizeof ( struct sChinookCan   ) );
-//  memcpy( &Chinook.I2C   , &I2C   , sizeof ( struct sChinookI2C   ) );
-//  memcpy( &Chinook.Skadi , &I2C   , sizeof ( struct sChinookSkadi ) );
-//  memcpy( &Chinook.InputCapture , &InputCapture , sizeof ( struct sChinookInputCapture ) );
+  memcpy( &Chinook.Can   , &Can   , sizeof ( struct sChinookCan   ) );
+  memcpy( &Chinook.I2c   , &I2c   , sizeof ( struct sChinookI2c   ) );
+  memcpy( &Chinook.Skadi , &I2c   , sizeof ( struct sChinookSkadi ) );
+  memcpy( &Chinook.InputCapture , &InputCapture , sizeof ( struct sChinookInputCapture ) );
 //==============================================================================
 
 
@@ -101,6 +102,7 @@ void main(void)
   StateInitMast();
 
   Init_reg_Mast();
+  
 
   UINT32 i = 0;
   DRVA_STEP = 0;

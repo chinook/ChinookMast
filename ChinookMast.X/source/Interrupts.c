@@ -40,6 +40,9 @@ void __ISR(_TIMER_1_VECTOR, T1_INTERRUPT_PRIORITY) Timer1InterruptHandler(void)
 {
   Flag_Main_While = 1;
 
+  // Increment the number of overflows from this timer. Used primarily by Input Capture
+  Timer.Var.nOverflows[0]++;
+
   mT1ClearIntFlag();
 }
 
@@ -48,9 +51,9 @@ void __ISR(_TIMER_1_VECTOR, T1_INTERRUPT_PRIORITY) Timer1InterruptHandler(void)
 //=============================================
 void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
 {
-  /*
-   * DEVELOPPER CODE HERE
-   */
+
+  // Increment the number of overflows from this timer. Used primarily by Input Capture
+  Timer.Var.nOverflows[1]++;
 
   mT2ClearIntFlag();
 }
@@ -60,9 +63,9 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
 //=============================================
 void __ISR(_TIMER_3_VECTOR, T3_INTERRUPT_PRIORITY) Timer3InterruptHandler(void)
 {
-  /*
-   * DEVELOPPER CODE HERE
-   */
+
+  // Increment the number of overflows from this timer. Used primarily by Input Capture
+  Timer.Var.nOverflows[2]++;
 
   mT3ClearIntFlag();
 }
@@ -72,9 +75,9 @@ void __ISR(_TIMER_3_VECTOR, T3_INTERRUPT_PRIORITY) Timer3InterruptHandler(void)
 //=============================================
 void __ISR(_TIMER_4_VECTOR, T4_INTERRUPT_PRIORITY) Timer4InterruptHandler(void)
 {
-  /*
-   * DEVELOPPER CODE HERE
-   */
+
+  // Increment the number of overflows from this timer. Used primarily by Input Capture
+  Timer.Var.nOverflows[3]++;
 
   mT4ClearIntFlag();
 }
@@ -84,9 +87,9 @@ void __ISR(_TIMER_4_VECTOR, T4_INTERRUPT_PRIORITY) Timer4InterruptHandler(void)
 //=============================================
 void __ISR(_TIMER_5_VECTOR, T5_INTERRUPT_PRIORITY) Timer5InterruptHandler(void)
 {
-  /*
-   * DEVELOPPER CODE HERE
-   */
+
+  // Increment the number of overflows from this timer. Used primarily by Input Capture
+  Timer.Var.nOverflows[4]++;
 
   mT5ClearIntFlag();
 }
@@ -274,29 +277,76 @@ void __ISR(_UART_5_VECTOR, U5_INTERRUPT_PRIORITY) Uart5InterruptHandler(void)
 
 void __ISR(_UART_6_VECTOR, U6_INTERRUPT_PRIORITY) Uart6InterruptHandler(void)
 {
-	// RX interrupt handling
-  //===========================================================
-	if(INTGetFlag(INT_SOURCE_UART_RX(UART6)))
-	{
-    // Clear the RX interrupt Flag
-    INTClearFlag(INT_SOURCE_UART_RX(UART6));
-
-    /*
-     *  DEVELOPPER CODE HERE
-     */
-	}
-  //===========================================================
+  UINT8  i
+        ,iMax   // Read/write max 8 bytes/interrupt
+        ,data   // used in UartFifoWrite/Read functions
+        ;
 
 	// TX interrupt handling
   //===========================================================
-	if ( INTGetFlag(INT_SOURCE_UART_TX(UART6)) )
-	{
-    // Clear the TX interrupt Flag
-    INTClearFlag(INT_SOURCE_UART_TX(UART6));
 
-    /*
-     *  DEVELOPPER CODE HERE
-     */
+  if ( INTGetEnable ( INT_SOURCE_UART_TX(UART6) ) )               // If TX interrupts enabled
+  {
+    if ( INTGetFlag ( INT_SOURCE_UART_TX(UART6) ) )               // If TX interrupt occured
+    {
+      if ( UARTTransmitterIsReady(UART6) && !Uart.Var.uartTxFifo[UART6].bufEmpty )  // If TX buffer is ready to receive data and the user's TX buffer is not empty
+      {
+        if (Uart.Var.uartTxFifo[UART6].lineBuffer.length < 8)     // Write max 8 bytes/interrupt
+        {
+          iMax = Uart.Var.uartTxFifo[UART6].lineBuffer.length;
+        }
+        else
+        {
+          iMax = 8;
+        }
+
+        for (i = 0; i < iMax; i++)
+        {
+          UartFifoRead((void *) &Uart.Var.uartTxFifo[UART6], &data);  // Copy from user
+          U1TXREG = data;                                         // Put data in PIC32's TX buffer
+        }
+      }
+
+      if (Uart.Var.uartTxFifo[UART6].bufEmpty)                    // If User's TX buffer is empty
+      {
+        Uart.DisableTxInterrupts(UART6);                          // Disable TX interrupts
+      }
+
+      INTClearFlag(INT_SOURCE_UART_TX(UART6));                    // Clear the TX interrupt Flag
+    }
+  }
+  //===========================================================
+  
+
+	// RX interrupt handling
+  //===========================================================
+  if ( INTGetEnable ( INT_SOURCE_UART_RX(UART6) ) )               // If RX interrupts enabled
+  {
+    if ( INTGetFlag ( INT_SOURCE_UART_RX(UART6) ) )               // If RX interrupt occured
+    {
+      i = 0;
+      iMax = 8;                                                   // Read max 8 bytes/interrupt
+      while (   UARTReceivedDataIsAvailable(UART6)                // While RX data available
+            && !Uart.Var.uartRxFifo[UART6].bufFull                // and user's RX buffer not full
+            && (i < iMax)                                         // and under 8 bytes read
+            )
+      { // while ^
+        data = UARTGetDataByte(UART6);                            // Get data for PIC32's RX FIFO buffer and copy it to user (next line)
+        if ( UartFifoWrite((void *) &Uart.Var.uartRxFifo[UART6], &data) < 0 ) // If copy to user did not work
+        {
+          break;                                                  // Exit while loop
+        }
+        i++;
+      } // end while
+
+      if (!Uart.Var.uartRxFifo[UART6].bufEmpty)                   // If there is data in the user's RX buffer
+      {
+        Uart.Var.oIsRxDataAvailable[UART6] = 1;                   // Set according flag
+      }
+
+      INTClearFlag (INT_SOURCE_UART_RX(UART6) );                  // Clear the RX interrupt Flag
+
+    }
 	}
   //===========================================================
 }
