@@ -193,24 +193,24 @@ void StateInitMast(void)
 
   INIT_PORTS;
 //  INIT_WDT;
-  INIT_TIMER;
+//  INIT_TIMER;
 //  INIT_INPUT_CAPTURE;
 //  INIT_PWM;
 //  INIT_ADC;
   INIT_UART;
 //  INIT_CAN;
-  INIT_SKADI;
-  INIT_SPI;
-  INIT_I2C;
+//  INIT_SKADI;
+//  INIT_SPI;
+//  INIT_I2C;
   START_INTERRUPTS;
 
-  DRVA_RESET = 0;
-  DRVA_SLEEP = 1;
-  DRV_mgs(DRVA, CONTROL_Mastw);
-  DRV_mgs(DRVA, TORQUE_Mastw);
-  DRV_mgs(DRVA, BLANK_Mastw);
-  DRV_mgs(DRVA, DECAY_Mastw);
-  DRV_mgs(DRVA, STATUS_Mastw);
+//  DRVA_RESET = 0;
+//  DRVA_SLEEP = 1;
+//  DRV_mgs(DRVA, CONTROL_Mastw);
+//  DRV_mgs(DRVA, TORQUE_Mastw);
+//  DRV_mgs(DRVA, BLANK_Mastw);
+//  DRV_mgs(DRVA, DECAY_Mastw);
+//  DRV_mgs(DRVA, STATUS_Mastw);
 
 
 }

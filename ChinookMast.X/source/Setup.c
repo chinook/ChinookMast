@@ -95,6 +95,7 @@ void InitSpi(void)
                                 | SPI_TX_EVENT_BUFFER_SR_EMPTY
                                 | SPI_RX_EVENT_BUFFER_NOT_EMPTY
                 ;
+
   err = Spi.Open(SPI4, oMasterFlags, 5e5);   // Open the SPI4 as a master at a bitrate of 5 MHz
   if (err < 0)                // Check for errors
   {
@@ -185,8 +186,8 @@ void InitPorts(void)
     Port.B.SetPinsDigitalOut(BIT_10);     // LED_DEBG2
     Port.B.SetPinsDigitalOut(BIT_11);     // LED_DEBG3
     Port.B.SetPinsDigitalOut(BIT_12);     // LED_DEBG4
-    Port.B.SetPinsDigitalOut(BIT_13);     // LED_ERROR
-    Port.B.SetPinsDigitalOut(BIT_15);     // LED_CAN
+    Port.B.SetPinsDigitalOut(BIT_13);     // LED_CAN
+    Port.B.SetPinsDigitalOut(BIT_15);     // LED_ERROR
     Port.F.SetPinsDigitalOut(BIT_3);      // LED_STATUS
 
     /* Setup  IO switch */
@@ -238,15 +239,15 @@ void InitPorts(void)
 void InitUart (void)
 {
 
-  UartConfig_t       oConfig      = UART_ENABLE_PINS_TX_RX_ONLY;
-  UartFifoMode_t     oFifoMode    = UART_INTERRUPT_ON_TX_DONE | UART_INTERRUPT_ON_RX_NOT_EMPTY;
-  UartLineCtrlMode_t oLineControl = UART_DATA_SIZE_8_BITS | UART_PARITY_NONE | UART_STOP_BITS_1;
+  UartConfig_t        oConfig       = UART_ENABLE_PINS_TX_RX_ONLY;
+  UartFifoMode_t      oFifoMode     = UART_INTERRUPT_ON_TX_BUFFER_EMPTY | UART_INTERRUPT_ON_RX_NOT_EMPTY;
+  UartLineCtrlMode_t  oLineControl  = UART_DATA_SIZE_8_BITS | UART_PARITY_NONE | UART_STOP_BITS_1;
 
   Uart.Open(UART6, BAUD57600, oConfig, oFifoMode, oLineControl);   // Open UART 6 as : 9600 BAUD, 1 stop bit, no parity and 8 bits data, not used as main UART for Skadi
   Uart.EnableTx(UART6);
   Uart.EnableRx(UART6);
 
-//  Uart.ConfigInterrupt(UART6, UART6_INTERRUPT_PRIORITY, UART6_INTERRUPT_SUBPRIORITY);
+  Uart.ConfigInterrupt(UART6, UART6_INTERRUPT_PRIORITY, UART6_INTERRUPT_SUBPRIORITY);
   
 }
 
@@ -361,11 +362,11 @@ void StartInterrupts(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable timer interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  Timer.EnableInterrupt(TIMER_1);
-  Timer.EnableInterrupt(TIMER_2);
-  Timer.EnableInterrupt(TIMER_3);
-  Timer.EnableInterrupt(TIMER_4);
-  Timer.EnableInterrupt(TIMER_5);
+//  Timer.EnableInterrupt(TIMER_1);
+//  Timer.EnableInterrupt(TIMER_2);
+//  Timer.EnableInterrupt(TIMER_3);
+//  Timer.EnableInterrupt(TIMER_4);
+//  Timer.EnableInterrupt(TIMER_5);
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -378,17 +379,6 @@ void StartInterrupts(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable SPI interrupts             // Not functionnal yet
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//#ifdef __32MX795F512L__   // SPI1 only on this device
-//  Spi.EnableRxInterrupts(SPI1);   // Enable RX Interrupts for SPI1
-//  Spi.EnableTxInterrupts(SPI1);   // Enable TX Interrupts for SPI1
-//#endif
-//
-//  Spi.EnableRxInterrupts(SPI2);   // Enable RX Interrupts for SPI2
-//  Spi.EnableTxInterrupts(SPI2);   // Enable TX Interrupts for SPI2
-//
-//  Spi.EnableRxInterrupts(SPI3);   // Enable RX Interrupts for SPI3
-//  Spi.EnableTxInterrupts(SPI3);   // Enable TX Interrupts for SPI3
-//
 //  Spi.EnableRxInterrupts(SPI4);   // Enable RX Interrupts for SPI4
 //  Spi.EnableTxInterrupts(SPI4);   // Enable TX Interrupts for SPI4
 

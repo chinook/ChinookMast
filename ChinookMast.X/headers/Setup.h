@@ -77,8 +77,8 @@ void StartInterrupts  (void);
 // Define OUTPUT LED
 //==============================================================================
 #define LED_STATUS        LATFbits.LATF3
-#define LED_CAN           LATBbits.LATB15
-#define LED_ERROR         LATBbits.LATB13
+#define LED_CAN           LATBbits.LATB13
+#define LED_ERROR         LATBbits.LATB15
 #define LED_DEBG4         LATBbits.LATB12
 #define LED_DEBG3         LATBbits.LATB11
 #define LED_DEBG2         LATBbits.LATB10
@@ -184,12 +184,12 @@ typedef struct{
 typedef struct{
   INT8 TDECAY;              //increment of 500ns
   INT8 DECMOD;              //000 : force slow decay
-                                  //001 : slow decay for increasing current
-                                  //010 : force fast decay
-                                  //011 : use mexed decay
-                                  //100 : slow decay for increasing current
-                                  //101 : AUTO mixed decay
-                                  //110 -111 :reserved
+                            //001 : slow decay for increasing current
+                            //010 : force fast decay
+                            //011 : use mexed decay
+                            //100 : slow decay for increasing current
+                            //101 : AUTO mixed decay
+                            //110 -111 :reserved
 }drvDecay;
 
 typedef struct{

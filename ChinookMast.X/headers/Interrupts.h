@@ -60,43 +60,19 @@
 //===============================================
 // UART interrupts priorities and subpriorities
 //===============================================
-#define UART1_INTERRUPT_PRIORITY        1           // Used in ChinookLib function
-#define U1_INTERRUPT_PRIORITY           ipl1auto    // Used in ISR
-#define UART2_INTERRUPT_PRIORITY        2           // Used in ChinookLib function
-#define U2_INTERRUPT_PRIORITY           ipl2auto    // Used in ISR
-#define UART3_INTERRUPT_PRIORITY        1           // Used in ChinookLib function
-#define U3_INTERRUPT_PRIORITY           ipl1auto    // Used in ISR
-#define UART4_INTERRUPT_PRIORITY        2           // Used in ChinookLib function
-#define U4_INTERRUPT_PRIORITY           ipl2auto    // Used in ISR
-#define UART5_INTERRUPT_PRIORITY        2           // Used in ChinookLib function
-#define U5_INTERRUPT_PRIORITY           ipl2auto    // Used in ISR
-#define UART6_INTERRUPT_PRIORITY        1           // Used in ChinookLib function
-#define U6_INTERRUPT_PRIORITY           ipl1auto    // Used in ISR
+#define UART6_INTERRUPT_PRIORITY        6           // Used in ChinookLib function
+#define U6_INTERRUPT_PRIORITY           ipl6auto    // Used in ISR
 
-#define UART1_INTERRUPT_SUBPRIORITY     3           // Highest subpriority
-#define UART2_INTERRUPT_SUBPRIORITY     1
-#define UART3_INTERRUPT_SUBPRIORITY     3           // Highest subpriority
-#define UART4_INTERRUPT_SUBPRIORITY     2
-#define UART5_INTERRUPT_SUBPRIORITY     0           // Lowest subpriority
-#define UART6_INTERRUPT_SUBPRIORITY     0           // Lowest subpriority
+#define UART6_INTERRUPT_SUBPRIORITY     3           // Lowest subpriority
 //===============================================
 
 
 //===============================================
 // SPI interrupts priorities and subpriorities
 //===============================================
-#define SPI1_INTERRUPT_PRIORITY         1           // Used in ChinookLib function
-#define S1_INTERRUPT_PRIORITY           ipl1auto    // Used in ISR
-#define SPI2_INTERRUPT_PRIORITY         2           // Used in ChinookLib function
-#define S2_INTERRUPT_PRIORITY           ipl2auto    // Used in ISR
-#define SPI3_INTERRUPT_PRIORITY         1           // Used in ChinookLib function
-#define S3_INTERRUPT_PRIORITY           ipl1auto    // Used in ISR
 #define SPI4_INTERRUPT_PRIORITY         2           // Used in ChinookLib function
 #define S4_INTERRUPT_PRIORITY           ipl2auto    // Used in ISR
 
-#define SPI1_INTERRUPT_SUBPRIORITY      3           // Highest subpriority
-#define SPI2_INTERRUPT_SUBPRIORITY      1
-#define SPI3_INTERRUPT_SUBPRIORITY      3           // Highest subpriority
 #define SPI4_INTERRUPT_SUBPRIORITY      0           // Lowest subpriority
 //===============================================
 
@@ -114,22 +90,13 @@
 //===============================================
 // Input Capture interrupts priorities and subpriorities
 //===============================================
-#define IC1_INTERRUPT_PRIORITY          6           // Used in ChinookLib function
-#define IC1_INT_PRIORITY                ipl6auto    // Used in ISR
-#define IC2_INTERRUPT_PRIORITY          4           // Used in ChinookLib function
-#define IC2_INT_PRIORITY                ipl4auto    // Used in ISR
-#define IC3_INTERRUPT_PRIORITY          3           // Used in ChinookLib function
-#define IC3_INT_PRIORITY                ipl3auto    // Used in ISR
-#define IC4_INTERRUPT_PRIORITY          5           // Used in ChinookLib function
-#define IC4_INT_PRIORITY                ipl5auto    // Used in ISR
-#define IC5_INTERRUPT_PRIORITY          5           // Used in ChinookLib function
-#define IC5_INT_PRIORITY                ipl5auto    // Used in ISR
+#define IC1_INTERRUPT_PRIORITY          5           // Used in ChinookLib function
+#define IC1_INT_PRIORITY                ipl5auto    // Used in ISR
+#define IC3_INTERRUPT_PRIORITY          4           // Used in ChinookLib function
+#define IC3_INT_PRIORITY                ipl4auto    // Used in ISR
 
 #define IC1_INTERRUPT_SUBPRIORITY       3           // Highest subpriority
-#define IC2_INTERRUPT_SUBPRIORITY       1
 #define IC3_INTERRUPT_SUBPRIORITY       3           // Highest subpriority
-#define IC4_INTERRUPT_SUBPRIORITY       0           // Lowest subpriority
-#define IC5_INTERRUPT_SUBPRIORITY       1           // Lowest subpriority
 //===============================================
 
 

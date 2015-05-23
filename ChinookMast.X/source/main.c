@@ -81,7 +81,6 @@ void main(void)
 // remove this line.
 //==============================================================================
   DDPCONbits.JTAGEN = 0;
-
 //==============================================================================
 
 
@@ -94,65 +93,100 @@ void main(void)
   SYSTEMConfig(SYS_FREQ, SYS_CFG_WAIT_STATES | SYS_CFG_PCACHE);
 //==============================================================================
 
-
 // State machine init
 //============================
 	pStateMast = &StateInitMast;
 //============================
   StateInitMast();
 
-  Init_reg_Mast();
+//  Init_reg_Mast();
+//  
+//
+//  UINT32 i = 0;
+//  DRVA_STEP = 0;
+//  DRVA_BIN1 = 1;
+//  DRVA_BIN2 = 0;
+
+//  Uart.SendDataBuffer(UART6, "==================================================\n\r", 52);
+
+//  pBuffStateMast  = pStateMast;
+//  sendUART();
+
+  sUartLineBuffer_t buffer =
+  {
+     .buffer = {0}
+    ,.length =  0
+  };
   
-
-  UINT32 i = 0;
-  DRVA_STEP = 0;
-  DRVA_BIN1 = 1;
-  DRVA_BIN2 = 0;
-
-  Uart.SendDataBuffer(UART6, "==================================================\n\r", 52);
-
-  pBuffStateMast  = pStateMast;
-  sendUART();
-
+  UINT32 character, i;
+  UINT8 alloString[] = "\n\rBRAVO CA MARCHE\n\r\0";
+  
 	while(1)  //infinite loop
 	{
-    // flag of 500us for stepper Mast.
-    if(Flag_Main_While)
+    // UART test
+    if (Uart.Var.oIsRxDataAvailable[UART6])
     {
-      Flag_Main_While = 0;
-     
-      LED_STATUS = SW1;
-
-      if(!SW2 && !memoMast_Down) {Mast_consigne += 1000;memoMast_Down=1;}
-      else if(SW2) memoMast_Down=0;
-      if(!SW3 && !memoMast_Up) {Mast_consigne -= 1000;memoMast_Up=1;}
-      else if(SW3) memoMast_Up=0;
+      Uart.GetRxFifoBuffer(UART6, &buffer, TRUE);
+      buffer.length = 0;
+      if (buffer.buffer[0] == 'a')
+      {
+        LED_CAN_TOGGLE;
+      }
+    }
+    
+//    // flag of 500us for stepper Mast.
+//    if(Flag_Main_While)
+//    {
+//      Flag_Main_While = 0;
+//     
+//      LED_STATUS = SW1;
+//
+//      if (!SW2 && !memoMast_Down) 
+//      {
+//        Mast_consigne += 1000;
+//        memoMast_Down = 1;
+//      }
+//      else if (SW2) 
+//      {
+//        memoMast_Down = 0;
+//      }
+//      if (!SW3 && !memoMast_Up) 
+//      {
+//        Mast_consigne -= 1000;
+//        memoMast_Up = 1;
+//      }
+//      else if (SW3) 
+//      {
+//        memoMast_Up = 0;
+//      }
 
 //==============================================================================
 // Mast State machine with Drive A
 //==============================================================================
-		(*pStateMast)();          // jump to next state
-     StateSchedulerMast();   // Decides which state will be next
+//      (*pStateMast)();          // jump to next state
+//       StateSchedulerMast();   // Decides which state will be next
+//
+//      if(pBuffStateMast != pStateMast)
+//      {
+//        pBuffStateMast = pStateMast;
+//        sendUART();
+//      }
 
-    if(pBuffStateMast != pStateMast){
-      pBuffStateMast  = pStateMast;
-      sendUART();
-    }
-
-    }
+//    }
 	}
 } //END MAIN CODE
 
-void sendUART(){
-    char  Text[100]={0};
-    int i=0;
-    if(pStateMast==&StateInitMast) Uart.SendDataBuffer(UART6, "State Mast : Init\t\t", 19);
-    else if(pStateMast==&StateCalibMast) Uart.SendDataBuffer(UART6, "State Mast : Calib\t\t", 20);
-    else if(pStateMast==&StateStopMast) Uart.SendDataBuffer(UART6, "State Mast : Stop\t\t", 19);
-    else if(pStateMast==&StateDownMast) Uart.SendDataBuffer(UART6, "State Mast : Down\t\t", 19);
-    else if(pStateMast==&StateUpMast) Uart.SendDataBuffer(UART6, "State Mast : Up  \t\t", 19);
+void sendUART()
+{
+  char  Text[100]={0};
+  int i=0;
+  if(pStateMast==&StateInitMast) Uart.SendDataBuffer(UART6, "State Mast : Init\t\t", 19);
+  else if(pStateMast==&StateCalibMast) Uart.SendDataBuffer(UART6, "State Mast : Calib\t\t", 20);
+  else if(pStateMast==&StateStopMast) Uart.SendDataBuffer(UART6, "State Mast : Stop\t\t", 19);
+  else if(pStateMast==&StateDownMast) Uart.SendDataBuffer(UART6, "State Mast : Down\t\t", 19);
+  else if(pStateMast==&StateUpMast) Uart.SendDataBuffer(UART6, "State Mast : Up  \t\t", 19);
 
-    sprintf(Text, "Mast Now = %d\t\tMast Consigne = %d\n\r", Mast_now, Mast_consigne);
-    Uart.SendDataBuffer(UART6, Text, sizeof(Text));
-    for(i=0; i<100; i++) Text[i]=0;
+  sprintf(Text, "Mast Now = %d\t\tMast Consigne = %d\n\r", Mast_now, Mast_consigne);
+  Uart.SendDataBuffer(UART6, Text, sizeof(Text));
+  for(i=0; i<100; i++) Text[i]=0;
 }

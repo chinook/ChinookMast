@@ -42,8 +42,8 @@
 #define LED_DEBUG2_ON       Port.B.ClearBits(BIT_10)
 #define LED_DEBUG3_ON       Port.B.ClearBits(BIT_11)
 #define LED_DEBUG4_ON       Port.B.ClearBits(BIT_12)
-#define LED_ERROR_ON        Port.B.ClearBits(BIT_13)
-#define LED_CAN_ON          Port.B.ClearBits(BIT_15)
+#define LED_ERROR_ON        Port.B.ClearBits(BIT_15)
+#define LED_CAN_ON          Port.B.ClearBits(BIT_13)
 #define LED_STATUS_ON       Port.F.ClearBits(BIT_3)
 
 #define LED_DEBUG0_OFF      Port.B.SetBits(BIT_8)
@@ -51,8 +51,8 @@
 #define LED_DEBUG2_OFF      Port.B.SetBits(BIT_10)
 #define LED_DEBUG3_OFF      Port.B.SetBits(BIT_11)
 #define LED_DEBUG4_OFF      Port.B.SetBits(BIT_12)
-#define LED_ERROR_OFF       Port.B.SetBits(BIT_13)
-#define LED_CAN_OFF         Port.B.SetBits(BIT_15)
+#define LED_ERROR_OFF       Port.B.SetBits(BIT_15)
+#define LED_CAN_OFF         Port.B.SetBits(BIT_13)
 #define LED_STATUS_OFF      Port.F.SetBits(BIT_3)
 
 #define LED_DEBUG0_TOGGLE   Port.B.ToggleBits(BIT_8)
@@ -60,8 +60,8 @@
 #define LED_DEBUG2_TOGGLE   Port.B.ToggleBits(BIT_10)
 #define LED_DEBUG3_TOGGLE   Port.B.ToggleBits(BIT_11)
 #define LED_DEBUG4_TOGGLE   Port.B.ToggleBits(BIT_12)
-#define LED_ERROR_TOGGLE    Port.B.ToggleBits(BIT_13)
-#define LED_CAN_TOGGLE      Port.B.ToggleBits(BIT_15)
+#define LED_ERROR_TOGGLE    Port.B.ToggleBits(BIT_15)
+#define LED_CAN_TOGGLE      Port.B.ToggleBits(BIT_13)
 #define LED_STATUS_TOGGLE   Port.F.ToggleBits(BIT_3)
 
 
