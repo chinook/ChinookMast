@@ -99,7 +99,7 @@ void InitSpi(void)
   err = Spi.Open(SPI4, oMasterFlags, 5e5);   // Open the SPI4 as a master at a bitrate of 5 MHz
   if (err < 0)                // Check for errors
   {
-    
+    LED_ERROR_OFF;
   }
 
   // SPI interrupts not functionnal as of yet

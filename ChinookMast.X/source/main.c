@@ -99,13 +99,13 @@ void main(void)
 //============================
   StateInitMast();
 
-//  Init_reg_Mast();
-//  
-//
-//  UINT32 i = 0;
-//  DRVA_STEP = 0;
-//  DRVA_BIN1 = 1;
-//  DRVA_BIN2 = 0;
+  Init_reg_Mast();
+  
+
+  UINT16 i = 0;
+  DRVA_STEP = 0;
+  DRVA_BIN1 = 1;
+  DRVA_BIN2 = 0;
 
 //  Uart.SendDataBuffer(UART6, "==================================================\n\r", 52);
 
@@ -118,20 +118,63 @@ void main(void)
     ,.length =  0
   };
   
-  UINT32 character, i;
+  UINT16 character;
   UINT8 alloString[] = "\n\rBRAVO CA MARCHE\n\r\0";
   
 	while(1)  //infinite loop
 	{
     // UART test
-    if (Uart.Var.oIsRxDataAvailable[UART6])
+//    if (Uart.Var.oIsRxDataAvailable[UART6])
+//    {
+//      Uart.GetRxFifoBuffer(UART6, &buffer, TRUE);
+//      buffer.length = 0;
+//      if (buffer.buffer[0] == 'a')
+//      {
+    i = 0;
+    if (!SW1)
     {
-      Uart.GetRxFifoBuffer(UART6, &buffer, TRUE);
-      buffer.length = 0;
-      if (buffer.buffer[0] == 'a')
-      {
-        LED_CAN_TOGGLE;
-      }
+        LED_CAN_OFF;/*1000 0001 0001 0000*/
+//        WriteDrive(DRVA, 0b0001000111111111);
+//        WriteDrive(DRVA, CONTROL_Mastw);
+////        character = ReadDrive(DRVA, 0b1001000111111111);
+//        character = ReadDrive(DRVA, 0x8ABC);
+//        WriteDrive(DRVA, CONTROL_Mastw);
+//        WriteDrive(DRVA, CONTROL_Mastw);
+//        character = ReadDrive(DRVA, 0x8EEF);
+//        WriteDrive(DRVA, CONTROL_Mastw);
+//        WriteDrive(DRVA, CONTROL_Mastw);
+//        WriteDrive(DRVA, 0b0001000111111111);
+//        WriteDrive(DRVA, 0b0001000111111111);
+//        character = ReadDrive(DRVA, 0b1001000111111111);
+//        WriteDrive(DRVA, 0b0001000111111111);
+//        WriteDrive(DRVA, 0b0001000111111111);
+//        character = ReadDrive(DRVA, 0b1001000111111111);
+//        WriteDrive(DRVA, 0b0001000111111111);
+//        WriteDrive(DRVA, 0b0001000111111111);
+//        Timer.DelayMs(1);
+//        WriteDrive(DRVA, 0b0101000101110111);
+//        Timer.DelayMs(1);
+        character = ReadDrive(DRVA, 0b1111000000000000);
+//        character = ReadDrive(DRVA, 0xF000);
+//        character = ReadDrive(DRVA, 0xF000);
+//        Timer.DelayMs(1);
+//        WriteDrive(DRVA, 0);
+//        WriteDrive(DRVA, 0b0111000101110111);
+//        character = ReadDrive(DRVA, 0xF000);
+//        character = ReadDrive(DRVA, 0xF000);
+//        WriteDrive(DRVA, 0b0111000101110111);
+//        WriteDrive(DRVA, 0b0111000101110111);
+//        WriteDrive(DRVA, 0b0001000111111111);
+//        i = 0b0001000111111111;
+//        i = 1;
+        i++;
+        if (i == 2)
+          while(1);
+//      }
+    }
+    else
+    {
+      LED_CAN_ON;
     }
     
 //    // flag of 500us for stepper Mast.

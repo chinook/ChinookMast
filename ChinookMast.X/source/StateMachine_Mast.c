@@ -200,17 +200,17 @@ void StateInitMast(void)
   INIT_UART;
 //  INIT_CAN;
 //  INIT_SKADI;
-//  INIT_SPI;
+  INIT_SPI;
 //  INIT_I2C;
   START_INTERRUPTS;
 
-//  DRVA_RESET = 0;
-//  DRVA_SLEEP = 1;
-//  DRV_mgs(DRVA, CONTROL_Mastw);
-//  DRV_mgs(DRVA, TORQUE_Mastw);
-//  DRV_mgs(DRVA, BLANK_Mastw);
-//  DRV_mgs(DRVA, DECAY_Mastw);
-//  DRV_mgs(DRVA, STATUS_Mastw);
+  DRVA_RESET = 0;
+  DRVA_SLEEP = 1;
+  WriteDrive(DRVA, CONTROL_Mastw);
+  WriteDrive(DRVA, TORQUE_Mastw);
+  WriteDrive(DRVA, BLANK_Mastw);
+  WriteDrive(DRVA, DECAY_Mastw);
+  WriteDrive(DRVA, STATUS_Mastw);
 
 
 }
