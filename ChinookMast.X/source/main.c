@@ -134,7 +134,21 @@ void main(void)
     if (!SW1)
     {
         LED_CAN_OFF;/*1000 0001 0001 0000*/
-//        WriteDrive(DRVA, 0b0001000111111111);
+////        WriteDrive(DRVA, 0b0001000111111111);
+//        WriteDrive(DRVA, CONTROL_Mastw);
+        WriteDrive(DRVA, 0x0003);
+//        ReadDrive(DRVA, (1 << 15) | CONTROL_Mastw);
+        ReadDrive(DRVA, 0x8000);
+//        ReadDrive(DRVA, (1 << 15) | CONTROL_Mastw);
+        WriteDrive(DRVA, 0x11FF);
+        ReadDrive(DRVA, 0x9000);
+//        ReadDrive(DRVA, (1 << 15) | 0b0001000111111111);
+        WriteDrive(DRVA, 0x0003);
+//        WriteDrive(DRVA, 0x11FF);
+//        ReadDrive(DRVA, 0x9000);
+//        ReadDrive(DRVA, 0x9000);
+//        ReadDrive(DRVA, (1 << 15) | CONTROL_Mastw);
+//        WriteDrive(DRVA, CONTROL_Mastw);
 //        WriteDrive(DRVA, CONTROL_Mastw);
 ////        character = ReadDrive(DRVA, 0b1001000111111111);
 //        character = ReadDrive(DRVA, 0x8ABC);
@@ -154,7 +168,7 @@ void main(void)
 //        Timer.DelayMs(1);
 //        WriteDrive(DRVA, 0b0101000101110111);
 //        Timer.DelayMs(1);
-        character = ReadDrive(DRVA, 0b1111000000000000);
+//        character = ReadDrive(DRVA, 0b1111000000000000);
 //        character = ReadDrive(DRVA, 0xF000);
 //        character = ReadDrive(DRVA, 0xF000);
 //        Timer.DelayMs(1);
@@ -167,8 +181,8 @@ void main(void)
 //        WriteDrive(DRVA, 0b0001000111111111);
 //        i = 0b0001000111111111;
 //        i = 1;
-        i++;
-        if (i == 2)
+//        i++;
+//        if (i == 2)
           while(1);
 //      }
     }

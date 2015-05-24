@@ -204,6 +204,7 @@ void StateInitMast(void)
 //  INIT_I2C;
   START_INTERRUPTS;
 
+  DRVB_SC = 0;
   DRVA_RESET = 0;
   DRVA_SLEEP = 1;
   WriteDrive(DRVA, CONTROL_Mastw);
