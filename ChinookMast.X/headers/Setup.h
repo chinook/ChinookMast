@@ -40,6 +40,19 @@
 //==============================================================================
 struct sChinook Chinook;            // Contains all ChinookLib functions
 
+
+//==============================================================================
+// Variable definitions
+//==============================================================================
+#define CAN_NB_CHANNELS     2 // 2 CAN channels will be used
+#define CAN_BUFFER_SIZE     8
+
+BYTE CanMessageFifoArea [ CAN_NB_CHANNELS     // Space used by CAN
+                        * CAN_BUFFER_SIZE 
+                        * CAN_TX_RX_MESSAGE_SIZE_BYTES 
+                        ];
+
+
 //==============================================================================
 // State Machine public functions prototypes
 //==============================================================================
@@ -262,11 +275,6 @@ typedef struct{
   drvDrive    Dri;
   drvStatus   Sta;
 }drvReg;
-
-//==============================================================================
-// Variable declarations
-//==============================================================================
-struct sChinook Chinook; // ChinookLib functions
 
 
 #endif	/* __SETUP_H__ */

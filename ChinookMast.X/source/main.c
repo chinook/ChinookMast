@@ -130,66 +130,29 @@ void main(void)
 //      buffer.length = 0;
 //      if (buffer.buffer[0] == 'a')
 //      {
+//      }
+//    }
+    
+    // SPI TEST
+    
     i = 0;
     if (!SW1)
     {
-        LED_CAN_OFF;/*1000 0001 0001 0000*/
-////        WriteDrive(DRVA, 0b0001000111111111);
-//        WriteDrive(DRVA, CONTROL_Mastw);
-        WriteDrive(DRVA, 0x0003);
-//        ReadDrive(DRVA, (1 << 15) | CONTROL_Mastw);
-        ReadDrive(DRVA, 0x8000);
-//        ReadDrive(DRVA, (1 << 15) | CONTROL_Mastw);
-        WriteDrive(DRVA, 0x11FF);
-        ReadDrive(DRVA, 0x9000);
-//        ReadDrive(DRVA, (1 << 15) | 0b0001000111111111);
-        WriteDrive(DRVA, 0x0003);
-//        WriteDrive(DRVA, 0x11FF);
-//        ReadDrive(DRVA, 0x9000);
-//        ReadDrive(DRVA, 0x9000);
-//        ReadDrive(DRVA, (1 << 15) | CONTROL_Mastw);
-//        WriteDrive(DRVA, CONTROL_Mastw);
-//        WriteDrive(DRVA, CONTROL_Mastw);
-////        character = ReadDrive(DRVA, 0b1001000111111111);
-//        character = ReadDrive(DRVA, 0x8ABC);
-//        WriteDrive(DRVA, CONTROL_Mastw);
-//        WriteDrive(DRVA, CONTROL_Mastw);
-//        character = ReadDrive(DRVA, 0x8EEF);
-//        WriteDrive(DRVA, CONTROL_Mastw);
-//        WriteDrive(DRVA, CONTROL_Mastw);
-//        WriteDrive(DRVA, 0b0001000111111111);
-//        WriteDrive(DRVA, 0b0001000111111111);
-//        character = ReadDrive(DRVA, 0b1001000111111111);
-//        WriteDrive(DRVA, 0b0001000111111111);
-//        WriteDrive(DRVA, 0b0001000111111111);
-//        character = ReadDrive(DRVA, 0b1001000111111111);
-//        WriteDrive(DRVA, 0b0001000111111111);
-//        WriteDrive(DRVA, 0b0001000111111111);
-//        Timer.DelayMs(1);
-//        WriteDrive(DRVA, 0b0101000101110111);
-//        Timer.DelayMs(1);
-//        character = ReadDrive(DRVA, 0b1111000000000000);
-//        character = ReadDrive(DRVA, 0xF000);
-//        character = ReadDrive(DRVA, 0xF000);
-//        Timer.DelayMs(1);
-//        WriteDrive(DRVA, 0);
-//        WriteDrive(DRVA, 0b0111000101110111);
-//        character = ReadDrive(DRVA, 0xF000);
-//        character = ReadDrive(DRVA, 0xF000);
-//        WriteDrive(DRVA, 0b0111000101110111);
-//        WriteDrive(DRVA, 0b0111000101110111);
-//        WriteDrive(DRVA, 0b0001000111111111);
-//        i = 0b0001000111111111;
-//        i = 1;
-//        i++;
-//        if (i == 2)
-          while(1);
-//      }
+      LED_CAN_OFF;/*1000 0001 0001 0000*/
+      WriteDrive(DRVA, 0x0003);
+      ReadDrive(DRVA, 0x8000);
+      WriteDrive(DRVA, 0x1155);
+      ReadDrive(DRVA, 0x9000);
+      WriteDrive(DRVA, 0x0003);
+      while(1);
     }
     else
     {
       LED_CAN_ON;
     }
+    
+    
+    // CODE À AMAURY
     
 //    // flag of 500us for stepper Mast.
 //    if(Flag_Main_While)

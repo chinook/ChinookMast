@@ -94,6 +94,7 @@ void InitSpi(void)
                                 | SPI_ENHANCED_BUFFER_MODE
                                 | SPI_TX_EVENT_BUFFER_SR_EMPTY
                                 | SPI_RX_EVENT_BUFFER_NOT_EMPTY
+                                | SPI_SAMPLE_END_CLK
                 ;
 
   err = Spi.Open(SPI4, oMasterFlags, 5e5);   // Open the SPI4 as a master at a bitrate of 5 MHz
@@ -257,8 +258,17 @@ void InitUart (void)
 //===========================
 void InitCan(void)
 {
-  Can.Initialize(CAN1, FALSE);
-  Can.Initialize(CAN2, FALSE);
+  /**Setup par defaut.
+   * CAN_CHANNEL0
+   * Mode: TX
+   * Type: SID
+   *
+   * CAN_CHANNEL1
+   * Mode: RX
+   * CAN_FILTER0: 0xC1, this configures the filter to accept with ID 0xC1
+   * CAN_FILTER_MASK0: 0x00, Configure CAN1 Filter Mask 0 to comprare no bits
+   * */
+   Can.Initialize(CAN1, CanMessageFifoArea, CAN_NB_CHANNELS, CAN_BUFFER_SIZE, FALSE);
 }
 
 
