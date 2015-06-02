@@ -122,16 +122,16 @@
 #define I2C2_INT_PRIORITY                ipl0auto    // Used in ISR
 #define I2C3_INTERRUPT_PRIORITY          0           // Used in ChinookLib function
 #define I2C3_INT_PRIORITY                ipl0auto    // Used in ISR
-#define I2C4_INTERRUPT_PRIORITY          0           // Used in ChinookLib function
-#define I2C4_INT_PRIORITY                ipl0auto    // Used in ISR
-#define I2C5_INTERRUPT_PRIORITY          5           // Used in ChinookLib function
-#define I2C5_INT_PRIORITY                ipl5auto    // Used in ISR
+#define I2C4_INTERRUPT_PRIORITY          5           // Used in ChinookLib function
+#define I2C4_INT_PRIORITY                ipl5auto    // Used in ISR
+#define I2C5_INTERRUPT_PRIORITY          0           // Used in ChinookLib function
+#define I2C5_INT_PRIORITY                ipl0auto    // Used in ISR
 
 #define I2C1_INTERRUPT_SUBPRIORITY       3           // Highest subpriority
 #define I2C2_INTERRUPT_SUBPRIORITY       1
 #define I2C3_INTERRUPT_SUBPRIORITY       1
-#define I2C4_INTERRUPT_SUBPRIORITY       1
-#define I2C5_INTERRUPT_SUBPRIORITY       2
+#define I2C4_INTERRUPT_SUBPRIORITY       2
+#define I2C5_INTERRUPT_SUBPRIORITY       0
 //===============================================
 
 
@@ -147,15 +147,15 @@ typedef enum
   ,I2C_MASTER_SEND_ACK
   ,I2C_MASTER_SEND_NACK
   ,I2C_MASTER_TRANSMIT_DATA
-  ,I2C_MASTER_SLAVE_SEND_STOP
+  ,I2C_MASTER_SLAVE_SENT_STOP
   ,I2C_MASTER_DONE
 } I2cMasterInterruptConditions_t;
 
-volatile I2cMasterInterruptConditions_t currentMasterState[7];
+volatile I2cMasterInterruptConditions_t nextMasterState;
 
 
 
-extern volatile UINT8 i2cData[4];
+extern volatile UINT8 i2cData[5];
 
 
 #endif	/* __INTERRUPT_H__ */

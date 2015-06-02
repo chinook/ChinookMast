@@ -50,7 +50,7 @@ volatile INT32  Mast_consigne = 10000;            // New value of Mast
 INT8  memoMast_Up = 0;
 INT8  memoMast_Down = 0;
 
-volatile UINT8 i2cData[4] = {0};
+volatile UINT8 i2cData[5] = {0};
 
 //==============================================================================
 // MAIN CODE
@@ -72,7 +72,7 @@ void main(void)
   memcpy( &Chinook.Adc   , &Adc   , sizeof ( struct sChinookAdc   ) );
   memcpy( &Chinook.Can   , &Can   , sizeof ( struct sChinookCan   ) );
   memcpy( &Chinook.I2c   , &I2c   , sizeof ( struct sChinookI2c   ) );
-  memcpy( &Chinook.Skadi , &I2c   , sizeof ( struct sChinookSkadi ) );
+  memcpy( &Chinook.Skadi , &Skadi , sizeof ( struct sChinookSkadi ) );
   memcpy( &Chinook.InputCapture , &InputCapture , sizeof ( struct sChinookInputCapture ) );
 //==============================================================================
 
@@ -102,20 +102,15 @@ void main(void)
   
   extern volatile BOOL oI2cDataSent;
 
-  extern volatile I2cMasterInterruptConditions_t currentMasterState[7];
-  currentMasterState[0] = I2C_MASTER_START_CONDITION;
-  currentMasterState[1] = I2C_MASTER_TRANSMIT_DATA;
-  currentMasterState[2] = I2C_MASTER_TRANSMIT_DATA;
-  currentMasterState[3] = I2C_MASTER_TRANSMIT_DATA;
-  currentMasterState[4] = I2C_MASTER_TRANSMIT_DATA;
-  currentMasterState[5] = I2C_MASTER_STOP_CONDITION;
-  currentMasterState[6] = I2C_MASTER_DONE;
+  extern volatile I2cMasterInterruptConditions_t nextMasterState;
+  nextMasterState = I2C_MASTER_START_CONDITION;
 
   I2c.Var.eepromAddress.rw = I2C_WRITE;
   i2cData[0] = I2c.Var.eepromAddress.byte;  // Slave address
   i2cData[1] = 0x05;      // HIGH byte of EEPROM internal memory
-  i2cData[2] = 0x40;           // LOW byte of EEPROM internal memory
-  i2cData[3] = 0xAA;                        // Data to write
+  i2cData[2] = 0x55;           // LOW byte of EEPROM internal memory
+  i2cData[3] = 0xFF;                        // Data to write
+  i2cData[4] = I2c.Var.eepromAddress.byte;  // Slave address
 
   StateInitMast();
 
@@ -159,12 +154,12 @@ void main(void)
     i = 0;
     if (!SW1)
     {
-//      LED_DEBUG0_ON;
       INTSetFlag(INT_I2C4M);
-//      I2c.EepromSendByte(I2C4, 0x0540, 0xAA);
+//      I2c.EepromSendByte(I2C4, 0x0555, 0xFF);
       while(!oI2cDataSent);
-      err = I2c.EepromReadByte(I2C4, 0x0540, &data);
-      if (data == 0xAA)
+//      Timer.DelayMs(10);
+      err = I2c.EepromReadByte(I2C4, 0x0555, &data);
+      if (data == 0xFF)
       {
         LED_CAN_ON;
       }
