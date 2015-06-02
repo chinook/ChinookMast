@@ -50,6 +50,8 @@ volatile INT32  Mast_consigne = 10000;            // New value of Mast
 INT8  memoMast_Up = 0;
 INT8  memoMast_Down = 0;
 
+volatile UINT8 i2cData[4] = {0};
+
 //==============================================================================
 // MAIN CODE
 //==============================================================================
@@ -97,6 +99,24 @@ void main(void)
 //============================
 	pStateMast = &StateInitMast;
 //============================
+  
+  extern volatile BOOL oI2cDataSent;
+
+  extern volatile I2cMasterInterruptConditions_t currentMasterState[7];
+  currentMasterState[0] = I2C_MASTER_START_CONDITION;
+  currentMasterState[1] = I2C_MASTER_TRANSMIT_DATA;
+  currentMasterState[2] = I2C_MASTER_TRANSMIT_DATA;
+  currentMasterState[3] = I2C_MASTER_TRANSMIT_DATA;
+  currentMasterState[4] = I2C_MASTER_TRANSMIT_DATA;
+  currentMasterState[5] = I2C_MASTER_STOP_CONDITION;
+  currentMasterState[6] = I2C_MASTER_DONE;
+
+  I2c.Var.eepromAddress.rw = I2C_WRITE;
+  i2cData[0] = I2c.Var.eepromAddress.byte;  // Slave address
+  i2cData[1] = 0x05;      // HIGH byte of EEPROM internal memory
+  i2cData[2] = 0x40;           // LOW byte of EEPROM internal memory
+  i2cData[3] = 0xAA;                        // Data to write
+
   StateInitMast();
 
   Init_reg_Mast();
@@ -120,9 +140,50 @@ void main(void)
   
   UINT16 character;
   UINT8 alloString[] = "\n\rBRAVO CA MARCHE\n\r\0";
+  INT8 err;
+  UINT8 data = 0;
+
+  LED_STATUS_OFF;
+  LED_ERROR_OFF;
+  LED_CAN_OFF;
+  LED_DEBUG4_OFF;
+  LED_DEBUG3_OFF;
+  LED_DEBUG2_OFF;
+  LED_DEBUG1_OFF;
+  LED_DEBUG0_OFF;
   
 	while(1)  //infinite loop
 	{
+    // I2C TEST
+
+    i = 0;
+    if (!SW1)
+    {
+//      LED_DEBUG0_ON;
+      INTSetFlag(INT_I2C4M);
+//      I2c.EepromSendByte(I2C4, 0x0540, 0xAA);
+      while(!oI2cDataSent);
+      err = I2c.EepromReadByte(I2C4, 0x0540, &data);
+      if (data == 0xAA)
+      {
+        LED_CAN_ON;
+      }
+      else
+      {
+        LED_ERROR_ON;
+      }
+      while(1);
+    }
+//    if (!SW1)
+//    {
+//      LED_CAN_ON;
+//      LED_DEBUG0_ON;
+//      LED_ERROR_ON;
+//      while(1);
+//    }
+
+
+
     // UART test
 //    if (Uart.Var.oIsRxDataAvailable[UART6])
 //    {
@@ -133,23 +194,23 @@ void main(void)
 //      }
 //    }
     
-    // SPI TEST
-    
-    i = 0;
-    if (!SW1)
-    {
-      LED_CAN_OFF;/*1000 0001 0001 0000*/
-      WriteDrive(DRVA, 0x0003);
-      ReadDrive(DRVA, 0x8000);
-      WriteDrive(DRVA, 0x1155);
-      ReadDrive(DRVA, 0x9000);
-      WriteDrive(DRVA, 0x0003);
-      while(1);
-    }
-    else
-    {
-      LED_CAN_ON;
-    }
+//    // SPI TEST
+//
+//    i = 0;
+//    if (!SW1)
+//    {
+//      LED_CAN_OFF;/*1000 0001 0001 0000*/
+//      WriteDrive(DRVA, 0x0003);
+//      ReadDrive(DRVA, 0x8000);
+//      WriteDrive(DRVA, 0x1155);
+//      ReadDrive(DRVA, 0x9000);
+//      WriteDrive(DRVA, 0x0003);
+//      while(1);
+//    }
+//    else
+//    {
+//      LED_CAN_ON;
+//    }
     
     
     // CODE À AMAURY

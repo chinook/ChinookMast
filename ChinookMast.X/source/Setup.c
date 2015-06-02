@@ -277,7 +277,13 @@ void InitCan(void)
 //===========================
 void InitI2c(void)
 {
+  INT8 err;
   I2c.Open(I2C4, I2C_FREQ_400K);
+  err = I2c.ConfigInterrupt(I2C4, I2C5_INTERRUPT_PRIORITY, I2C5_INTERRUPT_SUBPRIORITY);
+  if (err < 0)
+  {
+    LED_ERROR_ON;
+  }
 }
 
 
@@ -368,6 +374,7 @@ void InitInputCapture(void)
 //===========================
 void StartInterrupts(void)
 {
+  INT8 err;
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable timer interrupts
@@ -404,6 +411,26 @@ void StartInterrupts(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //  InputCapture.EnableInterrupt(IC1);
 //  InputCapture.EnableInterrupt(IC3);
+
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Enable I2C interrupts
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  err = I2c.EnableInterrupt (I2C4, I2C_MASTER_INTERRUPT);
+  if (err < 0)
+  {
+    LED_ERROR_ON;
+  }
+  err = I2c.DisableInterrupt(I2C4, I2C_SLAVE_INTERRUPT);
+  if (err < 0)
+  {
+    LED_ERROR_ON;
+  }
+  err = I2c.DisableInterrupt(I2C4, I2C_BUS_COLLISION_INTERRUPT);
+  if (err < 0)
+  {
+    LED_ERROR_ON;
+  }
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

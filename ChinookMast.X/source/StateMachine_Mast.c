@@ -200,21 +200,21 @@ void StateInitMast(void)
   INIT_UART;
 //  INIT_CAN;
 //  INIT_SKADI;
-  INIT_SPI;
-//  INIT_I2C;
+//  INIT_SPI;
+  INIT_I2C;
   START_INTERRUPTS;
 
-  DRVB_SC = 0;
-//  Timer.DelayMs(1);
-  DRVA_RESET = 0;
-//  Timer.DelayMs(1);
-  DRVA_SLEEP = 1;
-//  Timer.DelayMs(1);
-  WriteDrive(DRVA, CONTROL_Mastw);
-  WriteDrive(DRVA, TORQUE_Mastw);
-  WriteDrive(DRVA, BLANK_Mastw);
-  WriteDrive(DRVA, DECAY_Mastw);
-  WriteDrive(DRVA, STATUS_Mastw);
+//  DRVB_SC = 0;
+////  Timer.DelayMs(1);
+//  DRVA_RESET = 0;
+////  Timer.DelayMs(1);
+//  DRVA_SLEEP = 1;
+////  Timer.DelayMs(1);
+//  WriteDrive(DRVA, CONTROL_Mastw);
+//  WriteDrive(DRVA, TORQUE_Mastw);
+//  WriteDrive(DRVA, BLANK_Mastw);
+//  WriteDrive(DRVA, DECAY_Mastw);
+//  WriteDrive(DRVA, STATUS_Mastw);
 
 
 }
