@@ -151,8 +151,6 @@ typedef enum
   ,I2C_MASTER_DONE
 } I2cMasterInterruptConditions_t;
 
-volatile I2cMasterInterruptConditions_t nextMasterState;
-
 
 
 extern volatile UINT8 i2cData[5];

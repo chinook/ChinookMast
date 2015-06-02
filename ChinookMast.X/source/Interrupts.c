@@ -36,6 +36,35 @@ volatile BOOL  oI2cDataSent = 0
 
 volatile UINT8 iMasterState = 0;
 
+
+volatile I2cMasterInterruptConditions_t nextMasterWriteState[10] = 
+{
+  I2C_MASTER_START_CONDITION
+ ,I2C_MASTER_TRANSMIT_DATA
+ ,I2C_MASTER_TRANSMIT_DATA
+ ,I2C_MASTER_TRANSMIT_DATA
+ ,I2C_MASTER_TRANSMIT_DATA
+ ,I2C_MASTER_STOP_CONDITION
+ ,I2C_MASTER_START_CONDITION
+ ,I2C_MASTER_TRANSMIT_DATA
+ ,I2C_MASTER_STOP_CONDITION
+ ,I2C_MASTER_DONE
+};
+volatile I2cMasterInterruptConditions_t nextReadWriteState[9] = 
+{
+  I2C_MASTER_START_CONDITION
+ ,I2C_MASTER_TRANSMIT_DATA
+ ,I2C_MASTER_TRANSMIT_DATA
+ ,I2C_MASTER_TRANSMIT_DATA
+ ,I2C_MASTER_REPEAT_START
+ ,I2C_MASTER_TRANSMIT_DATA
+ ,I2C_MASTER_RECEIVE_DATA
+ ,I2C_MASTER_STOP_CONDITION
+ ,I2C_MASTER_DONE
+};
+
+volatile UINT8 iCurrentState = 0;
+
 //==============================================================================
 //	TIMER INTERRUPTS
 //==============================================================================
@@ -230,7 +259,7 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
   {
     INTClearFlag(INT_I2C4M);
 
-    switch (nextMasterState)
+    switch (nextMasterWriteState[iCurrentState])
     {
     //======================================================  
       case I2C_MASTER_RECEIVE_DATA : 
@@ -242,30 +271,17 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
       case I2C_MASTER_START_CONDITION : 
         I2C4CONbits.SEN = 1;    //start condition sequence
         LED_STATUS_ON;
-        nextMasterState = I2C_MASTER_TRANSMIT_DATA;
         break;
     //====================================================== 
         
     //======================================================  
       case I2C_MASTER_STOP_CONDITION : 
         I2C4CONbits.PEN = 1;
-        if (iByteToSend < 5)
+        if (iCurrentState >=8)
         {
-          nextMasterState = I2C_MASTER_START_CONDITION;
-          if (iByteToSend == 4)
+          if (!I2CByteWasAcknowledged(I2C4))
           {
-            iByteToSend++;
-          }
-        }
-        else
-        {
-          if (I2CByteWasAcknowledged(I2C4))
-          {
-            nextMasterState = I2C_MASTER_DONE;
-          }
-          else
-          {
-            nextMasterState = I2C_MASTER_START_CONDITION;
+            iCurrentState -= 3;
           }
         }
         LED_DEBUG4_ON;
@@ -274,22 +290,13 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
         
     //======================================================    
       case I2C_MASTER_TRANSMIT_DATA : 
-        if (iByteToSend < 4)
+        if (iCurrentState < 5)
         {
-          I2C4TRN = i2cData[iByteToSend++];
-          if (iByteToSend == 4)
-          {
-            nextMasterState = I2C_MASTER_STOP_CONDITION;
-          }
-          else
-          {
-            nextMasterState = I2C_MASTER_TRANSMIT_DATA;
-          }
+          I2C4TRN = i2cData[iCurrentState - 1];
         }
         else
         {
           I2C4TRN = i2cData[4];
-          nextMasterState = I2C_MASTER_STOP_CONDITION;
         }
         LED_DEBUG1_ON;  
         break;
@@ -335,6 +342,7 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
         break;
     //======================================================  
     }
+    iCurrentState++;
   }
 }
 //=============================================

@@ -102,9 +102,6 @@ void main(void)
   
   extern volatile BOOL oI2cDataSent;
 
-  extern volatile I2cMasterInterruptConditions_t nextMasterState;
-  nextMasterState = I2C_MASTER_START_CONDITION;
-
   I2c.Var.eepromAddress.rw = I2C_WRITE;
   i2cData[0] = I2c.Var.eepromAddress.byte;  // Slave address
   i2cData[1] = 0x05;      // HIGH byte of EEPROM internal memory
