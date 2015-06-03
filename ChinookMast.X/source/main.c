@@ -42,6 +42,14 @@ void sendUART();
 // VARIABLE DECLARATIONS
 //==============================================================================
 volatile extern INT32 Flag_Main_While;       // From Interrupt.c
+extern volatile BOOL  oI2cMustWrite
+                     ,oI2cMustRead
+                     ,oI2c4DataRead
+                     ;
+
+extern volatile UINT8 iCurrentState;
+
+volatile UINT8 data = 0;
 
 // Mast general value
 volatile INT32  Mast_now = 10;                  // Actual position of Mast
@@ -100,7 +108,7 @@ void main(void)
 	pStateMast = &StateInitMast;
 //============================
   
-  extern volatile BOOL oI2cDataSent;
+  extern volatile BOOL oI2c4DataSent;
 
   I2c.Var.eepromAddress.rw = I2C_WRITE;
   i2cData[0] = I2c.Var.eepromAddress.byte;  // Slave address
@@ -133,7 +141,6 @@ void main(void)
   UINT16 character;
   UINT8 alloString[] = "\n\rBRAVO CA MARCHE\n\r\0";
   INT8 err;
-  UINT8 data = 0;
 
   LED_STATUS_OFF;
   LED_ERROR_OFF;
@@ -151,11 +158,24 @@ void main(void)
     i = 0;
     if (!SW1)
     {
+      oI2cMustWrite = 1;
       INTSetFlag(INT_I2C4M);
+      while(!oI2c4DataSent);
+      
+      I2c.Var.eepromAddress.rw = I2C_READ;
+      i2cData[3] = I2c.Var.eepromAddress.byte;
+      i2cData[4] = 0;
+      i2cData[5] = 0;
+      
+      iCurrentState = 0;
+      oI2cMustRead = 1;
+      INTSetFlag(INT_I2C4M);
+      while(!oI2c4DataRead);
+      LED_STATUS_ON;
+      
 //      I2c.EepromSendByte(I2C4, 0x0555, 0xFF);
-      while(!oI2cDataSent);
-//      Timer.DelayMs(10);
-      err = I2c.EepromReadByte(I2C4, 0x0555, &data);
+//      err = I2c.EepromReadByte(I2C4, 0x0555, (UINT8 *) &data);
+      
       if (data == 0xFF)
       {
         LED_CAN_ON;

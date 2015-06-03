@@ -30,9 +30,14 @@
 volatile INT32 Flag_Main_While = 0;
 volatile UINT8 iByteToSend = 0;
 
-volatile BOOL  oI2cDataSent = 0
-              ,oPollingDone = 0
+volatile BOOL  oI2c4DataSent = 0
+              ,oI2c4DataRead = 0
+              ,oPollingDone  = 0
+              ,oI2cMustWrite = 0
+              ,oI2cMustRead  = 0
               ;
+
+extern volatile UINT8 data;
 
 volatile UINT8 iMasterState = 0;
 
@@ -50,7 +55,8 @@ volatile I2cMasterInterruptConditions_t nextMasterWriteState[10] =
  ,I2C_MASTER_STOP_CONDITION
  ,I2C_MASTER_DONE
 };
-volatile I2cMasterInterruptConditions_t nextReadWriteState[9] = 
+
+volatile I2cMasterInterruptConditions_t nextMasterReadState[] = 
 {
   I2C_MASTER_START_CONDITION
  ,I2C_MASTER_TRANSMIT_DATA
@@ -59,6 +65,7 @@ volatile I2cMasterInterruptConditions_t nextReadWriteState[9] =
  ,I2C_MASTER_REPEAT_START
  ,I2C_MASTER_TRANSMIT_DATA
  ,I2C_MASTER_RECEIVE_DATA
+ ,I2C_MASTER_SEND_NACK
  ,I2C_MASTER_STOP_CONDITION
  ,I2C_MASTER_DONE
 };
@@ -247,102 +254,183 @@ void __ISR(_ADC_VECTOR, ADC_INTERRUPT_PRIO) AdcInterruptHandler(void)
 //=============================================
 void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
 {
-  if (INTGetFlag(INT_I2C4B))  //Bus Collision interrupt
-  {
-    INTClearFlag(INT_I2C4B);
-  }
 //  if (INTGetFlag(INT_I2C4S))  // Slave interrupt
 //  {
 //    INTClearFlag(INT_I2C4S);
 //  }
+  
+  if (INTGetFlag(INT_I2C4B))  //Bus Collision interrupt
+  {
+    INTClearFlag(INT_I2C4B);
+  }
+  
   if (INTGetFlag(INT_I2C4M))  // Master interrupt
   {
     INTClearFlag(INT_I2C4M);
 
-    switch (nextMasterWriteState[iCurrentState])
+    if (oI2cMustWrite)
     {
-    //======================================================  
-      case I2C_MASTER_RECEIVE_DATA : 
-        I2C4CONbits.RCEN = 1;   //Receive byte sequence
-        break;
-    //====================================================== 
-        
-    //======================================================  
-      case I2C_MASTER_START_CONDITION : 
-        I2C4CONbits.SEN = 1;    //start condition sequence
-        LED_STATUS_ON;
-        break;
-    //====================================================== 
-        
-    //======================================================  
-      case I2C_MASTER_STOP_CONDITION : 
-        I2C4CONbits.PEN = 1;
-        if (iCurrentState >=8)
-        {
-          if (!I2CByteWasAcknowledged(I2C4))
+      switch (nextMasterWriteState[iCurrentState])
+      {
+      //======================================================  
+        case I2C_MASTER_RECEIVE_DATA : 
+          I2C4CONbits.RCEN = 1;   //Receive byte sequence
+          break;
+      //====================================================== 
+
+      //======================================================  
+        case I2C_MASTER_START_CONDITION : 
+          I2C4CONbits.SEN = 1;    //start condition sequence
+          break;
+      //====================================================== 
+
+      //======================================================  
+        case I2C_MASTER_STOP_CONDITION : 
+          I2C4CONbits.PEN = 1;
+          if (iCurrentState >=8)
           {
-            iCurrentState -= 3;
+            if (!I2CByteWasAcknowledged(I2C4))
+            {
+              iCurrentState -= 3;
+            }
           }
-        }
-        LED_DEBUG4_ON;
-        break;
-    //====================================================== 
-        
-    //======================================================    
-      case I2C_MASTER_TRANSMIT_DATA : 
-        if (iCurrentState < 5)
-        {
-          I2C4TRN = i2cData[iCurrentState - 1];
-        }
-        else
-        {
-          I2C4TRN = i2cData[4];
-        }
-        LED_DEBUG1_ON;  
-        break;
-    //====================================================== 
-        
-    //======================================================  
-      case I2C_MASTER_DONE : 
-        INTEnable(INT_I2C4M, INT_DISABLED);
-        oI2cDataSent = 1;
-        LED_DEBUG0_ON;
-        break;
-    //====================================================== 
-        
-    //======================================================  
-      case I2C_MASTER_REPEAT_START : 
-        I2C4CONbits.RSEN = 1;   //repeated start condition sequence
-        break;
-    //====================================================== 
-        
-    //======================================================  
-      case I2C_MASTER_SLAVE_SENT_STOP :
-        break;
-    //====================================================== 
-        
-    //======================================================  
-      case I2C_MASTER_SEND_ACK : 
-        I2C4CONbits.ACKDT = 0;  //ACK
-        I2C4CONbits.ACKEN = 1;  //Send ACK sequence
-        LED_DEBUG3_ON;
-        break;
-    //====================================================== 
-        
-    //======================================================  
-      case I2C_MASTER_SEND_NACK : 
-        I2C4CONbits.ACKDT = 1;  //NACK
-        I2C4CONbits.ACKEN = 1;  //Send NACK sequence
-        LED_DEBUG2_ON;
-        break;
-    //====================================================== 
-        
-    //======================================================  
-      default : 
-        break;
-    //======================================================  
-    }
-    iCurrentState++;
-  }
-}
+          break;
+      //====================================================== 
+
+      //======================================================    
+        case I2C_MASTER_TRANSMIT_DATA : 
+          if (iCurrentState < 5)
+          {
+            I2C4TRN = i2cData[iCurrentState - 1];
+          }
+          else
+          {
+            I2C4TRN = i2cData[4];
+          }
+          break;
+      //====================================================== 
+
+      //======================================================  
+        case I2C_MASTER_DONE : 
+          oI2cMustWrite = 0;
+          oI2c4DataSent = 1;
+          iCurrentState = 0;
+//          INTEnable(INT_I2C4M, INT_DISABLED);
+          break;
+      //====================================================== 
+
+      //======================================================  
+        case I2C_MASTER_REPEAT_START : 
+          I2C4CONbits.RSEN = 1;   //repeated start condition sequence
+          break;
+      //====================================================== 
+
+      //======================================================  
+        case I2C_MASTER_SLAVE_SENT_STOP :
+          break;
+      //====================================================== 
+
+      //======================================================  
+        case I2C_MASTER_SEND_ACK : 
+          I2C4CONbits.ACKDT = 0;  //ACK
+          I2C4CONbits.ACKEN = 1;  //Send ACK sequence
+          break;
+      //====================================================== 
+
+      //======================================================  
+        case I2C_MASTER_SEND_NACK : 
+          I2C4CONbits.ACKDT = 1;  //NACK
+          I2C4CONbits.ACKEN = 1;  //Send NACK sequence
+          break;
+      //====================================================== 
+
+      //======================================================  
+        default : 
+          break;
+      //======================================================  
+      } // end switch
+      iCurrentState++;
+    } // end if
+    
+    
+
+    if (oI2cMustRead)
+    {
+      switch (nextMasterReadState[iCurrentState])
+      {
+      //======================================================  
+        case I2C_MASTER_RECEIVE_DATA : 
+          I2C4CONbits.RCEN = 1;   //Receive byte sequence
+          break;
+      //====================================================== 
+
+      //======================================================  
+        case I2C_MASTER_START_CONDITION : 
+          I2C4CONbits.SEN = 1;    //start condition sequence
+          break;
+      //====================================================== 
+
+      //======================================================  
+        case I2C_MASTER_REPEAT_START : 
+          I2C4CONbits.RSEN = 1;   //repeated start condition sequence
+          break;
+      //====================================================== 
+
+      //======================================================  
+        case I2C_MASTER_STOP_CONDITION : 
+          I2C4CONbits.PEN = 1;
+          data = I2C4RCV;
+          oI2c4DataRead = 1;
+          break;
+      //====================================================== 
+
+      //======================================================    
+        case I2C_MASTER_TRANSMIT_DATA : 
+          if (iCurrentState < 3)
+          {
+            I2C4TRN = i2cData[iCurrentState - 1];
+          }
+          else
+          {
+            I2C4TRN = i2cData[iCurrentState - 2];
+          }
+          break;
+      //====================================================== 
+
+      //======================================================  
+        case I2C_MASTER_DONE : 
+          INTEnable(INT_I2C4M, INT_DISABLED);
+          oI2cMustRead = 0;
+          oI2c4DataRead = 1;
+          break;
+      //====================================================== 
+
+      //======================================================  
+        case I2C_MASTER_SLAVE_SENT_STOP :
+          break;
+      //====================================================== 
+
+      //======================================================  
+        case I2C_MASTER_SEND_ACK : 
+          I2C4CONbits.ACKDT = 0;  //ACK
+          I2C4CONbits.ACKEN = 1;  //Send ACK sequence
+          break;
+      //====================================================== 
+
+      //======================================================  
+        case I2C_MASTER_SEND_NACK : 
+          I2C4CONbits.ACKDT = 1;  //NACK
+          I2C4CONbits.ACKEN = 1;  //Send NACK sequence
+          break;
+      //====================================================== 
+
+      //======================================================  
+        default : 
+          break;
+      //======================================================  
+      } // end switch
+      iCurrentState++;
+    } // end if
+  }  // end if
+}   // end if
 //=============================================
