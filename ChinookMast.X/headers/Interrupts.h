@@ -138,18 +138,6 @@
 //==============================================================================
 // VARIABLES
 //==============================================================================
-typedef enum
-{
-   I2C_MASTER_START_CONDITION
-  ,I2C_MASTER_REPEAT_START
-  ,I2C_MASTER_STOP_CONDITION
-  ,I2C_MASTER_RECEIVE_DATA
-  ,I2C_MASTER_SEND_ACK
-  ,I2C_MASTER_SEND_NACK
-  ,I2C_MASTER_TRANSMIT_DATA
-  ,I2C_MASTER_SLAVE_SENT_STOP
-  ,I2C_MASTER_DONE
-} I2cMasterInterruptConditions_t;
 
 
 

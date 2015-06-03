@@ -42,7 +42,7 @@ extern volatile UINT8 data;
 volatile UINT8 iMasterState = 0;
 
 
-volatile I2cMasterInterruptConditions_t nextMasterWriteState[10] = 
+volatile I2cMasterStates_t nextMasterWriteState[10] = 
 {
   I2C_MASTER_START_CONDITION
  ,I2C_MASTER_TRANSMIT_DATA
@@ -56,7 +56,7 @@ volatile I2cMasterInterruptConditions_t nextMasterWriteState[10] =
  ,I2C_MASTER_DONE
 };
 
-volatile I2cMasterInterruptConditions_t nextMasterReadState[] = 
+volatile I2cMasterStates_t nextMasterReadState[] = 
 {
   I2C_MASTER_START_CONDITION
  ,I2C_MASTER_TRANSMIT_DATA
