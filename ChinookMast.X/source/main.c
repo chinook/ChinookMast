@@ -49,7 +49,7 @@ extern volatile BOOL  oI2cMustWrite
 
 extern volatile UINT8 iCurrentState;
 
-volatile UINT8 data = 0;
+UINT8 data = 0;
 
 // Mast general value
 volatile INT32  Mast_now = 10;                  // Actual position of Mast
@@ -158,25 +158,61 @@ void main(void)
     i = 0;
     if (!SW1)
     {
-      oI2cMustWrite = 1;
-      INTSetFlag(INT_I2C4M);
-      while(!oI2c4DataSent);
+//      oI2cMustWrite = 1;
+//      INTSetFlag(INT_I2C4M);
+//      while(!oI2c4DataSent);
       
-      I2c.Var.eepromAddress.rw = I2C_READ;
-      i2cData[3] = I2c.Var.eepromAddress.byte;
-      i2cData[4] = 0;
-      i2cData[5] = 0;
+//      I2c.Var.eepromAddress.rw = I2C_READ;
+//      i2cData[3] = I2c.Var.eepromAddress.byte;
+//      i2cData[4] = 0;
+//      i2cData[5] = 0;
       
-      iCurrentState = 0;
-      oI2cMustRead = 1;
-      INTSetFlag(INT_I2C4M);
-      while(!oI2c4DataRead);
-      LED_STATUS_ON;
+//      iCurrentState = 0;
+//      oI2cMustRead = 1;
+//      INTSetFlag(INT_I2C4M);
+//      while(!oI2c4DataRead);
+//      LED_STATUS_ON;
       
 //      I2c.EepromSendByte(I2C4, 0x0555, 0xFF);
 //      err = I2c.EepromReadByte(I2C4, 0x0555, (UINT8 *) &data);
       
-      if (data == 0xFF)
+      UINT8 buffer[7];
+      I2c.Var.eepromAddress.rw = I2C_WRITE;
+      buffer[0] = I2c.Var.eepromAddress.byte;
+      buffer[1] = 0x04;
+      buffer[2] = 0x00;
+      buffer[3] = 0xAA;
+      
+      err = I2c.AddDataToFifoWriteQueue(I2C4, buffer, 4, FALSE);
+      if (err < 0)
+      {
+        LED_STATUS_ON;
+      }
+      
+      Timer.DelayMs(100);
+      
+      I2c.Var.eepromAddress.rw = I2C_WRITE;
+      buffer[0] = I2c.Var.eepromAddress.byte;
+      buffer[1] = 0x04;
+      buffer[2] = 0x00;
+      I2c.Var.eepromAddress.rw = I2C_READ;
+      buffer[3] = I2c.Var.eepromAddress.byte;
+      
+      err = I2c.AddDataToFifoReadQueue(I2C4, buffer, 4);
+      if (err < 0)
+      {
+        LED_DEBUG4_ON;
+      }
+      
+      Timer.DelayMs(10);
+      
+      err = I2c.ReadRxFifo(I2C4, &data, 1);
+      if (err < 0)
+      {
+        LED_DEBUG3_ON;
+      }
+      
+      if (data == 0xAA)
       {
         LED_CAN_ON;
       }

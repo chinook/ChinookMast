@@ -30,47 +30,6 @@
 volatile INT32 Flag_Main_While = 0;
 volatile UINT8 iByteToSend = 0;
 
-volatile BOOL  oI2c4DataSent = 0
-              ,oI2c4DataRead = 0
-              ,oPollingDone  = 0
-              ,oI2cMustWrite = 0
-              ,oI2cMustRead  = 0
-              ;
-
-extern volatile UINT8 data;
-
-volatile UINT8 iMasterState = 0;
-
-
-volatile I2cMasterStates_t nextMasterWriteState[10] = 
-{
-  I2C_MASTER_START_CONDITION
- ,I2C_MASTER_TRANSMIT_DATA
- ,I2C_MASTER_TRANSMIT_DATA
- ,I2C_MASTER_TRANSMIT_DATA
- ,I2C_MASTER_TRANSMIT_DATA
- ,I2C_MASTER_STOP_CONDITION
- ,I2C_MASTER_START_CONDITION
- ,I2C_MASTER_TRANSMIT_DATA
- ,I2C_MASTER_STOP_CONDITION
- ,I2C_MASTER_DONE
-};
-
-volatile I2cMasterStates_t nextMasterReadState[] = 
-{
-  I2C_MASTER_START_CONDITION
- ,I2C_MASTER_TRANSMIT_DATA
- ,I2C_MASTER_TRANSMIT_DATA
- ,I2C_MASTER_TRANSMIT_DATA
- ,I2C_MASTER_REPEAT_START
- ,I2C_MASTER_TRANSMIT_DATA
- ,I2C_MASTER_RECEIVE_DATA
- ,I2C_MASTER_SEND_NACK
- ,I2C_MASTER_STOP_CONDITION
- ,I2C_MASTER_DONE
-};
-
-volatile UINT8 iCurrentState = 0;
 
 //==============================================================================
 //	TIMER INTERRUPTS
@@ -258,6 +217,7 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
 //  {
 //    INTClearFlag(INT_I2C4S);
 //  }
+  sI2cCmdBuffer_t masterData;
   
   if (INTGetFlag(INT_I2C4B))  //Bus Collision interrupt
   {
@@ -268,54 +228,62 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
   {
     INTClearFlag(INT_I2C4M);
 
-    if (oI2cMustWrite)
+    if (I2c.Var.oReadDataInNextInterrupt[I2C4])   // If a read was started last interrupt
     {
-      switch (nextMasterWriteState[iCurrentState])
+      masterData.data  = I2C4RCV;   // Read from I2C buffer
+      masterData.state = I2C_MASTER_RECEIVE_DATA;
+      I2cFifoWrite((void *) &I2c.Var.i2cUserFifo[I2C4], &masterData);
+      I2c.Var.oRxDataAvailable[I2C4] = 1;
+      I2c.Var.oReadDataInNextInterrupt[I2C4] = 0;
+    }
+    
+    if (I2c.Var.oI2cWriteIsRunning)
+    {
+      I2cFifoRead((void *) &I2c.Var.i2cWriteQueue[I2C4], &masterData);
+      switch (masterData.state)
       {
       //======================================================  
         case I2C_MASTER_RECEIVE_DATA : 
-          I2C4CONbits.RCEN = 1;   //Receive byte sequence
+          I2C4CONbits.RCEN = 1;                         //Receive byte sequence
+          I2c.Var.oReadDataInNextInterrupt[I2C4] = 1;   // Flag for the next interrupt to read the rx buffer
           break;
       //====================================================== 
 
       //======================================================  
         case I2C_MASTER_START_CONDITION : 
-          I2C4CONbits.SEN = 1;    //start condition sequence
+          I2C4CONbits.SEN = 1;                          //start condition sequence
           break;
       //====================================================== 
 
       //======================================================  
         case I2C_MASTER_STOP_CONDITION : 
           I2C4CONbits.PEN = 1;
-          if (iCurrentState >=8)
-          {
-            if (!I2CByteWasAcknowledged(I2C4))
-            {
-              iCurrentState -= 3;
-            }
-          }
+//          if (iCurrentState >=8)
+//          {
+//            if (!I2CByteWasAcknowledged(I2C4))
+//            {
+//              iCurrentState -= 3;
+//            }
+//          }
           break;
       //====================================================== 
 
       //======================================================    
         case I2C_MASTER_TRANSMIT_DATA : 
-          if (iCurrentState < 5)
-          {
-            I2C4TRN = i2cData[iCurrentState - 1];
-          }
-          else
-          {
-            I2C4TRN = i2cData[4];
-          }
+          I2C4TRN = masterData.data;
           break;
       //====================================================== 
 
       //======================================================  
         case I2C_MASTER_DONE : 
-          oI2cMustWrite = 0;
-          oI2c4DataSent = 1;
-          iCurrentState = 0;
-//          INTEnable(INT_I2C4M, INT_DISABLED);
+          if (I2c.Var.i2cWriteQueue[I2C4].bufEmpty)   // Nothing more to send
+          {
+            I2c.Var.oI2cWriteIsRunning[I2C4] = 0;       // Turn off writing process
+          }
+          else
+          {
+            I2c.EnableInterrupt(I2C4, I2C_MASTER_INTERRUPT);  // Start another writing process
+          }
           break;
       //====================================================== 
 
@@ -327,6 +295,7 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
 
       //======================================================  
         case I2C_MASTER_SLAVE_SENT_STOP :
+          LED_ERROR_ON;
           break;
       //====================================================== 
 
@@ -345,22 +314,29 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
       //====================================================== 
 
       //======================================================  
+        case I2C_CMD_ERROR : 
+          LED_ERROR_ON;
+          break;
+      //====================================================== 
+
+      //======================================================  
         default : 
           break;
       //======================================================  
       } // end switch
-      iCurrentState++;
     } // end if
     
     
 
-    if (oI2cMustRead)
+    if (I2c.Var.oI2cReadIsRunning)
     {
-      switch (nextMasterReadState[iCurrentState])
+      I2cFifoRead((void *) &I2c.Var.i2cReadQueue[I2C4], &masterData);
+      switch (masterData.state)
       {
       //======================================================  
         case I2C_MASTER_RECEIVE_DATA : 
           I2C4CONbits.RCEN = 1;   //Receive byte sequence
+          I2c.Var.oReadDataInNextInterrupt[I2C4] = 1;
           break;
       //====================================================== 
 
@@ -379,34 +355,31 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
       //======================================================  
         case I2C_MASTER_STOP_CONDITION : 
           I2C4CONbits.PEN = 1;
-          data = I2C4RCV;
-          oI2c4DataRead = 1;
           break;
       //====================================================== 
 
       //======================================================    
         case I2C_MASTER_TRANSMIT_DATA : 
-          if (iCurrentState < 3)
-          {
-            I2C4TRN = i2cData[iCurrentState - 1];
-          }
-          else
-          {
-            I2C4TRN = i2cData[iCurrentState - 2];
-          }
+          I2C4TRN = masterData.data;
           break;
       //====================================================== 
 
       //======================================================  
         case I2C_MASTER_DONE : 
-          INTEnable(INT_I2C4M, INT_DISABLED);
-          oI2cMustRead = 0;
-          oI2c4DataRead = 1;
+          if (I2c.Var.i2cReadQueue[I2C4].bufEmpty)            // Nothing more to send
+          {
+            I2c.Var.oI2cReadIsRunning[I2C4] = 0;              // Turn off reading process
+          }
+          else
+          {
+            I2c.EnableInterrupt(I2C4, I2C_MASTER_INTERRUPT);  // Start another reading process
+          }
           break;
       //====================================================== 
 
       //======================================================  
         case I2C_MASTER_SLAVE_SENT_STOP :
+          LED_ERROR_ON;
           break;
       //====================================================== 
 
@@ -425,11 +398,16 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
       //====================================================== 
 
       //======================================================  
+        case I2C_CMD_ERROR : 
+          LED_ERROR_ON;
+          break;
+      //======================================================
+
+      //======================================================  
         default : 
           break;
       //======================================================  
       } // end switch
-      iCurrentState++;
     } // end if
   }  // end if
 }   // end if
