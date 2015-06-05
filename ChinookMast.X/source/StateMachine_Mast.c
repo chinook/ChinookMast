@@ -197,7 +197,7 @@ void StateInitMast(void)
 //  INIT_INPUT_CAPTURE;
 //  INIT_PWM;
 //  INIT_ADC;
-  INIT_UART;
+//  INIT_UART;
 //  INIT_CAN;
 //  INIT_SKADI;
 //  INIT_SPI;

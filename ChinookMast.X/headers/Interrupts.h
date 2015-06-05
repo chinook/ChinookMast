@@ -90,12 +90,12 @@
 //===============================================
 // Input Capture interrupts priorities and subpriorities
 //===============================================
-#define IC1_INTERRUPT_PRIORITY          5           // Used in ChinookLib function
-#define IC1_INT_PRIORITY                ipl5auto    // Used in ISR
+#define IC1_INTERRUPT_PRIORITY          4           // Used in ChinookLib function
+#define IC1_INT_PRIORITY                ipl4auto    // Used in ISR
 #define IC3_INTERRUPT_PRIORITY          4           // Used in ChinookLib function
 #define IC3_INT_PRIORITY                ipl4auto    // Used in ISR
 
-#define IC1_INTERRUPT_SUBPRIORITY       3           // Highest subpriority
+#define IC1_INTERRUPT_SUBPRIORITY       2           // Highest subpriority
 #define IC3_INTERRUPT_SUBPRIORITY       3           // Highest subpriority
 //===============================================
 

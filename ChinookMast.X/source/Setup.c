@@ -278,7 +278,7 @@ void InitCan(void)
 void InitI2c(void)
 {
   INT8 err;
-  I2c.Open(I2C4, I2C_FREQ_400K);
+  I2c.Open(I2C4, I2C_FREQ_100K);
   err = I2c.ConfigInterrupt(I2C4, I2C4_INTERRUPT_PRIORITY, I2C4_INTERRUPT_SUBPRIORITY);
   if (err < 0)
   {
@@ -389,8 +389,8 @@ void StartInterrupts(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable UART interrupts             // Not functionnal yet
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  Uart.EnableRxInterrupts (UART6);  // Enable RX Interrupts for UART6
-  Uart.DisableTxInterrupts(UART6);  // Disable TX Interrupts for UART6
+//  Uart.EnableRxInterrupts (UART6);  // Enable RX Interrupts for UART6
+//  Uart.DisableTxInterrupts(UART6);  // Disable TX Interrupts for UART6
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -416,6 +416,7 @@ void StartInterrupts(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable I2C interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//  err = I2c.DisableInterrupt (I2C4, I2C_MASTER_INTERRUPT);
   err = I2c.EnableInterrupt (I2C4, I2C_MASTER_INTERRUPT);
   if (err < 0)
   {

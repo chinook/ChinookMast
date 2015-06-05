@@ -179,11 +179,11 @@ void main(void)
       UINT8 buffer[7];
       I2c.Var.eepromAddress.rw = I2C_WRITE;
       buffer[0] = I2c.Var.eepromAddress.byte;
-      buffer[1] = 0x04;
-      buffer[2] = 0x00;
+      buffer[1] = 0x05;
+      buffer[2] = 0x40;
       buffer[3] = 0xAA;
       
-      err = I2c.AddDataToFifoWriteQueue(I2C4, buffer, 4, FALSE);
+      err = I2c.AddDataToFifoWriteQueue(I2C4, &buffer[0], 4, FALSE);
       if (err < 0)
       {
         LED_STATUS_ON;
@@ -191,20 +191,29 @@ void main(void)
       
       Timer.DelayMs(100);
       
+//      while(I2c.Var.oI2cWriteIsRunning[I2C4]);
+      
       I2c.Var.eepromAddress.rw = I2C_WRITE;
       buffer[0] = I2c.Var.eepromAddress.byte;
-      buffer[1] = 0x04;
-      buffer[2] = 0x00;
+      buffer[1] = 0x05;
+      buffer[2] = 0x40;
       I2c.Var.eepromAddress.rw = I2C_READ;
       buffer[3] = I2c.Var.eepromAddress.byte;
       
-      err = I2c.AddDataToFifoReadQueue(I2C4, buffer, 4);
+      err = I2c.AddDataToFifoReadQueue(I2C4, &buffer[0], 1);
       if (err < 0)
       {
-        LED_DEBUG4_ON;
+        LED_DEBUG1_ON;
       }
+//      while(I2c.Var.oI2cWriteIsRunning[I2C4]);
       
-      Timer.DelayMs(10);
+//      
+//      Timer.DelayMs(10);
+      
+      while(I2c.Var.oI2cReadIsRunning[I2C4]);
+      
+//      while(!I2c.Var.oRxDataAvailable[I2C4]);
+      
       
       err = I2c.ReadRxFifo(I2C4, &data, 1);
       if (err < 0)

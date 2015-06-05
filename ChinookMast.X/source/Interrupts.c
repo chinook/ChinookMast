@@ -237,7 +237,7 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
       I2c.Var.oReadDataInNextInterrupt[I2C4] = 0;
     }
     
-    if (I2c.Var.oI2cWriteIsRunning)
+    if (I2c.Var.oI2cWriteIsRunning[I2C4])
     {
       I2cFifoRead((void *) &I2c.Var.i2cWriteQueue[I2C4], &masterData);
       switch (masterData.state)
@@ -282,7 +282,8 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
           }
           else
           {
-            I2c.EnableInterrupt(I2C4, I2C_MASTER_INTERRUPT);  // Start another writing process
+//            I2c.EnableInterrupt(I2C4, I2C_MASTER_INTERRUPT);  // Start another writing process
+            INTSetFlag(INT_I2C4M);                    // Start another writing process
           }
           break;
       //====================================================== 
@@ -328,7 +329,7 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
     
     
 
-    if (I2c.Var.oI2cReadIsRunning)
+    if (I2c.Var.oI2cReadIsRunning[I2C4])
     {
       I2cFifoRead((void *) &I2c.Var.i2cReadQueue[I2C4], &masterData);
       switch (masterData.state)
@@ -372,7 +373,7 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
           }
           else
           {
-            I2c.EnableInterrupt(I2C4, I2C_MASTER_INTERRUPT);  // Start another reading process
+            INTSetFlag(INT_I2C4M);                    // Start another reading process
           }
           break;
       //====================================================== 
