@@ -255,6 +255,7 @@ void main(void)
 //      {
 //        LED_ERROR_ON;
 //      }
+      
       while(1);
     }
 //    if (!SW1)
