@@ -278,7 +278,7 @@ void InitCan(void)
 void InitI2c(void)
 {
   INT8 err;
-  I2c.Open(I2C4, I2C_FREQ_100K);
+  I2c.Open(I2C4, I2C_FREQ_400K);
   err = I2c.ConfigInterrupt(I2C4, I2C4_INTERRUPT_PRIORITY, I2C4_INTERRUPT_SUBPRIORITY);
   if (err < 0)
   {

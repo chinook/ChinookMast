@@ -50,6 +50,7 @@ extern volatile BOOL  oI2cMustWrite
 extern volatile UINT8 iCurrentState;
 
 UINT8 data = 0;
+UINT8 dataBuffer[15] = {0};
 
 // Mast general value
 volatile INT32  Mast_now = 10;                  // Actual position of Mast
@@ -176,14 +177,26 @@ void main(void)
 //      I2c.EepromSendByte(I2C4, 0x0555, 0xFF);
 //      err = I2c.EepromReadByte(I2C4, 0x0555, (UINT8 *) &data);
       
-      UINT8 buffer[7];
+      UINT8 buffer[15];
       I2c.Var.eepromAddress.rw = I2C_WRITE;
       buffer[0] = I2c.Var.eepromAddress.byte;
       buffer[1] = 0x05;
       buffer[2] = 0x40;
       buffer[3] = 0xAA;
+      buffer[4] = 0xBB;
+      buffer[5] = 0xCC;
+      buffer[6] = 0xDD;
+      buffer[7] = 0xEE;
+      buffer[8] = 0xFF;
+      buffer[9] = 0xFF;
+      buffer[10] = 0xCA;
+      buffer[11] = 0xCA;
+      buffer[12] = 0xDE;
+      buffer[13] = 0xAD;
+      buffer[14] = 0x55;
       
-      err = I2c.AddDataToFifoWriteQueue(I2C4, &buffer[0], 4, TRUE);
+//      err = I2c.AddDataToFifoWriteQueue(I2C4, &buffer[0], 4, TRUE);
+      err = I2c.AddDataToFifoWriteQueue(I2C4, &buffer[0], 15, DO_POLL);
       if (err < 0)
       {
         LED_STATUS_ON;
@@ -200,7 +213,8 @@ void main(void)
       I2c.Var.eepromAddress.rw = I2C_READ;
       buffer[3] = I2c.Var.eepromAddress.byte;
       
-      err = I2c.AddDataToFifoReadQueue(I2C4, &buffer[0], 1);
+//      err = I2c.AddDataToFifoReadQueue(I2C4, &buffer[0], 1);
+      err = I2c.AddDataToFifoReadQueue(I2C4, &buffer[0], 3, 12);
       if (err < 0)
       {
         LED_DEBUG1_ON;
@@ -214,20 +228,33 @@ void main(void)
       
 //      while(!I2c.Var.oRxDataAvailable[I2C4]);
       
-      err = I2c.ReadRxFifo(I2C4, &data, 1);
+//      err = I2c.ReadRxFifo(I2C4, &data, 6);
+      err = I2c.ReadRxFifo(I2C4, &dataBuffer[0], 12);
       if (err < 0)
       {
         LED_DEBUG3_ON;
       }
       
-      if (data == 0xAA)
+      buffer[3] = 0xAA;
+      for (i = 0; i < 12; i++)
       {
-        LED_CAN_ON;
+        if (dataBuffer[i] != buffer[i+3])
+        {
+          LED_ERROR_ON;
+        }
+        else
+        {
+          LED_CAN_ON;
+        }
       }
-      else
-      {
-        LED_ERROR_ON;
-      }
+//      if (data == 0xAA)
+//      {
+//        LED_CAN_ON;
+//      }
+//      else
+//      {
+//        LED_ERROR_ON;
+//      }
       while(1);
     }
 //    if (!SW1)
