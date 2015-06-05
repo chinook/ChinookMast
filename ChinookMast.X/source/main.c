@@ -183,15 +183,15 @@ void main(void)
       buffer[2] = 0x40;
       buffer[3] = 0xAA;
       
-      err = I2c.AddDataToFifoWriteQueue(I2C4, &buffer[0], 4, FALSE);
+      err = I2c.AddDataToFifoWriteQueue(I2C4, &buffer[0], 4, TRUE);
       if (err < 0)
       {
         LED_STATUS_ON;
       }
       
-      Timer.DelayMs(100);
+//      Timer.DelayMs(100);
       
-//      while(I2c.Var.oI2cWriteIsRunning[I2C4]);
+      while(I2c.Var.oI2cWriteIsRunning[I2C4]);
       
       I2c.Var.eepromAddress.rw = I2C_WRITE;
       buffer[0] = I2c.Var.eepromAddress.byte;
@@ -213,7 +213,6 @@ void main(void)
       while(I2c.Var.oI2cReadIsRunning[I2C4]);
       
 //      while(!I2c.Var.oRxDataAvailable[I2C4]);
-      
       
       err = I2c.ReadRxFifo(I2C4, &data, 1);
       if (err < 0)

@@ -258,6 +258,43 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
       //======================================================  
         case I2C_MASTER_STOP_CONDITION : 
           I2C4CONbits.PEN = 1;
+          
+          if (I2c.Var.oPoolSlaveAcknowledge[I2C4])
+          {
+            if (!I2c.Var.oSecondStopAfterPooling[I2C4])
+            {
+              masterData.state = I2C_MASTER_START_CONDITION;
+              I2cFifoWrite((void *) &I2c.Var.i2cWriteQueue[I2C4], &masterData);
+              
+              masterData.state = I2C_MASTER_TRANSMIT_DATA;
+              I2cFifoWrite((void *) &I2c.Var.i2cWriteQueue[I2C4], &masterData);
+              
+              masterData.state = I2C_MASTER_STOP_CONDITION;
+              I2cFifoWrite((void *) &I2c.Var.i2cWriteQueue[I2C4], &masterData);
+              
+              I2c.Var.oSecondStopAfterPooling[I2C4] = 1;
+            }
+            else
+            {
+              if (!I2CByteWasAcknowledged(I2C4))
+              {
+                masterData.state = I2C_MASTER_START_CONDITION;
+                I2cFifoWrite((void *) &I2c.Var.i2cWriteQueue[I2C4], &masterData);
+
+                masterData.state = I2C_MASTER_TRANSMIT_DATA;
+                I2cFifoWrite((void *) &I2c.Var.i2cWriteQueue[I2C4], &masterData);
+
+                masterData.state = I2C_MASTER_STOP_CONDITION;
+                I2cFifoWrite((void *) &I2c.Var.i2cWriteQueue[I2C4], &masterData);
+              }
+              else
+              {
+                masterData.state = I2C_MASTER_DONE;
+                I2cFifoWrite((void *) &I2c.Var.i2cWriteQueue[I2C4], &masterData);
+                I2c.Var.oSecondStopAfterPooling[I2C4] = 0;
+              }
+            }
+          }
 //          if (iCurrentState >=8)
 //          {
 //            if (!I2CByteWasAcknowledged(I2C4))
