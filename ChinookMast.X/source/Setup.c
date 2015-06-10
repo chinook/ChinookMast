@@ -59,8 +59,8 @@ void InitTimer(void)
 //	Open timers
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%
   timerCounterValue = Timer.Open(TIMER_1, 500, SCALE_US);   // Open Timer 1 with a period of 500 ms
-//  timerCounterValue = Timer.Open(TIMER_2, 500, SCALE_US);   // Open Timer 2 with a period of 500 us
-//  timerCounterValue = Timer.Open(TIMER_3, 50, SCALE_US);   // Open Timer 3 with a period of 500 ms
+  timerCounterValue = Timer.Open(TIMER_2, 500, SCALE_US);   // Open Timer 2 with a period of 500 us
+  timerCounterValue = Timer.Open(TIMER_3, 500, SCALE_US);   // Open Timer 3 with a period of 500 ms
 //  timerCounterValue = Timer.Open(TIMER_4, 500, SCALE_MS);   // Open Timer 4 with a period of 500 ms
 //  timerCounterValue = Timer.Open(TIMER_5, 500, SCALE_US);   // Open Timer 5 with a period of 500 us
   
@@ -68,8 +68,8 @@ void InitTimer(void)
 //	Configure timer interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   Timer.ConfigInterrupt(TIMER_1, TIMER1_INTERRUPT_PRIORITY, TIMER1_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_1 to the values specified in Interrupt.h
-//  Timer.ConfigInterrupt(TIMER_2, TIMER2_INTERRUPT_PRIORITY, TIMER2_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_2 to the values specified in Interrupt.h
-//  Timer.ConfigInterrupt(TIMER_3, TIMER3_INTERRUPT_PRIORITY, TIMER3_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_3 to the values specified in Interrupt.h
+  Timer.ConfigInterrupt(TIMER_2, TIMER2_INTERRUPT_PRIORITY, TIMER2_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_2 to the values specified in Interrupt.h
+  Timer.ConfigInterrupt(TIMER_3, TIMER3_INTERRUPT_PRIORITY, TIMER3_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_3 to the values specified in Interrupt.h
 //  Timer.ConfigInterrupt(TIMER_4, TIMER4_INTERRUPT_PRIORITY, TIMER4_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_4 to the values specified in Interrupt.h
 //  Timer.ConfigInterrupt(TIMER_5, TIMER5_INTERRUPT_PRIORITY, TIMER5_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_5 to the values specified in Interrupt.h
 
@@ -95,6 +95,7 @@ void InitSpi(void)
                                 | SPI_TX_EVENT_BUFFER_SR_EMPTY
                                 | SPI_RX_EVENT_BUFFER_NOT_EMPTY
                                 | SPI_SAMPLE_END_CLK
+                                | SPI_OPEN_CKE_REV
                 ;
 
   err = Spi.Open(SPI4, oMasterFlags, 5e5);   // Open the SPI4 as a master at a bitrate of 5 MHz
@@ -104,9 +105,7 @@ void InitSpi(void)
   }
 
   // SPI interrupts not functionnal as of yet
-//  Spi.ConfigInterrupt(SPI2, SPI2_INTERRUPT_PRIORITY, SPI2_INTERRUPT_SUBPRIORITY);  // Configure Interrupt for SPI2
-//  Spi.ConfigInterrupt(SPI3, SPI3_INTERRUPT_PRIORITY, SPI4_INTERRUPT_SUBPRIORITY);  // Configure Interrupt for SPI3
-//  Spi.ConfigInterrupt(SPI4, SPI3_INTERRUPT_PRIORITY, SPI4_INTERRUPT_SUBPRIORITY);  // Configure Interrupt for SPI4
+//  Spi.ConfigInterrupt(SPI4, SPI4_INTERRUPT_PRIORITY, SPI4_INTERRUPT_SUBPRIORITY);  // Configure Interrupt for SPI4
 }
 
 
@@ -115,32 +114,15 @@ void InitSpi(void)
 //===========================
 void InitPwm(void)
 {
-
-  // Open PWM1 using Timer3 with 50% duty cycle and 0% offset
-  Pwm.Open(PWM_1);
-  Pwm.SetDutyCycle  (PWM_1, 50);
-  Pwm.SetPulseOffset(PWM_1,  0);
-
-  // Open PWM2 using Timer3 with 50% duty cycle and 0% offset
-  Pwm.Open(PWM_2);
-  Pwm.SetDutyCycle  (PWM_2, 50);
-  Pwm.SetPulseOffset(PWM_2,  0);
-
-  // Open PWM3 using Timer3 with 50% duty cycle and 0% offset
-  Pwm.Open(PWM_3);
-  Pwm.SetDutyCycle  (PWM_3, 50);
-  Pwm.SetPulseOffset(PWM_3,  0);
-
   // Open PWM4 using Timer3 with 50% duty cycle and 0% offset
   Pwm.Open(PWM_4);
-  Pwm.SetDutyCycle  (PWM_4, 50);
-  Pwm.SetPulseOffset(PWM_4,  0);
+  Pwm.SetDutyCycle  (PWM_4, 500);
+  Pwm.SetPulseOffset(PWM_4,   0);
 
-  // Open PWM5 using Timer3 with 50% duty cycle and 0% offset
+  // Open PWM5 using Timer3 with 50% duty cycle and 50% offset
   Pwm.Open(PWM_5);
-  Pwm.SetDutyCycle  (PWM_5, 50);
-  Pwm.SetPulseOffset(PWM_5,  0);
-
+  Pwm.SetDutyCycle  (PWM_5, 500);
+  Pwm.SetPulseOffset(PWM_5, 500);
 }
 
 
@@ -182,55 +164,72 @@ void InitPorts(void)
                     | BIT_12 | BIT_13 | BIT_14 | BIT_15 );
 
    /* Setup IO LED */
-    Port.B.SetPinsDigitalOut(BIT_8);      // LED_DEBG0
-    Port.B.SetPinsDigitalOut(BIT_9);      // LED_DEBG1
-    Port.B.SetPinsDigitalOut(BIT_10);     // LED_DEBG2
-    Port.B.SetPinsDigitalOut(BIT_11);     // LED_DEBG3
-    Port.B.SetPinsDigitalOut(BIT_12);     // LED_DEBG4
-    Port.B.SetPinsDigitalOut(BIT_13);     // LED_CAN
-    Port.B.SetPinsDigitalOut(BIT_15);     // LED_ERROR
-    Port.F.SetPinsDigitalOut(BIT_3);      // LED_STATUS
+  Port.B.SetPinsDigitalOut(BIT_8);      // LED_DEBG0
+  Port.B.SetPinsDigitalOut(BIT_9);      // LED_DEBG1
+  Port.B.SetPinsDigitalOut(BIT_10);     // LED_DEBG2
+  Port.B.SetPinsDigitalOut(BIT_11);     // LED_DEBG3
+  Port.B.SetPinsDigitalOut(BIT_12);     // LED_DEBG4
+  Port.B.SetPinsDigitalOut(BIT_13);     // LED_CAN
+  Port.B.SetPinsDigitalOut(BIT_15);     // LED_ERROR
+  Port.F.SetPinsDigitalOut(BIT_3);      // LED_STATUS
 
-    /* Setup  IO switch */
-    Port.E.SetPinsDigitalIn(BIT_5);      // SW1
-    Port.E.SetPinsDigitalIn(BIT_6);      // SW2
-    Port.E.SetPinsDigitalIn(BIT_7);      // SW3
+  /* Setup  IO switch */
+  Port.E.SetPinsDigitalIn(BIT_5);      // SW1
+  Port.E.SetPinsDigitalIn(BIT_6);      // SW2
+  Port.E.SetPinsDigitalIn(BIT_7);      // SW3
 
-    /* Setup  Output to control Drive A */
-    Port.E.SetPinsDigitalOut(BIT_3);      // DRVA_RESET
-    Port.E.SetPinsDigitalOut(BIT_4);      // DRVA_SLEEP
-    Port.E.SetPinsDigitalOut(BIT_1);      // DRVA_DIR
-    Port.E.SetPinsDigitalOut(BIT_2);      // DRVA_STEP
-    Port.D.SetPinsDigitalOut(BIT_4);      // DRVA_BIN1
-    Port.D.SetPinsDigitalOut(BIT_2);      // DRVA_BIN2
+  /* Setup  Output to control Drive A */
+  Port.E.SetPinsDigitalOut(BIT_3);      // DRVA_RESET
+  Port.E.SetPinsDigitalOut(BIT_4);      // DRVA_SLEEP
+  Port.E.SetPinsDigitalOut(BIT_1);      // DRVA_DIR
+  Port.E.SetPinsDigitalOut(BIT_2);      // DRVA_STEP
+  Port.D.SetPinsDigitalOut(BIT_4);      // DRVA_BIN1
+  Port.D.SetPinsDigitalOut(BIT_2);      // DRVA_BIN2
 
-    /* Setup  Input Drive A */
-    Port.D.SetPinsDigitalIn(BIT_6);      // DRVA_FLT
-    Port.D.SetPinsDigitalIn(BIT_5);      // DRVA_STALL
+  /* Setup  Input Drive A */
+  Port.D.SetPinsDigitalIn(BIT_6);      // DRVA_FLT
+  Port.D.SetPinsDigitalIn(BIT_5);      // DRVA_STALL
 
-    /* Setup  Output to control Drive B */
-//    Port.G.SetPinsDigitalOut(BIT_2);      // DRVB_RESET
-    Port.D.SetPinsDigitalOut(BIT_0);      // DRVB_SLEEP
-    Port.E.SetPinsDigitalOut(BIT_0);      // DRVB_DIR
-    Port.C.SetPinsDigitalOut(BIT_15);      // DRVB_STEP
-    Port.D.SetPinsDigitalOut(BIT_3);      // DRVB_BIN1
-    Port.D.SetPinsDigitalOut(BIT_1);      // DRVB_BIN2
+  /* Setup  Output to control Drive B */
+//    Port.G.SetPinsDigitalOut(BIT_2);    // DRVB_RESET
+  Port.D.SetPinsDigitalOut(BIT_0);      // DRVB_SLEEP
+  Port.E.SetPinsDigitalOut(BIT_0);      // DRVB_DIR
+  Port.C.SetPinsDigitalOut(BIT_15);     // DRVB_STEP
+  Port.D.SetPinsDigitalOut(BIT_3);      // DRVB_BIN1
+  Port.D.SetPinsDigitalOut(BIT_1);      // DRVB_BIN2
 
-    /* Setup  Input Drive B */
-    Port.D.SetPinsDigitalIn(BIT_5);       // DRVB_FLT
-//    Port.C.SetPinsDigitalIn(BIT_15);      // DRVB_STALL
+  /* Setup  Input Drive B */
+  Port.D.SetPinsDigitalIn(BIT_5);       // DRVB_FLT
+//    Port.C.SetPinsDigitalIn(BIT_15);    // DRVB_STALL
 
-    /* Setup  SPI SCn */
-    Port.F.SetPinsDigitalIn(BIT_4);       // SDI
-    Port.F.SetPinsDigitalOut(BIT_5);      // SD0
-    Port.C.SetPinsDigitalOut(BIT_13);     // DRVB_SC
-    Port.C.SetPinsDigitalOut(BIT_14);     // DRVA_SC
-    Port.B.SetPinsDigitalOut(BIT_14);     // CLK
+  /* Setup  SPI SCn */
+  Port.F.SetPinsDigitalIn(BIT_4);       // SDI
+  Port.F.SetPinsDigitalOut(BIT_5);      // SD0
+  Port.C.SetPinsDigitalOut(BIT_13);     // DRVB_SC
+  Port.C.SetPinsDigitalOut(BIT_14);     // DRVA_SC
+  Port.B.SetPinsDigitalOut(BIT_14);     // CLK
 
-    Port.D.SetPinsDigitalIn(BIT_11);        // LIMIT_SW
+  Port.D.SetPinsDigitalIn(BIT_11);      // LIMIT_SW
 
-    Port.G.SetPinsDigitalIn (BIT_9);        // U6RX
-    Port.G.SetPinsDigitalOut(BIT_6);        // U6TX
+  Port.G.SetPinsDigitalIn (BIT_9);      // U6RX
+  Port.G.SetPinsDigitalOut(BIT_6);      // U6TX
+
+  Port.D.SetPinsDigitalIn (BIT_8);      // DRVA_IO_CON1
+  Port.D.SetPinsDigitalIn (BIT_10);     // DRVA_IO_CON2
+
+  LED_STATUS_OFF;
+  LED_ERROR_OFF;
+  LED_CAN_OFF;
+  LED_DEBUG4_OFF;
+  LED_DEBUG3_OFF;
+  LED_DEBUG2_OFF;
+  LED_DEBUG1_OFF;
+  LED_DEBUG0_OFF;
+  
+  
+  DRVA_STEP = 0;
+  DRVA_BIN1 = 1;
+  DRVA_BIN2 = 0;
 }
 
 
@@ -345,7 +344,7 @@ void InitAdc(void)
   // Open ADC with parameters above
   Adc.Open(samplingClk, configHardware, configPort, configScan);
 
-  Adc.ConfigInterrupt(ADC_INTERRUPT_PRIORITY, ADC_INTERRUPT_SUBPRIORITY);
+//  Adc.ConfigInterrupt(ADC_INTERRUPT_PRIORITY, ADC_INTERRUPT_SUBPRIORITY);
 
 }
 
@@ -379,9 +378,9 @@ void StartInterrupts(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable timer interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//  Timer.EnableInterrupt(TIMER_1);
-//  Timer.EnableInterrupt(TIMER_2);
-//  Timer.EnableInterrupt(TIMER_3);
+  Timer.EnableInterrupt(TIMER_1);
+  Timer.EnableInterrupt(TIMER_2);
+  Timer.EnableInterrupt(TIMER_3);
 //  Timer.EnableInterrupt(TIMER_4);
 //  Timer.EnableInterrupt(TIMER_5);
 
@@ -389,8 +388,8 @@ void StartInterrupts(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable UART interrupts             // Not functionnal yet
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//  Uart.EnableRxInterrupts (UART6);  // Enable RX Interrupts for UART6
-//  Uart.DisableTxInterrupts(UART6);  // Disable TX Interrupts for UART6
+  Uart.EnableRxInterrupts (UART6);  // Enable RX Interrupts for UART6
+  Uart.DisableTxInterrupts(UART6);  // Disable TX Interrupts for UART6
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -409,29 +408,28 @@ void StartInterrupts(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable InputCapture interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//  InputCapture.EnableInterrupt(IC1);
-//  InputCapture.EnableInterrupt(IC3);
+  InputCapture.EnableInterrupt(IC1);
+  InputCapture.EnableInterrupt(IC3);
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable I2C interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//  err = I2c.DisableInterrupt (I2C4, I2C_MASTER_INTERRUPT);
-  err = I2c.EnableInterrupt (I2C4, I2C_MASTER_INTERRUPT);
-  if (err < 0)
-  {
-    LED_ERROR_ON;
-  }
-  err = I2c.DisableInterrupt(I2C4, I2C_SLAVE_INTERRUPT);
-  if (err < 0)
-  {
-    LED_ERROR_ON;
-  }
-  err = I2c.DisableInterrupt(I2C4, I2C_BUS_COLLISION_INTERRUPT);
-  if (err < 0)
-  {
-    LED_ERROR_ON;
-  }
+//  err = I2c.EnableInterrupt (I2C4, I2C_MASTER_INTERRUPT);
+//  if (err < 0)
+//  {
+//    LED_ERROR_ON;
+//  }
+//  err = I2c.DisableInterrupt(I2C4, I2C_SLAVE_INTERRUPT);
+//  if (err < 0)
+//  {
+//    LED_ERROR_ON;
+//  }
+//  err = I2c.DisableInterrupt(I2C4, I2C_BUS_COLLISION_INTERRUPT);
+//  if (err < 0)
+//  {
+//    LED_ERROR_ON;
+//  }
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

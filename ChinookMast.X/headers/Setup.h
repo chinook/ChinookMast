@@ -178,9 +178,10 @@ void StartInterrupts  (void);
 #define DRVA_SC           LATCbits.LATC14
 
 //==============================================================================
-// Define INPUT LIMIT SWITCH
+// Define UNCODER
 //==============================================================================
-#define LIMIT_SW          PORTDbits.RD11
+#define DRVA_IO_CON1      PORTDbits.RD8
+#define DRVA_IO_CON2      PORTDbits.RD10
 
 
 //==============================================================================

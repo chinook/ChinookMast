@@ -27,8 +27,9 @@
 
 #include "..\headers\Interrupts.h"
 
-volatile INT32 Flag_Main_While = 0;
-volatile UINT8 iByteToSend = 0;
+volatile BOOL oFlagMainWhile = 0;
+volatile BOOL oCapture1 = 0;
+volatile BOOL oCapture3 = 0;
 
 
 //==============================================================================
@@ -40,7 +41,7 @@ volatile UINT8 iByteToSend = 0;
 //=============================================
 void __ISR(_TIMER_1_VECTOR, T1_INTERRUPT_PRIORITY) Timer1InterruptHandler(void)
 {
-  Flag_Main_While = 1;
+  oFlagMainWhile = 1;
 
   // Increment the number of overflows from this timer. Used primarily by Input Capture
   Timer.Var.nOverflows[0]++;
@@ -72,28 +73,53 @@ void __ISR(_TIMER_3_VECTOR, T3_INTERRUPT_PRIORITY) Timer3InterruptHandler(void)
   mT3ClearIntFlag();
 }
 
-//=============================================
-// Configure the Timer 4 interrupt handler
-//=============================================
-void __ISR(_TIMER_4_VECTOR, T4_INTERRUPT_PRIORITY) Timer4InterruptHandler(void)
+
+/*******************************************************************************
+ ***********************                               *************************
+ ********************           CAN INTERRUPTS            **********************
+ ***********************                               *************************
+ ******************************************************************************/
+
+//================================================
+// Configure the CAN1 interrupt handler
+//================================================
+void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 {
+    // Check if the source of the interrupt is RX_EVENT. This is redundant since
+    // only this event is enabled in this example but this shows one scheme for
+    // handling events
+    if ((CANGetModuleEvent(CAN1) & CAN_RX_EVENT) != 0) {
 
-  // Increment the number of overflows from this timer. Used primarily by Input Capture
-  Timer.Var.nOverflows[3]++;
+        // Within this, you can check which channel caused the event by using
+        // the CANGetModuleEvent() function which returns a code representing
+        // the highest priority pending event.
+        if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL1_EVENT) {
 
-  mT4ClearIntFlag();
-}
+            // This means that channel 1 caused the event.
+            // The CAN_RX_CHANNEL_NOT_EMPTY event is persistent. You could either
+            // read the channel in the ISR to clear the event condition or as done
+            // here, disable the event source, and set an application flag to
+            // indicate that a message has been received. The event can be
+            // enabled by the application when it has processed one message.
+            // Note that leaving the event enabled would cause the CPU to keep
+            // executing the ISR since the CAN_RX_CHANNEL_NOT_EMPTY event is
+            // persistent (unless the not empty condition is cleared.)
+            CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);    
+            
+            //Do shit
+            
+            CANUpdateChannel(CAN1, CAN_CHANNEL1);
+            CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+            
+        }
+    }
 
-//=============================================
-// Configure the Timer 5 interrupt handler
-//=============================================
-void __ISR(_TIMER_5_VECTOR, T5_INTERRUPT_PRIORITY) Timer5InterruptHandler(void)
-{
-
-  // Increment the number of overflows from this timer. Used primarily by Input Capture
-  Timer.Var.nOverflows[4]++;
-
-  mT5ClearIntFlag();
+    // The CAN1 Interrupt flag is  cleared at the end of the interrupt routine.
+    // This is because the event source that could have caused this interrupt to
+    // occur (CAN_RX_CHANNEL_NOT_EMPTY) is disabled. Attempting to clear the
+    // CAN1 interrupt flag when the the CAN_RX_CHANNEL_NOT_EMPTY interrupt is
+    // enabled will not have any effect because the base event is still present.
+    INTClearFlag(INT_CAN1);
 }
 
 
@@ -187,19 +213,69 @@ void __ISR(_UART_6_VECTOR, U6_INTERRUPT_PRIORITY) Uart6InterruptHandler(void)
 
 /*******************************************************************************
  ***********************                               *************************
- ********************           ADC INTERRUPT             **********************
+ ********************      INPUT CAPTURE INTERRUPTS       **********************
  ***********************                               *************************
- *******************************************************************************/
+ ******************************************************************************/
 
-//=============================================
-// Configure the ADC interrupt handler
-//=============================================
-void __ISR(_ADC_VECTOR, ADC_INTERRUPT_PRIO) AdcInterruptHandler(void)
+//================================================
+// Configure the InputCapture 1 interrupt handler
+//================================================
+void __ISR(_INPUT_CAPTURE_1_VECTOR, IC1_INT_PRIORITY) InputCapture1InterruptHandler(void)
 {
-  Adc.Read();               // Read the enabled channels and puts them in Adc.Var.adcReadValues[]
-  INTClearFlag(INT_AD1);    // Clear the ADC conversion done interrupt Flag
+  /*
+   * DEVELOPPER CODE HERE
+   */
+
+  // Get the timer used by this Input Capture
+  TimerNum_t numTimer = InputCapture.Var.timerUsed[IC1];
+
+  // Wait for capture data to be ready
+  while(!(InputCapture.IsCaptureReady(IC1)));
+
+  // Update values of timer overflows
+  InputCapture.Var.previousTimerOverflows[IC1] = InputCapture.Var.currentTimerOverflows[IC1];
+  InputCapture.Var.currentTimerOverflows[IC1]  = Timer.ReadOverflows(numTimer);
+
+  // Store the timer value of the capture event
+  InputCapture.Var.previousCaptureCountValue[IC1] = InputCapture.Var.currentCaptureCountValue[IC1];
+  InputCapture.Var.currentCaptureCountValue [IC1] = InputCapture.ReadCapture(IC1);
+
+  oCapture1 = 1;   // Flag that tells that a new Capture event occured
+
+  // Clear the interrupt flag
+  INTClearFlag(INT_IC1);
 }
-//=============================================
+//================================================
+
+//================================================
+// Configure the InputCapture 3 interrupt handler
+//================================================
+void __ISR(_INPUT_CAPTURE_3_VECTOR, IC3_INT_PRIORITY) InputCapture3InterruptHandler(void)
+{
+  /*
+   * DEVELOPPER CODE HERE
+   */
+
+  // Get the timer used by this Input Capture
+  TimerNum_t numTimer = InputCapture.Var.timerUsed[IC3];
+
+  // Wait for capture data to be ready
+  while(!(InputCapture.IsCaptureReady(IC3)));
+
+  // Update values of timer overflows
+  InputCapture.Var.previousTimerOverflows[IC3] = InputCapture.Var.currentTimerOverflows[IC3];
+  InputCapture.Var.currentTimerOverflows[IC3]  = Timer.ReadOverflows(numTimer);
+
+  // Store the timer value of the capture event
+  InputCapture.Var.previousCaptureCountValue[IC3] = InputCapture.Var.currentCaptureCountValue[IC3];
+  InputCapture.Var.currentCaptureCountValue [IC3] = InputCapture.ReadCapture(IC3);
+
+  oCapture3 = 1;   // Flag that tells that a new Capture event occured
+
+  // Clear the interrupt flag
+  INTClearFlag(INT_IC3);
+}
+//================================================
 
 
 /*******************************************************************************

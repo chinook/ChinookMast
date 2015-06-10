@@ -136,9 +136,10 @@ INT32 ReadDrive(INT32 DRV, INT32 msg)
 
 void Init_reg_Mast(void)
 {
+//  Drive_Mast_Setup.Ctl.ENABLE   = 0b1;            //0 = disable, 1 = enable
   Drive_Mast_Setup.Ctl.ENABLE   = 0b1;            //0 = disable, 1 = enable
   Drive_Mast_Setup.Ctl.RDIR     = 0b1;            //0 = use DIR pin, 1 = use inverse DIR PIN
-  Drive_Mast_Setup.Ctl.RSETEP   = 0b1;            //0 = nothing, 1 : give a step on stepper = STEP pin
+  Drive_Mast_Setup.Ctl.RSETEP   = 0b0;            //0 = nothing, 1 : give a step on stepper = STEP pin
   Drive_Mast_Setup.Ctl.MODE     = 0b0000;         //000 = FULL step.... 1000 = 1/256, other reserved
   Drive_Mast_Setup.Ctl.EXSTALL  = 0b0;            //0 = internal stall effect, 1 = external stall effect
   Drive_Mast_Setup.Ctl.ISGAIN   = 0b00;           //gain AOP,  00=5, 01=10, 10=20, 11=40

@@ -45,17 +45,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=source/DRV8711_Para.c source/Interrupts.c source/Setup.c source/SkadiFunctions.c source/StateFunctions.c source/StateMachine_Mast.c source/main.c
+SOURCEFILES_QUOTED_IF_SPACED=source/DRV8711_Para.c source/Interrupts.c source/Setup.c source/SkadiFunctions.c source/main.c source/StateMachine.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/source/DRV8711_Para.o ${OBJECTDIR}/source/Interrupts.o ${OBJECTDIR}/source/Setup.o ${OBJECTDIR}/source/SkadiFunctions.o ${OBJECTDIR}/source/StateFunctions.o ${OBJECTDIR}/source/StateMachine_Mast.o ${OBJECTDIR}/source/main.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/source/DRV8711_Para.o.d ${OBJECTDIR}/source/Interrupts.o.d ${OBJECTDIR}/source/Setup.o.d ${OBJECTDIR}/source/SkadiFunctions.o.d ${OBJECTDIR}/source/StateFunctions.o.d ${OBJECTDIR}/source/StateMachine_Mast.o.d ${OBJECTDIR}/source/main.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/source/DRV8711_Para.o ${OBJECTDIR}/source/Interrupts.o ${OBJECTDIR}/source/Setup.o ${OBJECTDIR}/source/SkadiFunctions.o ${OBJECTDIR}/source/main.o ${OBJECTDIR}/source/StateMachine.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/source/DRV8711_Para.o.d ${OBJECTDIR}/source/Interrupts.o.d ${OBJECTDIR}/source/Setup.o.d ${OBJECTDIR}/source/SkadiFunctions.o.d ${OBJECTDIR}/source/main.o.d ${OBJECTDIR}/source/StateMachine.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/source/DRV8711_Para.o ${OBJECTDIR}/source/Interrupts.o ${OBJECTDIR}/source/Setup.o ${OBJECTDIR}/source/SkadiFunctions.o ${OBJECTDIR}/source/StateFunctions.o ${OBJECTDIR}/source/StateMachine_Mast.o ${OBJECTDIR}/source/main.o
+OBJECTFILES=${OBJECTDIR}/source/DRV8711_Para.o ${OBJECTDIR}/source/Interrupts.o ${OBJECTDIR}/source/Setup.o ${OBJECTDIR}/source/SkadiFunctions.o ${OBJECTDIR}/source/main.o ${OBJECTDIR}/source/StateMachine.o
 
 # Source Files
-SOURCEFILES=source/DRV8711_Para.c source/Interrupts.c source/Setup.c source/SkadiFunctions.c source/StateFunctions.c source/StateMachine_Mast.c source/main.c
+SOURCEFILES=source/DRV8711_Para.c source/Interrupts.c source/Setup.c source/SkadiFunctions.c source/main.c source/StateMachine.c
 
 
 CFLAGS=
@@ -118,23 +118,17 @@ ${OBJECTDIR}/source/SkadiFunctions.o: source/SkadiFunctions.c  nbproject/Makefil
 	@${RM} ${OBJECTDIR}/source/SkadiFunctions.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/SkadiFunctions.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/SkadiFunctions.o.d" -o ${OBJECTDIR}/source/SkadiFunctions.o source/SkadiFunctions.c   
 	
-${OBJECTDIR}/source/StateFunctions.o: source/StateFunctions.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/source" 
-	@${RM} ${OBJECTDIR}/source/StateFunctions.o.d 
-	@${RM} ${OBJECTDIR}/source/StateFunctions.o 
-	@${FIXDEPS} "${OBJECTDIR}/source/StateFunctions.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/StateFunctions.o.d" -o ${OBJECTDIR}/source/StateFunctions.o source/StateFunctions.c   
-	
-${OBJECTDIR}/source/StateMachine_Mast.o: source/StateMachine_Mast.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/source" 
-	@${RM} ${OBJECTDIR}/source/StateMachine_Mast.o.d 
-	@${RM} ${OBJECTDIR}/source/StateMachine_Mast.o 
-	@${FIXDEPS} "${OBJECTDIR}/source/StateMachine_Mast.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/StateMachine_Mast.o.d" -o ${OBJECTDIR}/source/StateMachine_Mast.o source/StateMachine_Mast.c   
-	
 ${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/main.o.d 
 	@${RM} ${OBJECTDIR}/source/main.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/main.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/main.o.d" -o ${OBJECTDIR}/source/main.o source/main.c   
+	
+${OBJECTDIR}/source/StateMachine.o: source/StateMachine.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/source" 
+	@${RM} ${OBJECTDIR}/source/StateMachine.o.d 
+	@${RM} ${OBJECTDIR}/source/StateMachine.o 
+	@${FIXDEPS} "${OBJECTDIR}/source/StateMachine.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/StateMachine.o.d" -o ${OBJECTDIR}/source/StateMachine.o source/StateMachine.c   
 	
 else
 ${OBJECTDIR}/source/DRV8711_Para.o: source/DRV8711_Para.c  nbproject/Makefile-${CND_CONF}.mk
@@ -161,23 +155,17 @@ ${OBJECTDIR}/source/SkadiFunctions.o: source/SkadiFunctions.c  nbproject/Makefil
 	@${RM} ${OBJECTDIR}/source/SkadiFunctions.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/SkadiFunctions.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/SkadiFunctions.o.d" -o ${OBJECTDIR}/source/SkadiFunctions.o source/SkadiFunctions.c   
 	
-${OBJECTDIR}/source/StateFunctions.o: source/StateFunctions.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/source" 
-	@${RM} ${OBJECTDIR}/source/StateFunctions.o.d 
-	@${RM} ${OBJECTDIR}/source/StateFunctions.o 
-	@${FIXDEPS} "${OBJECTDIR}/source/StateFunctions.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/StateFunctions.o.d" -o ${OBJECTDIR}/source/StateFunctions.o source/StateFunctions.c   
-	
-${OBJECTDIR}/source/StateMachine_Mast.o: source/StateMachine_Mast.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/source" 
-	@${RM} ${OBJECTDIR}/source/StateMachine_Mast.o.d 
-	@${RM} ${OBJECTDIR}/source/StateMachine_Mast.o 
-	@${FIXDEPS} "${OBJECTDIR}/source/StateMachine_Mast.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/StateMachine_Mast.o.d" -o ${OBJECTDIR}/source/StateMachine_Mast.o source/StateMachine_Mast.c   
-	
 ${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/main.o.d 
 	@${RM} ${OBJECTDIR}/source/main.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/main.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/main.o.d" -o ${OBJECTDIR}/source/main.o source/main.c   
+	
+${OBJECTDIR}/source/StateMachine.o: source/StateMachine.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/source" 
+	@${RM} ${OBJECTDIR}/source/StateMachine.o.d 
+	@${RM} ${OBJECTDIR}/source/StateMachine.o 
+	@${FIXDEPS} "${OBJECTDIR}/source/StateMachine.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/StateMachine.o.d" -o ${OBJECTDIR}/source/StateMachine.o source/StateMachine.c   
 	
 endif
 
