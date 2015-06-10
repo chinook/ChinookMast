@@ -217,15 +217,15 @@ void StateInit(void)
   Timer.DelayMs(1);
   DRVA_SLEEP = 1;
   Timer.DelayMs(1);
-  WriteDrive(DRVA, CONTROL_Mastw);
+//  WriteDrive(DRVA, CONTROL_Mastw);
   WriteDrive(DRVA, 0x0001);
-  WriteDrive(DRVA, TORQUE_Mastw);
-  WriteDrive(DRVA, 0x10FF);
-  WriteDrive(DRVA, 0x2180);
-  WriteDrive(DRVA, BLANK_Mastw);
-  WriteDrive(DRVA, DECAY_Mastw);
-  WriteDrive(DRVA, STATUS_Mastw);
-  WriteDrive(DRVA, 0x7000);
+//  WriteDrive(DRVA, TORQUE_Mastw);
+//  WriteDrive(DRVA, 0x10FF);
+//  WriteDrive(DRVA, 0x2180);
+//  WriteDrive(DRVA, BLANK_Mastw);
+//  WriteDrive(DRVA, DECAY_Mastw);
+//  WriteDrive(DRVA, STATUS_Mastw);
+//  WriteDrive(DRVA, 0x7000);
 }
 
 
