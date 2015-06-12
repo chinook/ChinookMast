@@ -27,9 +27,12 @@
 
 #include "..\headers\Interrupts.h"
 
-volatile BOOL oFlagMainWhile = 0;
-volatile BOOL oCapture1 = 0;
-volatile BOOL oCapture3 = 0;
+volatile BOOL  oFlagMainWhile = 0
+              ,oCapture1      = 0
+              ,oCapture2      = 0
+              ,oCapture3      = 0
+              ,oCapture4      = 0
+              ;
 
 
 //==============================================================================
@@ -248,6 +251,36 @@ void __ISR(_INPUT_CAPTURE_1_VECTOR, IC1_INT_PRIORITY) InputCapture1InterruptHand
 //================================================
 
 //================================================
+// Configure the InputCapture 2 interrupt handler
+//================================================
+void __ISR(_INPUT_CAPTURE_2_VECTOR, IC2_INT_PRIORITY) InputCapture2InterruptHandler(void)
+{
+  /*
+   * DEVELOPPER CODE HERE
+   */
+
+  // Get the timer used by this Input Capture
+  TimerNum_t numTimer = InputCapture.Var.timerUsed[IC2];
+
+  // Wait for capture data to be ready
+  while(!(InputCapture.IsCaptureReady(IC2)));
+
+  // Update values of timer overflows
+  InputCapture.Var.previousTimerOverflows[IC2] = InputCapture.Var.currentTimerOverflows[IC2];
+  InputCapture.Var.currentTimerOverflows[IC2]  = Timer.ReadOverflows(numTimer);
+
+  // Store the timer value of the capture event
+  InputCapture.Var.previousCaptureCountValue[IC2] = InputCapture.Var.currentCaptureCountValue[IC2];
+  InputCapture.Var.currentCaptureCountValue [IC2] = InputCapture.ReadCapture(IC2);
+
+  oCapture2 = 1;   // Flag that tells that a new Capture event occured
+
+  // Clear the interrupt flag
+  INTClearFlag(INT_IC2);
+}
+//================================================
+
+//================================================
 // Configure the InputCapture 3 interrupt handler
 //================================================
 void __ISR(_INPUT_CAPTURE_3_VECTOR, IC3_INT_PRIORITY) InputCapture3InterruptHandler(void)
@@ -274,6 +307,36 @@ void __ISR(_INPUT_CAPTURE_3_VECTOR, IC3_INT_PRIORITY) InputCapture3InterruptHand
 
   // Clear the interrupt flag
   INTClearFlag(INT_IC3);
+}
+//================================================
+
+//================================================
+// Configure the InputCapture 4 interrupt handler
+//================================================
+void __ISR(_INPUT_CAPTURE_4_VECTOR, IC4_INT_PRIORITY) InputCapture4InterruptHandler(void)
+{
+  /*
+   * DEVELOPPER CODE HERE
+   */
+
+  // Get the timer used by this Input Capture
+  TimerNum_t numTimer = InputCapture.Var.timerUsed[IC4];
+
+  // Wait for capture data to be ready
+  while(!(InputCapture.IsCaptureReady(IC4)));
+
+  // Update values of timer overflows
+  InputCapture.Var.previousTimerOverflows[IC4] = InputCapture.Var.currentTimerOverflows[IC4];
+  InputCapture.Var.currentTimerOverflows[IC4]  = Timer.ReadOverflows(numTimer);
+
+  // Store the timer value of the capture event
+  InputCapture.Var.previousCaptureCountValue[IC4] = InputCapture.Var.currentCaptureCountValue[IC4];
+  InputCapture.Var.currentCaptureCountValue [IC4] = InputCapture.ReadCapture(IC4);
+
+  oCapture4 = 1;   // Flag that tells that a new Capture event occured
+
+  // Clear the interrupt flag
+  INTClearFlag(INT_IC4);
 }
 //================================================
 

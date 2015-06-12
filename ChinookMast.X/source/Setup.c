@@ -95,7 +95,7 @@ void InitSpi(void)
                                 | SPI_TX_EVENT_BUFFER_SR_EMPTY
                                 | SPI_RX_EVENT_BUFFER_NOT_EMPTY
                                 | SPI_SAMPLE_END_CLK
-                                | SPI_OPEN_CKE_REV
+                                | SPI_DATA_ON_CLK_FEDGE
                                 ;
 
   err = Spi.Open(SPI4, oMasterFlags, 5e5);   // Open the SPI4 as a master at a bitrate of 5 MHz
@@ -114,15 +114,25 @@ void InitSpi(void)
 //===========================
 void InitPwm(void)
 {
-  // Open PWM4 using Timer3 with 50% duty cycle and 0% offset
-  Pwm.Open(PWM_4);
-  Pwm.SetDutyCycle  (PWM_4, 500);
-  Pwm.SetPulseOffset(PWM_4,   0);
+  // Open PWM2 using Timer3 with 50% duty cycle and 0% offset
+  Pwm.Open(PWM_2);
+  Pwm.SetDutyCycle  (PWM_2, 500);
+  Pwm.SetPulseOffset(PWM_2,   0);
 
-  // Open PWM5 using Timer3 with 50% duty cycle and 50% offset
-  Pwm.Open(PWM_5);
-  Pwm.SetDutyCycle  (PWM_5, 500);
-  Pwm.SetPulseOffset(PWM_5, 500);
+  // Open PWM3 using Timer3 with 50% duty cycle and 50% offset
+  Pwm.Open(PWM_3);
+  Pwm.SetDutyCycle  (PWM_3, 500);
+  Pwm.SetPulseOffset(PWM_3, 500);
+
+//  // Open PWM4 using Timer3 with 50% duty cycle and 0% offset
+//  Pwm.Open(PWM_4);
+//  Pwm.SetDutyCycle  (PWM_4, 500);
+//  Pwm.SetPulseOffset(PWM_4,   0);
+//
+//  // Open PWM5 using Timer3 with 50% duty cycle and 50% offset
+//  Pwm.Open(PWM_5);
+//  Pwm.SetDutyCycle  (PWM_5, 500);
+//  Pwm.SetPulseOffset(PWM_5, 500);
 }
 
 
@@ -363,11 +373,20 @@ void InitInputCapture(void)
   // Capture every rising edge, 1 interrupt each capture, use the 32 bits Timer 23, capture the first rising edge, Input Capture ON
 //  UINT16 config = IC_EVERY_RISE_EDGE | IC_INT_1CAPTURE | IC_CAP_32BIT | IC_FEDGE_RISE | IC_ON;
 
-  InputCapture.Open(IC1, config);
-  InputCapture.Open(IC3, config);
+  // Driver A
+//  InputCapture.Open(IC1, config);
+//  InputCapture.Open(IC3, config);
+//
+//  InputCapture.ConfigInterrupt(IC1, IC1_INTERRUPT_PRIORITY, IC1_INTERRUPT_SUBPRIORITY);
+//  InputCapture.ConfigInterrupt(IC3, IC3_INTERRUPT_PRIORITY, IC3_INTERRUPT_SUBPRIORITY);
 
-  InputCapture.ConfigInterrupt(IC1, IC1_INTERRUPT_PRIORITY, IC1_INTERRUPT_SUBPRIORITY);
-  InputCapture.ConfigInterrupt(IC3, IC3_INTERRUPT_PRIORITY, IC3_INTERRUPT_SUBPRIORITY);
+  // Driver B
+  InputCapture.Open(IC2, config);
+  InputCapture.Open(IC4, config);
+
+  InputCapture.ConfigInterrupt(IC4, IC2_INTERRUPT_PRIORITY, IC4_INTERRUPT_SUBPRIORITY);
+  InputCapture.ConfigInterrupt(IC2, IC4_INTERRUPT_PRIORITY, IC2_INTERRUPT_SUBPRIORITY);
+
 }
 
 

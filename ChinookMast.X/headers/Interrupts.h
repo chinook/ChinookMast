@@ -43,8 +43,8 @@
  * +--------------------------------------------+
  * | Priority | Subpriority | Interrupt handler |
  * |----------+-------------+-------------------|
- * | 1        | 0           |                   |
- * | 1        | 1           |                   |
+ * | 1        | 0           | Input Capture 2   |
+ * | 1        | 1           | Input Capture 4   |
  * | 1        | 2           | Input Capture 1   |
  * | 1        | 3           | Input Capture 3   |
  * |----------+-------------+-------------------|
@@ -122,11 +122,17 @@
 //===============================================
 #define IC1_INTERRUPT_PRIORITY          1           // Used in ChinookLib function
 #define IC1_INT_PRIORITY                ipl1auto    // Used in ISR
+#define IC2_INTERRUPT_PRIORITY          1           // Used in ChinookLib function
+#define IC2_INT_PRIORITY                ipl1auto    // Used in ISR
 #define IC3_INTERRUPT_PRIORITY          1           // Used in ChinookLib function
 #define IC3_INT_PRIORITY                ipl1auto    // Used in ISR
+#define IC4_INTERRUPT_PRIORITY          1           // Used in ChinookLib function
+#define IC4_INT_PRIORITY                ipl1auto    // Used in ISR
 
 #define IC1_INTERRUPT_SUBPRIORITY       2
+#define IC2_INTERRUPT_SUBPRIORITY       0
 #define IC3_INTERRUPT_SUBPRIORITY       3
+#define IC4_INTERRUPT_SUBPRIORITY       1
 //===============================================
 
 
