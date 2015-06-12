@@ -215,7 +215,7 @@ typedef struct{
 }drvControl;
 
 typedef struct{
-  INT8 TROQUE;              //torque value, see equation of max current
+  INT8 TORQUE;              //torque value, see equation of max current
   INT8 SMPLTH;              //EMF sample : 000 = 50us, 001 = 100us, 010 = 200us, 011 = 300us, 100 = 400us, 101 = 600us, 110 = 800us, 111 = 1000us,
 }drvTorque;
 

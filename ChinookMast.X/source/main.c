@@ -110,7 +110,7 @@ void main(void)
       // Mast State machine with Drive A
       //======================================
       (*pStateMast)();          // jump to next state
-      WriteDrive(DRVA, STATUS_Mastw);
+//      WriteDrive(DRVA, STATUS_Mastw);
       StateAcquisition();
       StateScheduler();   // Decides which state will be next
 

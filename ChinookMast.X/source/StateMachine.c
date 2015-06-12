@@ -27,6 +27,10 @@ INT8 Calib_done = 1;
 volatile INT32 Mast_now = 10;                  // Actual position of Mast
 volatile INT32 Mast_consigne = 10000;            // New value of Mast
 extern volatile BOOL oCapture1, oCapture3;
+volatile BOOL  oFirstTimeInStateUp   = 1
+              ,oFirstTimeInStateDown = 1
+              ,oFirstTimeInStateStop = 1
+              ;
 
 INT8  memoMast_Up = 0;
 INT8  memoMast_Down = 0;
@@ -211,21 +215,31 @@ void StateInit(void)
   START_INTERRUPTS;
     
   Init_reg_Mast();
-  DRVB_SC = 0;
+//  DRVB_SC = 0;
+  DRVA_SC = 0;
   Timer.DelayMs(1);
-  DRVA_RESET = 0;
+//  DRVA_RESET = 0;
+  DRVB_RESET = 0;
   Timer.DelayMs(1);
-  DRVA_SLEEP = 1;
+//  DRVA_SLEEP = 1;
+  DRVB_SLEEP = 1;
   Timer.DelayMs(1);
+  
 //  WriteDrive(DRVA, CONTROL_Mastw);
-  WriteDrive(DRVA, 0x0001);
 //  WriteDrive(DRVA, TORQUE_Mastw);
-//  WriteDrive(DRVA, 0x10FF);
+  WriteDrive(DRVB, CONTROL_Mastw);
+  WriteDrive(DRVB, TORQUE_Mastw);
+//  WriteDrive(DRVA, OFF_Mastw);
 //  WriteDrive(DRVA, 0x2180);
+  WriteDrive(DRVB, 0x2180);
 //  WriteDrive(DRVA, BLANK_Mastw);
 //  WriteDrive(DRVA, DECAY_Mastw);
+//  WriteDrive(DRVA, STALL_Mastw);
+//  WriteDrive(DRVA, DRIVE_Mastw);
 //  WriteDrive(DRVA, STATUS_Mastw);
-//  WriteDrive(DRVA, 0x7000);
+  WriteDrive(DRVB, STATUS_Mastw);
+
+
 }
 
 
@@ -237,10 +251,17 @@ void StateStop(void)
 {
 //  DRVA_STEP = 1;
 //  DRVA_SLEEP = 0;
+  DRVB_SLEEP = 0;
   
-  Pwm.SetDutyCycle(PWM_4, 500);
-  Pwm.SetDutyCycle(PWM_5, 500);
-  WriteDrive(DRVA, STATUS_Mastw);
+//  if (oFirstTimeInStateStop)
+//  {
+//    oFirstTimeInStateUp = 1;
+//    oFirstTimeInStateDown = 1;
+//    oFirstTimeInStateStop = 0;
+    Pwm.SetDutyCycle(PWM_4, 500);
+    Pwm.SetDutyCycle(PWM_5, 500);
+//  }
+//  WriteDrive(DRVA, STATUS_Mastw);
 }
 
 
@@ -262,16 +283,25 @@ void StateCalib(void)
 void StateDown(void)
 {
 //  DRVA_DIR = MAST_DIR_DOWN;
-  DRVA_SLEEP = 1;
+//  DRVA_SLEEP = 1;
+  DRVB_SLEEP = 1;
 
 //  DRVA_BIN1 ^= 1;
 //  DRVA_BIN2 ^= 1;
 //  DRVA_BIN1 = 0;
 //  DRVA_BIN2 = 0;
-  Pwm.SetDutyCycle(PWM_4, 750);
-  Pwm.SetDutyCycle(PWM_5, 250);
+  
+//  if (oFirstTimeInStateDown)
+//  {
+//    oFirstTimeInStateUp = 1;
+//    oFirstTimeInStateStop = 1;
+//    oFirstTimeInStateDown = 0;
+    Pwm.SetDutyCycle(PWM_4, 750);
+    Pwm.SetDutyCycle(PWM_5, 250);
+//  }
   Mast_now--;
-  WriteDrive(DRVA, STATUS_Mastw);
+//  WriteDrive(DRVA, STATUS_Mastw);
+  WriteDrive(DRVB, STATUS_Mastw);
 }
 
 
@@ -283,16 +313,24 @@ void StateDown(void)
 void StateUp(void)
 {
 //  DRVA_DIR = MAST_DIR_UP;
-  DRVA_SLEEP = 1;
+//  DRVA_SLEEP = 1;
+  DRVB_SLEEP = 1;
 
 //  DRVA_BIN1 ^= 1;
 //  DRVA_BIN2 ^= 1;
 //  DRVA_BIN1 = 0;
 //  DRVA_BIN2 = 0;
-  Pwm.SetDutyCycle(PWM_4, 250);
-  Pwm.SetDutyCycle(PWM_5, 750);
+//  if (oFirstTimeInStateUp)
+//  {
+//    oFirstTimeInStateStop = 1;
+//    oFirstTimeInStateDown = 1;
+//    oFirstTimeInStateUp = 0;
+    Pwm.SetDutyCycle(PWM_4, 250);
+    Pwm.SetDutyCycle(PWM_5, 750);
+//  }
   Mast_now++;
-  WriteDrive(DRVA, STATUS_Mastw);
+//  WriteDrive(DRVA, STATUS_Mastw);
+  WriteDrive(DRVB, STATUS_Mastw);
 }
 
 

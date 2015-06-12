@@ -185,7 +185,7 @@ typedef union
 /* Concatenation to build SPI message*/
   /**** write message 1|adresse(3)|configuration(12) ****/
 #define CONTROL_Mastw      0<<15|regCTRLadd<<12|Drive_Mast_Setup.Ctl.DTIME<<10|Drive_Mast_Setup.Ctl.ISGAIN<<8|Drive_Mast_Setup.Ctl.EXSTALL<<7|Drive_Mast_Setup.Ctl.MODE<<3|Drive_Mast_Setup.Ctl.RSETEP<<2|Drive_Mast_Setup.Ctl.RDIR<<1|Drive_Mast_Setup.Ctl.ENABLE
-#define TORQUE_Mastw       0<<15|regTORQUEadd<<12|Drive_Mast_Setup.Tor.SMPLTH<<8|Drive_Mast_Setup.Tor.TROQUE
+#define TORQUE_Mastw       0<<15|regTORQUEadd<<12|Drive_Mast_Setup.Tor.SMPLTH<<8|Drive_Mast_Setup.Tor.TORQUE
 #define OFF_Mastw          0<<15|regOFFadd<<12|Drive_Mast_Setup.Off.PWMMODE<<8|Drive_Mast_Setup.Off.TOFF
 #define BLANK_Mastw        0<<15|regBLANKadd<<12|Drive_Mast_Setup.Bla.ABT<<8|Drive_Mast_Setup.Bla.TBLANK
 #define DECAY_Mastw        0<<15|regDECAYadd<<12|Drive_Mast_Setup.Dec.DECMOD<<8|Drive_Mast_Setup.Dec.TDECAY
@@ -194,7 +194,7 @@ typedef union
 #define STATUS_Mastw       0<<15|regSTATUSadd<<12|Drive_Mast_Setup.Sta.STDLAT<<7|Drive_Mast_Setup.Sta.STD<<6|Drive_Mast_Setup.Sta.UVLO<<5|Drive_Mast_Setup.Sta.BPDF<<4|Drive_Mast_Setup.Sta.APDF<<3|Drive_Mast_Setup.Sta.BOCP<<2|Drive_Mast_Setup.Sta.AOCP<<1|Drive_Mast_Setup.Sta.OTS
 
 #define CONTROL_PITCHw     0<<15|regCTRLadd<<12|Drive_Pitch_Setup.Ctl.DTIME<<10|Drive_Pitch_Setup.Ctl.ISGAIN<<8|Drive_Pitch_Setup.Ctl.EXSTALL<<7|Drive_Pitch_Setup.Ctl.MODE<<3|Drive_Pitch_Setup.Ctl.RSETEP<<2|Drive_Pitch_Setup.Ctl.RDIR<<1|Drive_Pitch_Setup.Ctl.ENABLE
-#define TORQUE_PITCHw      0<<15|regTORQUEadd<<12|Drive_Pitch_Setup.Tor.SMPLTH<<8|Drive_Pitch_Setup.Tor.TROQUE
+#define TORQUE_PITCHw      0<<15|regTORQUEadd<<12|Drive_Pitch_Setup.Tor.SMPLTH<<8|Drive_Pitch_Setup.Tor.TORQUE
 #define OFF_PITCHw         0<<15|regOFFadd<<12|Drive_Pitch_Setup.Off.PWMMODE<<8|Drive_Pitch_Setup.Off.TOFF
 #define BLANK_PITCHw       0<<15|regBLANKadd<<12|Drive_Pitch_Setup.Bla.ABT<<8|Drive_Pitch_Setup.Bla.TBLANK
 #define DECAY_PITCHw       0<<15|regDECAYadd<<12|Drive_Pitch_Setup.Dec.DECMOD<<8|Drive_Pitch_Setup.Dec.TDECAY

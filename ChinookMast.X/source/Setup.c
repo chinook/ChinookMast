@@ -60,7 +60,7 @@ void InitTimer(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%
   timerCounterValue = Timer.Open(TIMER_1, 500, SCALE_US);   // Open Timer 1 with a period of 500 ms
   timerCounterValue = Timer.Open(TIMER_2, 500, SCALE_US);   // Open Timer 2 with a period of 500 us
-  timerCounterValue = Timer.Open(TIMER_3, 500, SCALE_US);   // Open Timer 3 with a period of 500 ms
+  timerCounterValue = Timer.Open(TIMER_3, 500, SCALE_US);    // Open Timer 3 with a period of 500 ms
 //  timerCounterValue = Timer.Open(TIMER_4, 500, SCALE_MS);   // Open Timer 4 with a period of 500 ms
 //  timerCounterValue = Timer.Open(TIMER_5, 500, SCALE_US);   // Open Timer 5 with a period of 500 us
   
@@ -96,7 +96,7 @@ void InitSpi(void)
                                 | SPI_RX_EVENT_BUFFER_NOT_EMPTY
                                 | SPI_SAMPLE_END_CLK
                                 | SPI_OPEN_CKE_REV
-                ;
+                                ;
 
   err = Spi.Open(SPI4, oMasterFlags, 5e5);   // Open the SPI4 as a master at a bitrate of 5 MHz
   if (err < 0)                // Check for errors
@@ -227,9 +227,12 @@ void InitPorts(void)
   LED_DEBUG0_OFF;
   
   
-  DRVA_STEP = 0;
-  DRVA_BIN1 = 1;
-  DRVA_BIN2 = 0;
+//  DRVA_STEP = 0;
+//  DRVA_BIN1 = 1;
+//  DRVA_BIN2 = 0;
+  DRVB_STEP = 0;
+  DRVB_BIN1 = 1;
+  DRVB_BIN2 = 0;
 }
 
 
