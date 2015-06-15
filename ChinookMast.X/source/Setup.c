@@ -101,7 +101,7 @@ void InitSpi(void)
   err = Spi.Open(SPI4, oMasterFlags, 5e5);   // Open the SPI4 as a master at a bitrate of 5 MHz
   if (err < 0)                // Check for errors
   {
-    LED_ERROR_OFF;
+    LED_ERROR_ON;
   }
 
   // SPI interrupts not functionnal as of yet
@@ -384,8 +384,8 @@ void InitInputCapture(void)
   InputCapture.Open(IC2, config);
   InputCapture.Open(IC4, config);
 
-  InputCapture.ConfigInterrupt(IC4, IC2_INTERRUPT_PRIORITY, IC4_INTERRUPT_SUBPRIORITY);
-  InputCapture.ConfigInterrupt(IC2, IC4_INTERRUPT_PRIORITY, IC2_INTERRUPT_SUBPRIORITY);
+  InputCapture.ConfigInterrupt(IC2, IC2_INTERRUPT_PRIORITY, IC2_INTERRUPT_SUBPRIORITY);
+  InputCapture.ConfigInterrupt(IC4, IC4_INTERRUPT_PRIORITY, IC4_INTERRUPT_SUBPRIORITY);
 
 }
 
@@ -430,8 +430,10 @@ void StartInterrupts(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable InputCapture interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  InputCapture.EnableInterrupt(IC1);
-  InputCapture.EnableInterrupt(IC3);
+//  InputCapture.EnableInterrupt(IC1);
+//  InputCapture.EnableInterrupt(IC3);
+  InputCapture.EnableInterrupt(IC2);
+  InputCapture.EnableInterrupt(IC4);
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

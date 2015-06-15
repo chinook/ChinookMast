@@ -255,7 +255,7 @@ void StateInit(void)
 void StateStop(void)
 {
 //  DRVA_SLEEP = 0;
-//  DRVB_SLEEP = 0;
+  DRVB_SLEEP = 0;
   
   if (oFirstTimeInStateStop)
   {
@@ -384,6 +384,7 @@ void StateAcquisition(void)
 
   if (oCapture2)
   {
+    LED_CAN_OFF;
     oCapture2 = 0;
     rx2 = InputCapture.GetTimeBetweenCaptures(IC2, SCALE_US);
     if (rx2 < 0)

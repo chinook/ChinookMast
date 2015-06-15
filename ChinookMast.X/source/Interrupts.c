@@ -258,6 +258,7 @@ void __ISR(_INPUT_CAPTURE_2_VECTOR, IC2_INT_PRIORITY) InputCapture2InterruptHand
   /*
    * DEVELOPPER CODE HERE
    */
+  LED_CAN_ON;
 
   // Get the timer used by this Input Capture
   TimerNum_t numTimer = InputCapture.Var.timerUsed[IC2];
