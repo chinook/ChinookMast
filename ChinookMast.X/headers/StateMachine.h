@@ -32,8 +32,8 @@
 void StateInit(void);           // Initialization state of the system
 void StateCalib(void);          // Stop pitch if pitch is on good position
 void StateStop(void);           // Stop motor if problem or if Mast = consigne
-void StateDown(void);           // Down Mast with stepper motor and a gage feedback.
-void StateUp(void);             // Up Mast with stepper motor and a gage feedback.
+void StateManualLeft(void);           // Down Mast with stepper motor and a gage feedback.
+void StateManualRight(void);             // Up Mast with stepper motor and a gage feedback.
 void StateAcquisition(void);    // Get data from peripherals
 void StateScheduler(void);      // State Scheduler. Decides which state is next
 
@@ -67,11 +67,11 @@ volatile  INT8  breakFlag   // Flag indicating if the emergency break has been p
 #define MAST_MIN              0
 
 /*********** BASIC CONDITION *****************/
-#define MAST_DOWN             (Mast_now > Mast_consigne)
-#define MAST_UP               (Mast_now < Mast_consigne)
-#define MAST_OK               (Mast_now == Mast_consigne)
-#define MAST_MAX_OK           (Mast_now == MAST_MAX)
-#define MAST_MIN_OK           (Mast_now == MAST_MIN)
+#define MAST_DOWN             (mastCurrentPos > Mast_consigne)
+#define MAST_UP               (mastCurrentPos < Mast_consigne)
+#define MAST_OK               (mastCurrentPos == Mast_consigne)
+#define MAST_MAX_OK           (mastCurrentPos == MAST_MAX)
+#define MAST_MIN_OK           (mastCurrentPos == MAST_MIN)
 #define MAST_DIR_DOWN         SW1
 #define MAST_DIR_UP           !MAST_DIR_DOWN
 #define MAST_CALIB_MODE       !Calib_done

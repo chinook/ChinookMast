@@ -114,6 +114,9 @@ void StartInterrupts  (void);
 #define LED_CAN_TOGGLE      Port.B.ToggleBits(BIT_13)
 #define LED_STATUS_TOGGLE   Port.F.ToggleBits(BIT_3)
 
+#define LED_ALL_OFF()   { LED_DEBUG0_OFF; LED_DEBUG1_OFF; LED_DEBUG2_OFF; LED_DEBUG3_OFF; LED_DEBUG4_OFF; LED_ERROR_OFF; LED_CAN_OFF; LED_STATUS_OFF; }
+#define LED_ALL_ON()   { LED_DEBUG0_ON; LED_DEBUG1_ON; LED_DEBUG2_ON; LED_DEBUG3_ON; LED_DEBUG4_ON; LED_ERROR_ON; LED_CAN_ON; LED_STATUS_ON; }
+
 //==============================================================================
 // Define INPUT SWITCH
 //==============================================================================
@@ -277,6 +280,7 @@ BYTE Can1MessageFifoArea [ CAN_NB_CHANNELS     // Space used by CAN
                          * CAN_TX_RX_MESSAGE_SIZE_BYTES
                          ];
 
+// Typedef for mapping the steering wheel switches
 typedef union
 {
   struct
@@ -302,7 +306,16 @@ typedef union
     UINT8 low;
     UINT8 high;
   } bytes;
+
+  UINT16 word;
+  
 } CanSwitches_t;
+
+// Message 0 : Identification
+#define SEND_ID_TO_BACKPLANE          Can.SendByte(CAN1, 0x30, 0x00)
+
+// Message 1 : Disconnect
+#define SEND_DISCONNECT_TO_BACKPLANE  Can.SendByte(CAN1, 0x31, 0x00)
 
 
 #endif	/* __SETUP_H__ */

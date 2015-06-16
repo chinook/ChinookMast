@@ -24,17 +24,19 @@
 INT8 Calib_done = 1;
 
 // Mast general value
-volatile INT32 Mast_now = 10;                  // Actual position of Mast
-volatile INT32 Mast_consigne = 4000;            // New value of Mast
+volatile INT32 mastCurrentPos = 10;                  // Actual position of Mast
+volatile INT32 Mast_consigne = 1000;            // New value of Mast
 extern volatile BOOL oCapture1
                     ,oCapture2
                     ,oCapture3
                     ,oCapture4
                     ;
 
-volatile BOOL  oFirstTimeInStateUp   = 1
-              ,oFirstTimeInStateDown = 1
-              ,oFirstTimeInStateStop = 1
+volatile BOOL  oFirstTimeInStateUp    = 1
+              ,oFirstTimeInStateDown  = 1
+              ,oFirstTimeInStateStop  = 1
+              ,oButtonLeft            = 0
+              ,oButtonRight           = 0
               ;
 
 BOOL  oCapture1Acquired = 0
@@ -43,8 +45,8 @@ BOOL  oCapture1Acquired = 0
      ,oCapture4Acquired = 0
      ;
 
-INT8  memoMast_Up = 0;
-INT8  memoMast_Down = 0;
+INT8  memoMast_Right = 0;
+INT8  memoMast_Left = 0;
 
 //==============================================================================
 //	STATES OF STATE MACHINE
@@ -72,11 +74,11 @@ void StateScheduler(void)
     }
     else if (INIT_2_DOWN)
     {
-      pStateMast = &StateDown;    // Down state
+      pStateMast = &StateManualLeft;    // Down state
     }
     else if (INIT_2_UP)
     {
-      pStateMast = &StateUp;      // Up state
+      pStateMast = &StateManualRight;      // Up state
     }
     else
     {
@@ -99,11 +101,11 @@ void StateScheduler(void)
     }
     else if (CALIB_2_DOWN)
     {
-      pStateMast = &StateDown;     // Down state
+      pStateMast = &StateManualLeft;     // Down state
     }
     else if (CALIB_2_UP)
     {
-      pStateMast = &StateUp;     // Up state
+      pStateMast = &StateManualRight;     // Up state
     }
     else
     {
@@ -126,11 +128,11 @@ void StateScheduler(void)
     }
     else if (STOP_2_DOWN)
     {
-      pStateMast = &StateDown;     // Down state
+      pStateMast = &StateManualLeft;     // Down state
     }
     else if (STOP_2_UP)
     {
-      pStateMast = &StateUp;     // Up state
+      pStateMast = &StateManualRight;     // Up state
     }
     else
     {
@@ -139,9 +141,9 @@ void StateScheduler(void)
   }
   
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  // Current state = StateDown
+  // Current state = StateManualLeft
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  else if (pStateMast == &StateDown)
+  else if (pStateMast == &StateManualLeft)
   {
     if (DOWN_2_INIT)
     {
@@ -157,18 +159,18 @@ void StateScheduler(void)
     }
     else if (DOWN_2_UP)
     {
-      pStateMast = &StateUp;     // UP state
+      pStateMast = &StateManualRight;     // UP state
     }
     else
     {
-      pStateMast = &StateDown;   // Go to Error state by default
+      pStateMast = &StateManualLeft;   // Go to Error state by default
     }
   }
   
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  // Current state = StateUp
+  // Current state = StateManualRight
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  else if (pStateMast == &StateUp)
+  else if (pStateMast == &StateManualRight)
   {
     if (UP_2_INIT)
     {
@@ -184,11 +186,11 @@ void StateScheduler(void)
     }
     else if (UP_2_DOWN)
     {
-      pStateMast = &StateDown;     // Down state
+      pStateMast = &StateManualLeft;     // Down state
     }
     else
     {
-      pStateMast = &StateUp;   // Go to Error state by default
+      pStateMast = &StateManualRight;   // Go to Error state by default
     }
   }
 
@@ -224,7 +226,11 @@ void StateInit(void)
   INIT_SPI;
 //  INIT_I2C;
   START_INTERRUPTS;
-    
+
+  // Send ID to backplane by CAN protocol
+  SEND_ID_TO_BACKPLANE;
+
+  // Init registers for the drive
   Init_reg_Mast();
 //  DRVB_SC = 0;
   DRVA_SC = 0;
@@ -249,8 +255,6 @@ void StateInit(void)
 //  WriteDrive(DRVA, DRIVE_Mastw);
 //  WriteDrive(DRVA, STATUS_Mastw);
   WriteDrive(DRVB, STATUS_Mastw);
-
-
 }
 
 
@@ -268,8 +272,7 @@ void StateStop(void)
     oFirstTimeInStateUp = 1;
     oFirstTimeInStateDown = 1;
     oFirstTimeInStateStop = 0;
-//    Pwm.SetDutyCycle(PWM_4, 500);
-//    Pwm.SetDutyCycle(PWM_5, 500);
+
     Pwm.SetDutyCycle(PWM_2, 500);
     Pwm.SetDutyCycle(PWM_3, 500);
   }
@@ -288,11 +291,11 @@ void StateCalib(void)
 
 
 //===============================================================
-// Name     : StateDown
+// Name     : StateManualLeft
 // Purpose  : Error state of the system. Used to assess and
 //            correct errors in the system.
 //===============================================================
-void StateDown(void)
+void StateManualLeft(void)
 {
 //  DRVA_SLEEP = 1;
   DRVB_SLEEP = 1;
@@ -302,23 +305,24 @@ void StateDown(void)
     oFirstTimeInStateUp = 1;
     oFirstTimeInStateStop = 1;
     oFirstTimeInStateDown = 0;
-//    Pwm.SetDutyCycle(PWM_4, 750);
-//    Pwm.SetDutyCycle(PWM_5, 250);
-    Pwm.SetDutyCycle(PWM_2, 800);
-    Pwm.SetDutyCycle(PWM_3, 200);
+
+//    Pwm.SetDutyCycle(PWM_2, 800);
+//    Pwm.SetDutyCycle(PWM_3, 200);
+    Pwm.SetDutyCycle(PWM_2, 250);
+    Pwm.SetDutyCycle(PWM_3, 750);
   }
-  Mast_now--;
+  mastCurrentPos--;
 //  WriteDrive(DRVA, STATUS_Mastw);
   WriteDrive(DRVB, STATUS_Mastw);
 }
 
 
 //===============================================================
-// Name     : StateUp
+// Name     : StateManualRight
 // Purpose  : Error state of the system. Used to assess and
 //            correct errors in the system.
 //===============================================================
-void StateUp(void)
+void StateManualRight(void)
 {
 //  DRVA_SLEEP = 1;
   DRVB_SLEEP = 1;
@@ -328,12 +332,12 @@ void StateUp(void)
     oFirstTimeInStateStop = 1;
     oFirstTimeInStateDown = 1;
     oFirstTimeInStateUp = 0;
-    Pwm.SetDutyCycle(PWM_2, 200);
-    Pwm.SetDutyCycle(PWM_3, 800);
-//    Pwm.SetDutyCycle(PWM_4, 250);
-//    Pwm.SetDutyCycle(PWM_5, 750);
+//    Pwm.SetDutyCycle(PWM_2, 200);
+//    Pwm.SetDutyCycle(PWM_3, 800);
+    Pwm.SetDutyCycle(PWM_2, 750);
+    Pwm.SetDutyCycle(PWM_3, 250);
   }
-  Mast_now++;
+  mastCurrentPos++;
 //  WriteDrive(DRVA, STATUS_Mastw);
   WriteDrive(DRVB, STATUS_Mastw);
 }
@@ -345,24 +349,26 @@ void StateUp(void)
 //===============================================================
 void StateAcquisition(void)
 {
-  if (!SW2 && !memoMast_Down) 
+  if ( (!SW2 && !memoMast_Left) || (oButtonLeft && !memoMast_Left) )
   {
-    Mast_consigne += 1000;
-    memoMast_Down = 1;
+    Mast_consigne -= 1000;
+    memoMast_Left = 1;
+    oButtonLeft = 0;
   }
   else if (SW2) 
   {
-    memoMast_Down = 0;
+    memoMast_Left = 0;
   }
   
-  if (!SW3 && !memoMast_Up) 
+  if ( (!SW3 && !memoMast_Right) || (oButtonRight && !memoMast_Right) )
   {
-    Mast_consigne -= 1000;
-    memoMast_Up = 1;
+    Mast_consigne += 1000;
+    memoMast_Right = 1;
+    oButtonRight = 0;
   }
   else if (SW3) 
   {
-    memoMast_Up = 0;
+    memoMast_Right = 0;
   }
   
   INT64 rx1, rx2, rx3, rx4;
@@ -370,44 +376,45 @@ void StateAcquisition(void)
   sUartLineBuffer_t buffer = 
   { 
     .buffer = {0} 
-   ,.length = 0 
+   ,.length =  0
   };
 
-  if (oCapture1)
-  {
-    oCapture1 = 0;
-    rx1 = InputCapture.GetTimeBetweenCaptures(IC1, SCALE_US);
-    if (rx1 < 0)
-    {
-      buffer.length = sprintf(buffer.buffer, "error\r\n");
-      Uart.PutTxFifoBuffer(UART6, &buffer);
-    }
-    else
-    {
-      buffer.length = sprintf(buffer.buffer, "IC1 = %d\r\n", rx1);
-      Uart.PutTxFifoBuffer(UART6, &buffer);
-    }
-  }
-  
-  if (oCapture3)
-  {
-    oCapture3 = 0;
-    rx3 = InputCapture.GetTimeBetweenCaptures(IC3, SCALE_US);
-    if (rx3 < 0)
-    {
-      buffer.length = sprintf(buffer.buffer, "error\r\n");
-      Uart.PutTxFifoBuffer(UART6, &buffer);
-    }
-    else
-    {
-      buffer.length = sprintf(buffer.buffer, "IC3 = %d\r\n", rx3);
-      Uart.PutTxFifoBuffer(UART6, &buffer);
-    }
-  }
+//  if (oCapture1)
+//  {
+//    oCapture1 = 0;
+//    rx1 = InputCapture.GetTimeBetweenCaptures(IC1, SCALE_US);
+//    if (rx1 < 0)
+//    {
+//      buffer.length = sprintf(buffer.buffer, "error\r\n");
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
+//    }
+//    else
+//    {
+//      buffer.length = sprintf(buffer.buffer, "IC1 = %d\r\n", rx1);
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
+//    }
+//  }
+//
+//  if (oCapture3)
+//  {
+//    oCapture3 = 0;
+//    rx3 = InputCapture.GetTimeBetweenCaptures(IC3, SCALE_US);
+//    if (rx3 < 0)
+//    {
+//      buffer.length = sprintf(buffer.buffer, "error\r\n");
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
+//    }
+//    else
+//    {
+//      buffer.length = sprintf(buffer.buffer, "IC3 = %d\r\n", rx3);
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
+//    }
+//  }
 
   if (oCapture2 && oCapture4)
   {
     oCapture2 = 0;
+    oCapture4 = 0;
     rx2 = InputCapture.GetTimeBetweenCaptures(IC2, SCALE_US);
     if (rx2 < 0)
     {
@@ -416,12 +423,11 @@ void StateAcquisition(void)
     }
     else
     {
-      buffer.length = sprintf(buffer.buffer, "IC2 = %d\r\n", rx2);
-      Uart.PutTxFifoBuffer(UART6, &buffer);
+//      buffer.length = sprintf(buffer.buffer, "IC2 speed = %d,    capture = %d\r\n", rx2, InputCapture.Var.currentCaptureCountValue[IC2]);
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
       oCapture2Acquired = 1;
     }
     
-    oCapture4 = 0;
     rx4 = InputCapture.GetTimeBetweenCaptures(IC4, SCALE_US);
     if (rx4 < 0)
     {
@@ -430,8 +436,8 @@ void StateAcquisition(void)
     }
     else
     {
-      buffer.length = sprintf(buffer.buffer, "IC4 = %d\r\n", rx4);
-      Uart.PutTxFifoBuffer(UART6, &buffer);
+//      buffer.length = sprintf(buffer.buffer, "IC4 speed = %d,    capture = %d\r\n", rx4, InputCapture.Var.currentCaptureCountValue[IC4]);
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
       oCapture4Acquired = 1;
     }
   }
@@ -443,24 +449,21 @@ void StateAcquisition(void)
     oCapture2Acquired = 0;
     oCapture4Acquired = 0;
 
-//    firstIc = InputCapture.GetDirection(IC2, IC4, rx4);
+    firstIc = InputCapture.GetDirection(IC2, IC4, rx4, SCALE_US);
     if (firstIc == IC2)
     {
       buffer.length = sprintf(buffer.buffer, "DROITE\r\n");
       Uart.PutTxFifoBuffer(UART6, &buffer);
-//      LED_CAN_ON;
     }
     else if (firstIc == IC4)
     {
       buffer.length = sprintf(buffer.buffer, "GAUCHE\r\n");
       Uart.PutTxFifoBuffer(UART6, &buffer);
-//      LED_DEBUG4_ON;
     }
     else
     {
       buffer.length = sprintf(buffer.buffer, "ERREUR\r\n");
       Uart.PutTxFifoBuffer(UART6, &buffer);
-//      LED_ERROR_ON;
     }
   }
   

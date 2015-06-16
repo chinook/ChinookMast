@@ -34,6 +34,10 @@ volatile BOOL  oFlagMainWhile = 0
               ,oCapture4      = 0
               ;
 
+extern volatile BOOL  oButtonLeft
+                     ,oButtonRight
+                     ;
+
 
 //==============================================================================
 //	TIMER INTERRUPTS
@@ -88,26 +92,19 @@ void __ISR(_TIMER_3_VECTOR, T3_INTERRUPT_PRIORITY) Timer3InterruptHandler(void)
 //================================================
 void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 {
-    // Check if the source of the interrupt is RX_EVENT. This is redundant since
-    // only this event is enabled in this example but this shows one scheme for
-    // handling events
-  LED_CAN_TOGGLE;
-  if ((CANGetModuleEvent(CAN1) & CAN_RX_EVENT) != 0) {
+  // Check if the source of the interrupt is RX_EVENT. This is redundant since
+  // only this event is enabled in this example but this shows one scheme for
+  // handling events
+//  LED_CAN_TOGGLE;
 
-    // Within this, you can check which channel caused the event by using
-    // the CANGetModuleEvent() function which returns a code representing
-    // the highest priority pending event.
-    if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL1_EVENT) {
+  if ((CANGetModuleEvent(CAN1) & CAN_RX_EVENT) != 0) 
+  {
+    /*
+     * CHANNEL 1 = SWITCHES STATES
+     */
+    if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL1_EVENT)
+    {
 
-      // This means that channel 1 caused the event.
-      // The CAN_RX_CHANNEL_NOT_EMPTY event is persistent. You could either
-      // read the channel in the ISR to clear the event condition or as done
-      // here, disable the event source, and set an application flag to
-      // indicate that a message has been received. The event can be
-      // enabled by the application when it has processed one message.
-      // Note that leaving the event enabled would cause the CPU to keep
-      // executing the ISR since the CAN_RX_CHANNEL_NOT_EMPTY event is
-      // persistent (unless the not empty condition is cleared.)
       CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
 
       CANRxMessageBuffer *message;
@@ -118,30 +115,50 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
       switches.bytes.low  = message->data[0];
       switches.bytes.high = message->data[1];
 
-      if (switches.bits.sw1 )
-//
-//      if((message->data[0]) & CALIBRATION){
-//        oCmdCalibrationPitch = 0;
-//        oCmdCalibrationGear = 0;
-//      }
-//      if((message->data[0]) & BREAK){
-//        oCmdBreak = 1;
-//      }
-//      else
-//        oCmdBreak =0;
-//      if((message->data[0]) & UPPITCH){
-//        oCmdUpPitch = 1;
-//      }
-//      else
-//        oCmdUpPitch =0;
-//      if((message->data[0]) & DOWNPITCH){
-//        oCmdDownPitch = 1;
-//      }
-//      else
-//        oCmdDownPitch =0;
+      if (switches.bits.sw1)
+      {
+        oButtonLeft = 1;
+        LED_DEBUG4_ON;
+      }
+      if (switches.bits.sw2)
+      {
+        oButtonRight = 1;
+        LED_CAN_ON;
+      }
 
       CANUpdateChannel(CAN1, CAN_CHANNEL1);
       CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+
+    }
+    
+    /*
+     * CHANNEL 2 = TELEMETRY
+     */
+    if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL2_EVENT)
+    {
+
+      CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
+
+      CANRxMessageBuffer *message;
+
+      message = CANGetRxMessage(CAN1,CAN_CHANNEL2);
+
+      CanSwitches_t switches;
+      switches.bytes.low  = message->data[0];
+      switches.bytes.high = message->data[1];
+
+      if (switches.bits.sw1)
+      {
+        /* do stuff */
+      }
+
+      if (switches.bits.sw10)
+      {
+        /* do stuff */
+      }
+
+      CANUpdateChannel(CAN1, CAN_CHANNEL2);
+      CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
 
     }
   }

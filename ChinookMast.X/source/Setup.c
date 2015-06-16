@@ -59,7 +59,7 @@ void InitTimer(void)
 //	Open timers
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%
   timerCounterValue = Timer.Open(TIMER_1, 25 , SCALE_MS);   // Open Timer 1 with a period of 500 ms
-  timerCounterValue = Timer.Open(TIMER_2, 677, SCALE_US);   // Open Timer 2 with a period of 500 us
+  timerCounterValue = Timer.Open(TIMER_2, 378, SCALE_MS);   // Open Timer 2 with a period of 500 us
   timerCounterValue = Timer.Open(TIMER_3, 500, SCALE_US);    // Open Timer 3 with a period of 500 ms
 //  timerCounterValue = Timer.Open(TIMER_4, 500, SCALE_MS);   // Open Timer 4 with a period of 500 ms
 //  timerCounterValue = Timer.Open(TIMER_5, 500, SCALE_US);   // Open Timer 5 with a period of 500 us
@@ -290,10 +290,11 @@ void InitCan(void)
 
   // Switches from steering wheel
   Can.SetChannel(CAN1, CAN_CHANNEL1, 8, RX);
-  Can.SetChannelMask(CAN1, CAN_CHANNEL1, CAN_FILTER0, 0x42, CAN_FILTER_MASK0, 0x7FF);
+//  Can.SetChannelMask(CAN1, CAN_CHANNEL1, CAN_FILTER0, 0x42, CAN_FILTER_MASK0, 0x7FF);
+  Can.SetChannelMask(CAN1, CAN_CHANNEL1, CAN_FILTER0, 0x50, CAN_FILTER_MASK0, 0x7FF);
 
 
-//  // Switches from telemetry (TODO)
+//  // Data from telemetry (TODO)
   Can.SetChannel(CAN1, CAN_CHANNEL2, 8, RX);
   Can.SetChannelMask(CAN1, CAN_CHANNEL2, CAN_FILTER1, 0x80, CAN_FILTER_MASK0, 0x7FF);
 

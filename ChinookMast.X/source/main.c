@@ -96,13 +96,6 @@ void main(void)
   pBuffStateMast  = pStateMast;
   
   oFlagMainWhile = 1;
-
-//  BYTE Can1MessageFifoArea [ CAN_NB_CHANNELS     // Space used by CAN
-//                           * CAN_BUFFER_SIZE
-//                           * CAN_TX_RX_MESSAGE_SIZE_BYTES
-//                           ];
-//
-//  Can.Initialize(CAN1, Can1MessageFifoArea, CAN_NB_CHANNELS, CAN_BUFFER_SIZE, FALSE);
   
 	while(1)  //infinite loop
 	{
@@ -114,13 +107,11 @@ void main(void)
     StateAcquisition();
     StateScheduler();   // Decides which state will be next
 
-    if(oFlagMainWhile)
-    {
-      oFlagMainWhile = 0;
-      Can.SendByte(CAN1, 0x80, 0x55);
-//      Can.SendData(CAN1, 0x80, 0xDEADBEEF);
-//      Can.
-    }
+//    if(oFlagMainWhile)
+//    {
+//      oFlagMainWhile = 0;
+//      Can.SendByte(CAN1, 0x80, 0x55);
+//    }
 
 	}  // end while
 }   //END MAIN CODE
@@ -132,10 +123,10 @@ void sendUART()
   if(pStateMast==&StateInit) Uart.SendDataBuffer(UART6, "State Mast : Init\t\t", 19);
   else if(pStateMast==&StateCalib) Uart.SendDataBuffer(UART6, "State Mast : Calib\t\t", 20);
   else if(pStateMast==&StateStop) Uart.SendDataBuffer(UART6, "State Mast : Stop\t\t", 19);
-  else if(pStateMast==&StateDown) Uart.SendDataBuffer(UART6, "State Mast : Down\t\t", 19);
-  else if(pStateMast==&StateUp) Uart.SendDataBuffer(UART6, "State Mast : Up  \t\t", 19);
+  else if(pStateMast==&StateManualLeft) Uart.SendDataBuffer(UART6, "State Mast : Down\t\t", 19);
+  else if(pStateMast==&StateManualRight) Uart.SendDataBuffer(UART6, "State Mast : Up  \t\t", 19);
 
-//  sprintf(Text, "Mast Now = %d\t\tMast Consigne = %d\n\r", Mast_now, Mast_consigne);
+//  sprintf(Text, "Mast Now = %d\t\tMast Consigne = %d\n\r", mastCurrentPos, Mast_consigne);
   Uart.SendDataBuffer(UART6, Text, sizeof(Text));
   for(i=0; i<100; i++) Text[i]=0;
 }
