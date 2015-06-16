@@ -37,6 +37,12 @@ volatile BOOL  oFirstTimeInStateUp   = 1
               ,oFirstTimeInStateStop = 1
               ;
 
+BOOL  oCapture1Acquired = 0
+     ,oCapture2Acquired = 0
+     ,oCapture3Acquired = 0
+     ,oCapture4Acquired = 0
+     ;
+
 INT8  memoMast_Up = 0;
 INT8  memoMast_Down = 0;
 
@@ -213,7 +219,7 @@ void StateInit(void)
   INIT_INPUT_CAPTURE;
   INIT_PWM;
   INIT_UART;
-//  INIT_CAN;
+  INIT_CAN;
 //  INIT_SKADI;
   INIT_SPI;
 //  INIT_I2C;
@@ -360,6 +366,7 @@ void StateAcquisition(void)
   }
   
   INT64 rx1, rx2, rx3, rx4;
+
   sUartLineBuffer_t buffer = 
   { 
     .buffer = {0} 
@@ -381,23 +388,6 @@ void StateAcquisition(void)
       Uart.PutTxFifoBuffer(UART6, &buffer);
     }
   }
-
-  if (oCapture2)
-  {
-    LED_CAN_OFF;
-    oCapture2 = 0;
-    rx2 = InputCapture.GetTimeBetweenCaptures(IC2, SCALE_US);
-    if (rx2 < 0)
-    {
-      buffer.length = sprintf(buffer.buffer, "error\r\n");
-      Uart.PutTxFifoBuffer(UART6, &buffer);
-    }
-    else
-    {
-      buffer.length = sprintf(buffer.buffer, "IC2 = %d\r\n", rx2);
-      Uart.PutTxFifoBuffer(UART6, &buffer);
-    }
-  }
   
   if (oCapture3)
   {
@@ -415,8 +405,22 @@ void StateAcquisition(void)
     }
   }
 
-  if (oCapture4)
+  if (oCapture2 && oCapture4)
   {
+    oCapture2 = 0;
+    rx2 = InputCapture.GetTimeBetweenCaptures(IC2, SCALE_US);
+    if (rx2 < 0)
+    {
+      buffer.length = sprintf(buffer.buffer, "error\r\n");
+      Uart.PutTxFifoBuffer(UART6, &buffer);
+    }
+    else
+    {
+      buffer.length = sprintf(buffer.buffer, "IC2 = %d\r\n", rx2);
+      Uart.PutTxFifoBuffer(UART6, &buffer);
+      oCapture2Acquired = 1;
+    }
+    
     oCapture4 = 0;
     rx4 = InputCapture.GetTimeBetweenCaptures(IC4, SCALE_US);
     if (rx4 < 0)
@@ -428,6 +432,38 @@ void StateAcquisition(void)
     {
       buffer.length = sprintf(buffer.buffer, "IC4 = %d\r\n", rx4);
       Uart.PutTxFifoBuffer(UART6, &buffer);
+      oCapture4Acquired = 1;
     }
   }
+  
+  INT8 firstIc;
+
+  if (oCapture2Acquired && oCapture4Acquired)
+  {
+    oCapture2Acquired = 0;
+    oCapture4Acquired = 0;
+
+//    firstIc = InputCapture.GetDirection(IC2, IC4, rx4);
+    if (firstIc == IC2)
+    {
+      buffer.length = sprintf(buffer.buffer, "DROITE\r\n");
+      Uart.PutTxFifoBuffer(UART6, &buffer);
+//      LED_CAN_ON;
+    }
+    else if (firstIc == IC4)
+    {
+      buffer.length = sprintf(buffer.buffer, "GAUCHE\r\n");
+      Uart.PutTxFifoBuffer(UART6, &buffer);
+//      LED_DEBUG4_ON;
+    }
+    else
+    {
+      buffer.length = sprintf(buffer.buffer, "ERREUR\r\n");
+      Uart.PutTxFifoBuffer(UART6, &buffer);
+//      LED_ERROR_ON;
+    }
+  }
+  
+  oCapture2Acquired = 0;
+  oCapture4Acquired = 0;
 }

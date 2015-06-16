@@ -96,29 +96,32 @@ void main(void)
   pBuffStateMast  = pStateMast;
   
   oFlagMainWhile = 1;
+
+//  BYTE Can1MessageFifoArea [ CAN_NB_CHANNELS     // Space used by CAN
+//                           * CAN_BUFFER_SIZE
+//                           * CAN_TX_RX_MESSAGE_SIZE_BYTES
+//                           ];
+//
+//  Can.Initialize(CAN1, Can1MessageFifoArea, CAN_NB_CHANNELS, CAN_BUFFER_SIZE, FALSE);
   
 	while(1)  //infinite loop
 	{
-    
-    // flag of 500us for stepper Mast.
+
+    //======================================
+    // Mast State machine with Drive A
+    //======================================
+    (*pStateMast)();          // jump to next state
+    StateAcquisition();
+    StateScheduler();   // Decides which state will be next
+
     if(oFlagMainWhile)
     {
       oFlagMainWhile = 0;
+      Can.SendByte(CAN1, 0x80, 0x55);
+//      Can.SendData(CAN1, 0x80, 0xDEADBEEF);
+//      Can.
+    }
 
-      //======================================
-      // Mast State machine with Drive A
-      //======================================
-      (*pStateMast)();          // jump to next state
-//      WriteDrive(DRVA, STATUS_Mastw);
-      StateAcquisition();
-      StateScheduler();   // Decides which state will be next
-
-//      if(pBuffStateMast != pStateMast)
-//      {
-//        pBuffStateMast = pStateMast;
-////        sendUART();
-//      }
-    } // end if oFlagMainWhile
 	}  // end while
 }   //END MAIN CODE
 

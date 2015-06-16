@@ -58,8 +58,8 @@ void InitTimer(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //	Open timers
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  timerCounterValue = Timer.Open(TIMER_1, 500, SCALE_US);   // Open Timer 1 with a period of 500 ms
-  timerCounterValue = Timer.Open(TIMER_2, 500, SCALE_US);   // Open Timer 2 with a period of 500 us
+  timerCounterValue = Timer.Open(TIMER_1, 25 , SCALE_MS);   // Open Timer 1 with a period of 500 ms
+  timerCounterValue = Timer.Open(TIMER_2, 677, SCALE_US);   // Open Timer 2 with a period of 500 us
   timerCounterValue = Timer.Open(TIMER_3, 500, SCALE_US);    // Open Timer 3 with a period of 500 ms
 //  timerCounterValue = Timer.Open(TIMER_4, 500, SCALE_MS);   // Open Timer 4 with a period of 500 ms
 //  timerCounterValue = Timer.Open(TIMER_5, 500, SCALE_US);   // Open Timer 5 with a period of 500 us
@@ -280,7 +280,24 @@ void InitCan(void)
    * CAN_FILTER0: 0xC1, this configures the filter to accept with ID 0xC1
    * CAN_FILTER_MASK0: 0x00, Configure CAN1 Filter Mask 0 to comprare no bits
    * */
-   Can.Initialize(CAN1, CanMessageFifoArea, CAN_NB_CHANNELS, CAN_BUFFER_SIZE, FALSE);
+
+  INT8 err;
+  err = Can.Initialize(CAN1, Can1MessageFifoArea, CAN_NB_CHANNELS, CAN_BUFFER_SIZE, FALSE);
+  if (err < 0)
+  {
+    LED_ERROR_ON;
+  }
+
+  // Switches from steering wheel
+  Can.SetChannel(CAN1, CAN_CHANNEL1, 8, RX);
+  Can.SetChannelMask(CAN1, CAN_CHANNEL1, CAN_FILTER0, 0x42, CAN_FILTER_MASK0, 0x7FF);
+
+
+//  // Switches from telemetry (TODO)
+  Can.SetChannel(CAN1, CAN_CHANNEL2, 8, RX);
+  Can.SetChannelMask(CAN1, CAN_CHANNEL2, CAN_FILTER1, 0x80, CAN_FILTER_MASK0, 0x7FF);
+
+  Can.ConfigInterrupt(CAN1, CAN1_INTERRUPT_PRIORITY, CAN1_INTERRUPT_SUBPRIORITY);
 }
 
 
@@ -434,6 +451,12 @@ void StartInterrupts(void)
 //  InputCapture.EnableInterrupt(IC3);
   InputCapture.EnableInterrupt(IC2);
   InputCapture.EnableInterrupt(IC4);
+
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Enable CAN interrupts
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  Can.EnableInterrupt(CAN1);
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
