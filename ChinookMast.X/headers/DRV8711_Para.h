@@ -211,7 +211,7 @@ typedef union
 //==============================================================================
 void WriteDrive(INT32 DRV, INT32 msg);
 INT32 ReadDrive(INT32 DRV, INT32 msg);
-void Init_reg_Mast(void);
+void InitDriver(void);
 /***********************************
 // * Template structure
 // **********************************/

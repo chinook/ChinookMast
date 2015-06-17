@@ -23,4 +23,6 @@ source/../headers//Setup.h  \
  source/../headers/StateMachine.h  \
 source/../headers/HardwareProfile.h  \
  source/../headers/DRV8711_Para.h  \
-source/../headers/SkadiFunctions.h 
+source/../headers/SkadiFunctions.h  \
+ source/../headers/CommandFunctions.h  \
+source/../headers/StateFunctions.h 

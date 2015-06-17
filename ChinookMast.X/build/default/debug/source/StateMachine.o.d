@@ -1,4 +1,4 @@
-build/default/production/source/StateMachine.o:  \
+build/default/debug/source/StateMachine.o:  \
 source/StateMachine.c  \
  source/../headers/StateMachine.h  \
 source/../headers//Setup.h  \

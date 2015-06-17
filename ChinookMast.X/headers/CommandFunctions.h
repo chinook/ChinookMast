@@ -16,34 +16,63 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //
 // Notes   : Function names can and should be renamed by the user to improve the
-//           readability of the code. User must set the functions here and adjust
-//           the structure skadiCommandTable located in Setup.c.
+//           readability of the code.
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-#ifndef __STATE_FUNCTIONS_H__
-#define	__STATE_FUNCTIONS_H__
+#ifndef __COMMAND_FUNCTIONS_H__
+#define	__COMMAND_FUNCTIONS_H__
 
 #include "Setup.h"
 
 
-//==============================================================================
-// State Machine public functions prototypes
-//==============================================================================
-void WriteMastPos2Eeprom (UINT8 pos);
+/*
+ * _____________                ________     _____               ________
+ * | wind angle |---> (+- ) --->| 1 / s |--->| ki |---> +    --->| Motor |
+ * |____________|       ^       |_______|    |____|              |_______|
+ *                      |______
+ *
+ */
 
-UINT8 ReadMastPosFromEeprom (void);
 
 //==============================================================================
 // Macro definitions
 //==============================================================================
+#define MAST_DIR_LEFT  -1
+#define MAST_DIR_RIGHT  1
+
+typedef struct sCmdValue
+{
+  double  previousValue
+         ,currentValue
+         ;
+} sCmdValue_t;
 
 
 //==============================================================================
 // Variable declarations
 //==============================================================================
+const float  KP
+            ,KI
+            ,K
+            ,T
+            ;
+
+const UINT8  pwmMaxDutyCycle
+            ,pwmMinDutyCycle
+            ;
+
+sCmdValue_t windAngle
+           ,mastAngle
+           ;
 
 
-#endif	/* __STATE_FUNCTIONS_H__ */
+
+//==============================================================================
+// State Machine public functions prototypes
+//==============================================================================
+void TustinZ (sCmdValue_t *input, sCmdValue_t *output);
+
+#endif	/* __COMMAND_FUNCTIONS_H__ */
 

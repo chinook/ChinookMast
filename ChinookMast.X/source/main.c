@@ -30,7 +30,8 @@
 #include "..\headers\HardwareProfile.h"
 #include "..\headers\DRV8711_Para.h"
 #include "..\headers\SkadiFunctions.h"
-//#include "..\headers\StateFunctions.h"
+#include "..\headers\CommandFunctions.h"
+#include "..\headers\StateFunctions.h"
 
 
 //==============================================================================
@@ -122,7 +123,7 @@ void sendUART()
   int i=0;
   if(pStateMast==&StateInit) Uart.SendDataBuffer(UART6, "State Mast : Init\t\t", 19);
   else if(pStateMast==&StateCalib) Uart.SendDataBuffer(UART6, "State Mast : Calib\t\t", 20);
-  else if(pStateMast==&StateStop) Uart.SendDataBuffer(UART6, "State Mast : Stop\t\t", 19);
+  else if(pStateMast==&StateManualStop) Uart.SendDataBuffer(UART6, "State Mast : Stop\t\t", 19);
   else if(pStateMast==&StateManualLeft) Uart.SendDataBuffer(UART6, "State Mast : Down\t\t", 19);
   else if(pStateMast==&StateManualRight) Uart.SendDataBuffer(UART6, "State Mast : Up  \t\t", 19);
 

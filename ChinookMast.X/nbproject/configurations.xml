@@ -10,6 +10,8 @@
       <itemPath>headers/Setup.h</itemPath>
       <itemPath>headers/SkadiFunctions.h</itemPath>
       <itemPath>headers/StateMachine.h</itemPath>
+      <itemPath>headers/CommandFunctions.h</itemPath>
+      <itemPath>headers/StateFunctions.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -24,6 +26,8 @@
       <itemPath>source/SkadiFunctions.c</itemPath>
       <itemPath>source/main.c</itemPath>
       <itemPath>source/StateMachine.c</itemPath>
+      <itemPath>source/CommandFunctions.c</itemPath>
+      <itemPath>source/StateFunctions.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

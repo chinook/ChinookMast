@@ -134,7 +134,7 @@ INT32 ReadDrive(INT32 DRV, INT32 msg)
 }
 
 
-void Init_reg_Mast(void)
+void InitDriver(void)
 {
   // CTRL register
   Drive_Mast_Setup.Ctl.ENABLE   = 0b1;            //0 = disable, 1 = enable
@@ -191,4 +191,28 @@ void Init_reg_Mast(void)
   Drive_Mast_Setup.Sta.STD      = 0b0;            //0 = normale operation, 1 = stall detected
   Drive_Mast_Setup.Sta.STDLAT   = 0b0;            //0 = normale operation, 1 = latched stall detect
 
+
+//  DRVB_SC = 0;
+  DRVA_SC = 0;
+  Timer.DelayMs(1);
+//  DRVA_RESET = 0;
+  DRVB_RESET = 0;
+  Timer.DelayMs(1);
+//  DRVA_SLEEP = 1;
+  DRVB_SLEEP = 0;
+  Timer.DelayMs(1);
+
+//  WriteDrive(DRVA, CONTROL_Mastw);
+//  WriteDrive(DRVA, TORQUE_Mastw);
+  WriteDrive(DRVB, CONTROL_Mastw);
+  WriteDrive(DRVB, TORQUE_Mastw);
+//  WriteDrive(DRVA, OFF_Mastw);
+//  WriteDrive(DRVA, 0x2180);
+  WriteDrive(DRVB, 0x2180);
+//  WriteDrive(DRVA, BLANK_Mastw);
+//  WriteDrive(DRVA, DECAY_Mastw);
+//  WriteDrive(DRVA, STALL_Mastw);
+//  WriteDrive(DRVA, DRIVE_Mastw);
+//  WriteDrive(DRVA, STATUS_Mastw);
+  WriteDrive(DRVB, STATUS_Mastw);
 }

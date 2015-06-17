@@ -38,6 +38,7 @@ extern volatile BOOL  oButtonLeft
                      ,oButtonRight
                      ;
 
+volatile UINT32 nTurns;
 
 //==============================================================================
 //	TIMER INTERRUPTS
@@ -120,10 +121,21 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
         oButtonLeft = 1;
         LED_DEBUG4_ON;
       }
-      if (switches.bits.sw2)
+      else
+      {
+        oButtonLeft = 0;
+        LED_DEBUG4_OFF;
+      }
+
+      if (switches.bits.sw10)
       {
         oButtonRight = 1;
-        LED_CAN_ON;
+        LED_DEBUG3_ON;
+      }
+      else
+      {
+        oButtonRight = 0;
+        LED_DEBUG3_OFF;
       }
 
       CANUpdateChannel(CAN1, CAN_CHANNEL1);
@@ -143,19 +155,7 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 
       message = CANGetRxMessage(CAN1,CAN_CHANNEL2);
 
-      CanSwitches_t switches;
-      switches.bytes.low  = message->data[0];
-      switches.bytes.high = message->data[1];
-
-      if (switches.bits.sw1)
-      {
-        /* do stuff */
-      }
-
-      if (switches.bits.sw10)
-      {
-        /* do stuff */
-      }
+      INT8 windAngle = message->data[0];
 
       CANUpdateChannel(CAN1, CAN_CHANNEL2);
       CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
@@ -317,6 +317,8 @@ void __ISR(_INPUT_CAPTURE_2_VECTOR, IC2_INT_PRIORITY) InputCapture2InterruptHand
   InputCapture.Var.currentCaptureCountValue [IC2] = InputCapture.ReadCapture(IC2);
 
   oCapture2 = 1;   // Flag that tells that a new Capture event occured
+
+  nTurns++;
 
   // Clear the interrupt flag
   INTClearFlag(INT_IC2);

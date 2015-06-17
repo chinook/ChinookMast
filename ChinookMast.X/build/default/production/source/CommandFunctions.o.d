@@ -1,7 +1,7 @@
-build/default/production/source/StateMachine.o:  \
-source/StateMachine.c  \
- source/../headers/StateMachine.h  \
-source/../headers//Setup.h  \
+build/default/production/source/CommandFunctions.o:  \
+ source/CommandFunctions.c  \
+source/../headers/CommandFunctions.h  \
+ source/../headers//Setup.h  \
  source/../headers//../../../ChinookLib/ChinookLib.X/headers/ChinookLib.h  \
  source/../headers//../../../ChinookLib/ChinookLib.X/headers//ChinookHardwareProfile.h  \
  source/../headers//../../../ChinookLib/ChinookLib.X/headers//ChinookAdc.h  \
@@ -18,7 +18,4 @@ source/../headers//Setup.h  \
  source/../headers//../../../ChinookLib/ChinookLib.X/headers//ChinookCan.h  \
  source/../headers//../../../ChinookLib/ChinookLib.X/headers//ChinookTimer.h  \
  source/../headers//../../../ChinookLib/ChinookLib.X/headers//ChinookUart.h  \
- source/../headers//../../../ChinookLib/ChinookLib.X/headers//ChinookWdt.h  \
- source/../headers/DRV8711_Para.h  \
-source/../headers/StateFunctions.h  \
- source/../headers/CommandFunctions.h 
+ source/../headers//../../../ChinookLib/ChinookLib.X/headers//ChinookWdt.h 

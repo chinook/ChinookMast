@@ -31,7 +31,7 @@
 //==============================================================================
 void StateInit(void);           // Initialization state of the system
 void StateCalib(void);          // Stop pitch if pitch is on good position
-void StateStop(void);           // Stop motor if problem or if Mast = consigne
+void StateManualStop(void);           // Stop motor if problem or if Mast = consigne
 void StateManualLeft(void);           // Down Mast with stepper motor and a gage feedback.
 void StateManualRight(void);             // Up Mast with stepper motor and a gage feedback.
 void StateAcquisition(void);    // Get data from peripherals
@@ -63,15 +63,15 @@ volatile  INT8  breakFlag   // Flag indicating if the emergency break has been p
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 /*********** LIMITS **/
-#define MAST_MAX              20000
-#define MAST_MIN              0
+#define MAST_MAX               90
+#define MAST_MIN              -90
 
 /*********** BASIC CONDITION *****************/
-#define MAST_DOWN             (mastCurrentPos > Mast_consigne)
-#define MAST_UP               (mastCurrentPos < Mast_consigne)
-#define MAST_OK               (mastCurrentPos == Mast_consigne)
-#define MAST_MAX_OK           (mastCurrentPos == MAST_MAX)
-#define MAST_MIN_OK           (mastCurrentPos == MAST_MIN)
+#define MAST_LEFT             (oManualMastLeft)
+#define MAST_RIGHT            (oManualMastRight)
+#define MAST_OK               (!oManualMastLeft && !oManualMastRight)
+#define MAST_MAX_OK           (mastCurrentPos >= MAST_MAX)
+#define MAST_MIN_OK           (mastCurrentPos <= MAST_MIN)
 #define MAST_DIR_DOWN         SW1
 #define MAST_DIR_UP           !MAST_DIR_DOWN
 #define MAST_CALIB_MODE       !Calib_done
@@ -81,32 +81,32 @@ volatile  INT8  breakFlag   // Flag indicating if the emergency break has been p
 /******* TRANSITION CONDITION INIT **********/
 #define INIT_2_CALIB         MAST_CALIB_MODE
 #define INIT_2_STOP          !MAST_CALIB_MODE && MODE_MANUEL && MAST_OK
-#define INIT_2_DOWN          !MAST_CALIB_MODE && MODE_MANUEL && MAST_DOWN &&!MAST_MIN_OK
-#define INIT_2_UP            !MAST_CALIB_MODE && MODE_MANUEL && MAST_UP &&!MAST_MAX_OK
+#define INIT_2_LEFT          !MAST_CALIB_MODE && MODE_MANUEL && MAST_LEFT &&!MAST_MIN_OK
+#define INIT_2_RIGHT            !MAST_CALIB_MODE && MODE_MANUEL && MAST_RIGHT &&!MAST_MAX_OK
 
 /******* TRANSITION CONDITION CALIB ********/
 #define CALIB_2_INIT         0
 #define CALIB_2_STOP         !MAST_CALIB_MODE && MODE_MANUEL && MAST_OK
-#define CALIB_2_DOWN         !MAST_CALIB_MODE && MODE_MANUEL && MAST_DOWN &&!MAST_MIN_OK
-#define CALIB_2_UP           !MAST_CALIB_MODE && MODE_MANUEL && MAST_UP  &&!MAST_MAX_OK
+#define CALIB_2_LEFT         !MAST_CALIB_MODE && MODE_MANUEL && MAST_LEFT &&!MAST_MIN_OK
+#define CALIB_2_RIGHT           !MAST_CALIB_MODE && MODE_MANUEL && MAST_RIGHT  &&!MAST_MAX_OK
 
 /******* TRANSITION CONDITION STOP *********/
 #define STOP_2_INIT          0
 #define STOP_2_CALIB         MAST_CALIB_MODE
-#define STOP_2_DOWN          !MAST_CALIB_MODE && MODE_MANUEL && MAST_DOWN &&!MAST_MIN_OK
-#define STOP_2_UP            !MAST_CALIB_MODE && MODE_MANUEL && MAST_UP  &&!MAST_MAX_OK
+#define STOP_2_LEFT          !MAST_CALIB_MODE && MODE_MANUEL && MAST_LEFT &&!MAST_MIN_OK
+#define STOP_2_RIGHT            !MAST_CALIB_MODE && MODE_MANUEL && MAST_RIGHT  &&!MAST_MAX_OK
 
 /******* TRANSITION CONDITION UP **********/
-#define UP_2_INIT            0
-#define UP_2_CALIB           MAST_CALIB_MODE
-#define UP_2_STOP            !MAST_CALIB_MODE && MODE_MANUEL && (MAST_OK || MAST_MAX_OK)
-#define UP_2_DOWN            !MAST_CALIB_MODE && MODE_MANUEL && MAST_DOWN &&!MAST_MIN_OK
+#define RIGHT_2_INIT            0
+#define RIGHT_2_CALIB           MAST_CALIB_MODE
+#define RIGHT_2_STOP            !MAST_CALIB_MODE && MODE_MANUEL && (MAST_OK || MAST_MAX_OK)
+#define RIGHT_2_LEFT            !MAST_CALIB_MODE && MODE_MANUEL && MAST_LEFT &&!MAST_MIN_OK
 
 /******* TRANSITION CONDITION DOWN *******/
-#define DOWN_2_INIT          0
-#define DOWN_2_CALIB         MAST_CALIB_MODE
-#define DOWN_2_STOP          !MAST_CALIB_MODE && MODE_MANUEL && (MAST_OK || MAST_MIN_OK)
-#define DOWN_2_UP            !MAST_CALIB_MODE && MODE_MANUEL && MAST_UP  && !MAST_MAX_OK
+#define LEFT_2_INIT          0
+#define LEFT_2_CALIB         MAST_CALIB_MODE
+#define LEFT_2_STOP          !MAST_CALIB_MODE && MODE_MANUEL && (MAST_OK || MAST_MIN_OK)
+#define LEFT_2_RIGHT            !MAST_CALIB_MODE && MODE_MANUEL && MAST_RIGHT  && !MAST_MAX_OK
 
 #endif	/* STATE_MACHINE_MAST_H */
 

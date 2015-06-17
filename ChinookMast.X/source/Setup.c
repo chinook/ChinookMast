@@ -240,8 +240,10 @@ void InitPorts(void)
 //  DRVA_STEP = 0;
 //  DRVA_BIN1 = 1;
 //  DRVA_BIN2 = 0;
+  DRVB_SLEEP = 0;
+  DRVA_SLEEP = 0;
   DRVB_STEP = 0;
-  DRVB_BIN1 = 1;
+  DRVB_BIN1 = 0;
   DRVB_BIN2 = 0;
 }
 
@@ -290,13 +292,12 @@ void InitCan(void)
 
   // Switches from steering wheel
   Can.SetChannel(CAN1, CAN_CHANNEL1, 8, RX);
-//  Can.SetChannelMask(CAN1, CAN_CHANNEL1, CAN_FILTER0, 0x42, CAN_FILTER_MASK0, 0x7FF);
-  Can.SetChannelMask(CAN1, CAN_CHANNEL1, CAN_FILTER0, 0x50, CAN_FILTER_MASK0, 0x7FF);
+  Can.SetChannelMask(CAN1, CAN_CHANNEL1, CAN_FILTER0, 0x42, CAN_FILTER_MASK0, 0x7FF);
 
 
-//  // Data from telemetry (TODO)
+//  // Data from telemetry
   Can.SetChannel(CAN1, CAN_CHANNEL2, 8, RX);
-  Can.SetChannelMask(CAN1, CAN_CHANNEL2, CAN_FILTER1, 0x80, CAN_FILTER_MASK0, 0x7FF);
+  Can.SetChannelMask(CAN1, CAN_CHANNEL2, CAN_FILTER1, 0x20, CAN_FILTER_MASK0, 0x7FF);
 
   Can.ConfigInterrupt(CAN1, CAN1_INTERRUPT_PRIORITY, CAN1_INTERRUPT_SUBPRIORITY);
 }
@@ -463,21 +464,21 @@ void StartInterrupts(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable I2C interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//  err = I2c.EnableInterrupt (I2C4, I2C_MASTER_INTERRUPT);
-//  if (err < 0)
-//  {
-//    LED_ERROR_ON;
-//  }
-//  err = I2c.DisableInterrupt(I2C4, I2C_SLAVE_INTERRUPT);
-//  if (err < 0)
-//  {
-//    LED_ERROR_ON;
-//  }
-//  err = I2c.DisableInterrupt(I2C4, I2C_BUS_COLLISION_INTERRUPT);
-//  if (err < 0)
-//  {
-//    LED_ERROR_ON;
-//  }
+  err = I2c.EnableInterrupt (I2C4, I2C_MASTER_INTERRUPT);
+  if (err < 0)
+  {
+    LED_ERROR_ON;
+  }
+  err = I2c.DisableInterrupt(I2C4, I2C_SLAVE_INTERRUPT);
+  if (err < 0)
+  {
+    LED_ERROR_ON;
+  }
+  err = I2c.DisableInterrupt(I2C4, I2C_BUS_COLLISION_INTERRUPT);
+  if (err < 0)
+  {
+    LED_ERROR_ON;
+  }
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
