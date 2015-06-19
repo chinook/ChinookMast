@@ -20,10 +20,11 @@
 
 #include "..\headers\StateMachine.h"
 #include "..\headers\DRV8711_Para.h"
+#include "..\headers\Interrupts.h"
 #include "..\headers\StateFunctions.h"
 #include "..\headers\CommandFunctions.h"
 
-INT8 Calib_done = 1;
+INT8 oCalibDone = 1;
 
 extern volatile UINT32 nTurns;
 
@@ -36,13 +37,14 @@ extern volatile BOOL oCapture1
                     ,oCapture2
                     ,oCapture3
                     ,oCapture4
+                    ,oChangeMode
+                    ,oTimer5
                     ;
 
-volatile BOOL  oFirstTimeInStateRight    = 1
-              ,oFirstTimeInStateLeft  = 1
-              ,oFirstTimeInStateStop  = 1
-              ,oButtonLeft            = 0
-              ,oButtonRight           = 0
+volatile BOOL  oFirstTimeInStateRight   = 1
+              ,oFirstTimeInStateLeft    = 1
+              ,oFirstTimeInStateStop    = 1
+              ,oManualMode              = 0
               ;
 
 BOOL  oCapture1Acquired = 0
@@ -277,7 +279,7 @@ void StateManualStop(void)
 //===============================================================
 void StateCalib(void)
 {
-  Calib_done = 0;
+  oCalibDone = 0;
 }
 
 
@@ -299,8 +301,8 @@ void StateManualLeft(void)
 
 //    Pwm.SetDutyCycle(PWM_2, 800);
 //    Pwm.SetDutyCycle(PWM_3, 200);
-    Pwm.SetDutyCycle(PWM_2, 250);
-    Pwm.SetDutyCycle(PWM_3, 750);
+    Pwm.SetDutyCycle(PWM_2, 750);
+    Pwm.SetDutyCycle(PWM_3, 250);
   }
 //  mastCurrentPos--;
 //  WriteDrive(DRVA, STATUS_Mastw);
@@ -325,8 +327,8 @@ void StateManualRight(void)
     oFirstTimeInStateRight = 0;
 //    Pwm.SetDutyCycle(PWM_2, 200);
 //    Pwm.SetDutyCycle(PWM_3, 800);
-    Pwm.SetDutyCycle(PWM_2, 750);
-    Pwm.SetDutyCycle(PWM_3, 250);
+    Pwm.SetDutyCycle(PWM_2, 250);
+    Pwm.SetDutyCycle(PWM_3, 750);
   }
 //  mastCurrentPos++;
 //  WriteDrive(DRVA, STATUS_Mastw);
@@ -340,9 +342,84 @@ void StateManualRight(void)
 //===============================================================
 void StateAcquisition(void)
 {
+  if (oTimer5)
+  {
+    oManualMode ^= 1;
+    oTimer5      = 0;
+    Timer.DisableInterrupt(TIMER_5);
+  }
+  if (oManualMode)
+  {
+    LED_DEBUG0_ON;
+  }
+  else
+  {
+    LED_DEBUG0_OFF;
+  }
+  
+  if (buttons.buttons.bits.boardSw1 != SW1)
+  {
+    buttons.buttons.bits.boardSw1  = SW1;
+    buttons.chng.bits.boardSw1     = 1;
+  }
+
+  if (buttons.buttons.bits.boardSw2 != SW2)
+  {
+    buttons.buttons.bits.boardSw2  = SW2;
+    buttons.chng.bits.boardSw2     = 1;
+  }
+
+  if (buttons.buttons.bits.boardSw3 != SW1)
+  {
+    buttons.buttons.bits.boardSw3  = SW1;
+    buttons.chng.bits.boardSw3     = 1;
+  }
+
+  if (buttons.chng.byte)
+  {
+    if (buttons.chng.bits.boardSw1)
+    {
+      buttons.chng.bits.boardSw1 = 0;
+
+      if (buttons.buttons.bits.boardSw1)
+      {
+        mastCurrentPos = 0;
+        WriteMastPos2Eeprom (mastCurrentPos);
+      }
+    }
+
+    if (buttons.chng.bits.boardSw2)
+    {
+      buttons.chng.bits.boardSw2 = 0;
+
+      if (buttons.buttons.bits.boardSw2)
+      {
+        if (!buttons.chng.bits.boardSw3 && buttons.buttons.bits.boardSw3)   // Start procedure to change manual mode
+        {
+          oChangingMode = 1;
+        }
+      }
+    }
+  }
 
   if ( (!SW3 || oButtonRight) && (!SW2 || oButtonLeft) )
   {
+    if (oFirstTimeForChangeMode)
+    {
+      WriteTimer5(0);
+      Timer.EnableInterrupt(TIMER_5);
+      oFirstTimeForChangeMode = 0;
+    }
+    else
+    {
+      if (oChangeMode)
+      {
+        oChangeMode = 0;
+        oFirstTimeForChangeMode = 1;
+        Timer.DisableInterrupt(TIMER_5);
+        oManualMode ^= 1;
+      }
+    }
     oManualMastLeft  = 0;
     oManualMastRight = 0;
   }
@@ -350,9 +427,7 @@ void StateAcquisition(void)
   {
     if ( (!SW2 && !oManualMastLeft) || (oButtonLeft && !oManualMastLeft) )
     {
-  //    Mast_consigne -= 1000;
       oManualMastLeft = 1;
-  //    oButtonLeft = 0;
     }
     else if (SW2 && !oButtonLeft)
     {
@@ -361,9 +436,7 @@ void StateAcquisition(void)
 
     if ( (!SW3 && !oManualMastRight) || (oButtonRight && !oManualMastRight) )
     {
-  //    Mast_consigne += 1000;
       oManualMastRight = 1;
-  //    oButtonRight = 0;
     }
     else if (SW3 && !oButtonRight)
     {
@@ -371,26 +444,28 @@ void StateAcquisition(void)
     }
   }
 
-  if (!SW1)
-  {
-    WriteMastPos2Eeprom(0);
-  }
-
-  if (oCapture2)
-  {
-    if (nTurns >= 7)
-    {
-      if (oManualMastRight)
-      {
-        mastCurrentPos++;
-      }
-      else if (oManualMastLeft)
-      {
-        mastCurrentPos--;
-      }
-      nTurns = 0;
-    }
-  }
+//  if (oCapture2)
+//  {
+//    oCapture2 = 0;
+//    if (oManualMastRight)
+//    {
+//      nTurns++;
+//      if (nTurns >= PULSE_PER_DEGREE)
+//      {
+//        mastCurrentPos++;
+//        nTurns = 0;
+//      }
+//    }
+//    else if (oManualMastLeft)
+//    {
+//      nTurns--;
+//      if (nTurns <= -PULSE_PER_DEGREE)
+//      {
+//        mastCurrentPos--;
+//        nTurns = 0;
+//      }
+//    }
+//  }
   
 //  INT64 rx1, rx2, rx3, rx4;
 //

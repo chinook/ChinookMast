@@ -39,6 +39,47 @@ UINT8 ReadMastPosFromEeprom (void);
 // Macro definitions
 //==============================================================================
 
+// Typedef for mapping the steering wheel switches and the buttons on the board
+typedef union
+{
+  struct
+  {
+    UINT8  steerWheelSw1  : 1
+          ,steerWheelSw10 : 1
+          ,boardSw1       : 1
+          ,boardSw2       : 1
+          ,boardSw3       : 1
+          ,               : 3
+          ;
+  } bits;
+
+  UINT8 byte;
+
+} Buttons_t;
+
+typedef union
+{
+  struct
+  {
+    UINT8  steerWheelSw1  : 1
+          ,steerWheelSw10 : 1
+          ,boardSw1       : 1
+          ,boardSw2       : 1
+          ,boardSw3       : 1
+          ,               : 3
+          ;
+  } bits;
+
+  UINT8 byte;
+
+} Chng_t;
+
+typedef struct sButtonStates
+{
+  Buttons_t buttons;
+  Chng_t    chng;
+} sButtonStates_t;
+
 
 //==============================================================================
 // Variable declarations

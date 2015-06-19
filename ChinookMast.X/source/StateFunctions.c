@@ -28,6 +28,8 @@
 //==============================================================================
 const UINT16 EEPROM_POS_REGISTER = 0x0100;
 
+sButtonStates_t buttons = {0};
+
 
 //==============================================================================
 // State Machine private functions prototypes

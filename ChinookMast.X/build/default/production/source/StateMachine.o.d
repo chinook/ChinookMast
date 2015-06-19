@@ -20,5 +20,6 @@ source/../headers//Setup.h  \
  source/../headers//../../../ChinookLib/ChinookLib.X/headers//ChinookUart.h  \
  source/../headers//../../../ChinookLib/ChinookLib.X/headers//ChinookWdt.h  \
  source/../headers/DRV8711_Para.h  \
-source/../headers/StateFunctions.h  \
- source/../headers/CommandFunctions.h 
+source/../headers/Interrupts.h  \
+ source/../headers/StateFunctions.h  \
+source/../headers/CommandFunctions.h 

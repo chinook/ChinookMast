@@ -59,7 +59,7 @@
  * | 3        | 3           |                   |
  * |----------+-------------+-------------------|
  * | 4        | 0           | Timer 2           |
- * | 4        | 1           |                   |
+ * | 4        | 1           | Timer 5           |
  * | 4        | 2           |                   |
  * | 4        | 3           | SPI 4             |
  * |----------+-------------+-------------------|
@@ -90,10 +90,13 @@
 #define T2_INTERRUPT_PRIORITY           ipl4auto  // Used in ISR
 #define TIMER3_INTERRUPT_PRIORITY       3         // Used in ChinookLib function
 #define T3_INTERRUPT_PRIORITY           ipl3auto  // Used in ISR
+#define TIMER5_INTERRUPT_PRIORITY       4         // Used in ChinookLib function
+#define T5_INTERRUPT_PRIORITY           ipl4auto  // Used in ISR
 
 #define TIMER1_INTERRUPT_SUBPRIORITY    3         // Highest subpriority
 #define TIMER2_INTERRUPT_SUBPRIORITY    0
 #define TIMER3_INTERRUPT_SUBPRIORITY    1         // Highest subpriority
+#define TIMER5_INTERRUPT_SUBPRIORITY    1         // Highest subpriority
 //===============================================
 
 
@@ -159,6 +162,38 @@
 //==============================================================================
 // VARIABLES
 //==============================================================================
+
+// Typedef for mapping the steering wheel switches
+typedef union
+{
+  struct
+  {
+    UINT16 sw1  : 1
+          ,sw2  : 1
+          ,sw3  : 1
+          ,sw4  : 1
+          ,sw5  : 1
+          ,sw6  : 1
+          ,sw7  : 1
+          ,sw8  : 1
+          ,sw9  : 1
+          ,sw10 : 1
+          ,sw11 : 1
+          ,sw12 : 1
+          ,     : 4
+          ;
+  } bits;
+
+  struct
+  {
+    UINT8 low;
+    UINT8 high;
+  } bytes;
+
+  UINT16 word;
+
+} CanSwitches_t;
+
 
 #endif	/* __INTERRUPT_H__ */
 

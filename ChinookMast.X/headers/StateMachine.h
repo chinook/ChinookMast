@@ -74,39 +74,41 @@ volatile  INT8  breakFlag   // Flag indicating if the emergency break has been p
 #define MAST_MIN_OK           (mastCurrentPos <= MAST_MIN)
 #define MAST_DIR_DOWN         SW1
 #define MAST_DIR_UP           !MAST_DIR_DOWN
-#define MAST_CALIB_MODE       !Calib_done
-#define MODE_MANUEL           1
+#define MAST_CALIB_MODE       !oCalibDone
+#define MANUAL_MODE           oManualMode
 
 
 /******* TRANSITION CONDITION INIT **********/
 #define INIT_2_CALIB         MAST_CALIB_MODE
-#define INIT_2_STOP          !MAST_CALIB_MODE && MODE_MANUEL && MAST_OK
-#define INIT_2_LEFT          !MAST_CALIB_MODE && MODE_MANUEL && MAST_LEFT &&!MAST_MIN_OK
-#define INIT_2_RIGHT            !MAST_CALIB_MODE && MODE_MANUEL && MAST_RIGHT &&!MAST_MAX_OK
+#define INIT_2_STOP          !MAST_CALIB_MODE && MANUAL_MODE && MAST_OK || !MANUAL_MODE
+#define INIT_2_LEFT          !MAST_CALIB_MODE && MANUAL_MODE && MAST_LEFT &&!MAST_MIN_OK
+#define INIT_2_RIGHT            !MAST_CALIB_MODE && MANUAL_MODE && MAST_RIGHT &&!MAST_MAX_OK
 
 /******* TRANSITION CONDITION CALIB ********/
 #define CALIB_2_INIT         0
-#define CALIB_2_STOP         !MAST_CALIB_MODE && MODE_MANUEL && MAST_OK
-#define CALIB_2_LEFT         !MAST_CALIB_MODE && MODE_MANUEL && MAST_LEFT &&!MAST_MIN_OK
-#define CALIB_2_RIGHT           !MAST_CALIB_MODE && MODE_MANUEL && MAST_RIGHT  &&!MAST_MAX_OK
+#define CALIB_2_STOP         !MAST_CALIB_MODE && MANUAL_MODE && MAST_OK || !MANUAL_MODE
+#define CALIB_2_LEFT         !MAST_CALIB_MODE && MANUAL_MODE && MAST_LEFT &&!MAST_MIN_OK
+#define CALIB_2_RIGHT           !MAST_CALIB_MODE && MANUAL_MODE && MAST_RIGHT  &&!MAST_MAX_OK
 
 /******* TRANSITION CONDITION STOP *********/
 #define STOP_2_INIT          0
 #define STOP_2_CALIB         MAST_CALIB_MODE
-#define STOP_2_LEFT          !MAST_CALIB_MODE && MODE_MANUEL && MAST_LEFT &&!MAST_MIN_OK
-#define STOP_2_RIGHT            !MAST_CALIB_MODE && MODE_MANUEL && MAST_RIGHT  &&!MAST_MAX_OK
+#define STOP_2_LEFT          !MAST_CALIB_MODE && MANUAL_MODE && MAST_LEFT &&!MAST_MIN_OK
+#define STOP_2_RIGHT            !MAST_CALIB_MODE && MANUAL_MODE && MAST_RIGHT  &&!MAST_MAX_OK
 
 /******* TRANSITION CONDITION UP **********/
 #define RIGHT_2_INIT            0
 #define RIGHT_2_CALIB           MAST_CALIB_MODE
-#define RIGHT_2_STOP            !MAST_CALIB_MODE && MODE_MANUEL && (MAST_OK || MAST_MAX_OK)
-#define RIGHT_2_LEFT            !MAST_CALIB_MODE && MODE_MANUEL && MAST_LEFT &&!MAST_MIN_OK
+#define RIGHT_2_STOP            !MAST_CALIB_MODE && MANUAL_MODE && (MAST_OK || MAST_MAX_OK) || !MANUAL_MODE
+#define RIGHT_2_LEFT            !MAST_CALIB_MODE && MANUAL_MODE && MAST_LEFT &&!MAST_MIN_OK
 
 /******* TRANSITION CONDITION DOWN *******/
 #define LEFT_2_INIT          0
 #define LEFT_2_CALIB         MAST_CALIB_MODE
-#define LEFT_2_STOP          !MAST_CALIB_MODE && MODE_MANUEL && (MAST_OK || MAST_MIN_OK)
-#define LEFT_2_RIGHT            !MAST_CALIB_MODE && MODE_MANUEL && MAST_RIGHT  && !MAST_MAX_OK
+#define LEFT_2_STOP          !MAST_CALIB_MODE && MANUAL_MODE && (MAST_OK || MAST_MIN_OK) || !MANUAL_MODE
+#define LEFT_2_RIGHT            !MAST_CALIB_MODE && MANUAL_MODE && MAST_RIGHT  && !MAST_MAX_OK
+
+#define PULSE_PER_DEGREE    30
 
 #endif	/* STATE_MACHINE_MAST_H */
 

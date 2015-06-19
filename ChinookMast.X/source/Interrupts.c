@@ -32,6 +32,7 @@ volatile BOOL  oFlagMainWhile = 0
               ,oCapture2      = 0
               ,oCapture3      = 0
               ,oCapture4      = 0
+              ,oTimer5        = 0
               ;
 
 extern volatile BOOL  oButtonLeft
@@ -81,6 +82,19 @@ void __ISR(_TIMER_3_VECTOR, T3_INTERRUPT_PRIORITY) Timer3InterruptHandler(void)
   mT3ClearIntFlag();
 }
 
+//=============================================
+// Configure the Timer 5 interrupt handler
+//=============================================
+void __ISR(_TIMER_5_VECTOR, T5_INTERRUPT_PRIORITY) Timer5InterruptHandler(void)
+{
+  oTimer5 = 1;
+
+  // Increment the number of overflows from this timer. Used primarily by Input Capture
+  Timer.Var.nOverflows[4]++;
+
+  mT5ClearIntFlag();
+}
+
 
 /*******************************************************************************
  ***********************                               *************************
@@ -116,26 +130,16 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
       switches.bytes.low  = message->data[0];
       switches.bytes.high = message->data[1];
 
-      if (switches.bits.sw1)
+      if (buttons.buttons.bits.steerWheelSw1  != switches.bits.sw1 )
       {
-        oButtonLeft = 1;
-        LED_DEBUG4_ON;
-      }
-      else
-      {
-        oButtonLeft = 0;
-        LED_DEBUG4_OFF;
+        buttons.buttons.bits.steerWheelSw1  = switches.bits.sw1;
+        buttons.chng.bits.steerWheelSw1     = 1;
       }
 
-      if (switches.bits.sw10)
+      if (buttons.buttons.bits.steerWheelSw10 != switches.bits.sw10)
       {
-        oButtonRight = 1;
-        LED_DEBUG3_ON;
-      }
-      else
-      {
-        oButtonRight = 0;
-        LED_DEBUG3_OFF;
+        buttons.buttons.bits.steerWheelSw10 = switches.bits.sw10;
+        buttons.chng.bits.steerWheelSw10    = 1;
       }
 
       CANUpdateChannel(CAN1, CAN_CHANNEL1);
@@ -317,8 +321,6 @@ void __ISR(_INPUT_CAPTURE_2_VECTOR, IC2_INT_PRIORITY) InputCapture2InterruptHand
   InputCapture.Var.currentCaptureCountValue [IC2] = InputCapture.ReadCapture(IC2);
 
   oCapture2 = 1;   // Flag that tells that a new Capture event occured
-
-  nTurns++;
 
   // Clear the interrupt flag
   INTClearFlag(INT_IC2);

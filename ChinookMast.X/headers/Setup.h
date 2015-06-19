@@ -280,37 +280,6 @@ BYTE Can1MessageFifoArea [ CAN_NB_CHANNELS     // Space used by CAN
                          * CAN_TX_RX_MESSAGE_SIZE_BYTES
                          ];
 
-// Typedef for mapping the steering wheel switches
-typedef union
-{
-  struct
-  {
-    UINT16 sw1  : 1
-          ,sw2  : 1
-          ,sw3  : 1
-          ,sw4  : 1
-          ,sw5  : 1
-          ,sw6  : 1
-          ,sw7  : 1
-          ,sw8  : 1
-          ,sw9  : 1
-          ,sw10 : 1
-          ,sw11 : 1
-          ,sw12 : 1
-          ,     : 4
-          ;
-  } bits;
-
-  struct
-  {
-    UINT8 low;
-    UINT8 high;
-  } bytes;
-
-  UINT16 word;
-  
-} CanSwitches_t;
-
 // Message 0 : Identification
 #define SEND_ID_TO_BACKPLANE          Can.SendByte(CAN1, 0x30, 0x00)
 
