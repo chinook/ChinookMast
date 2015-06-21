@@ -28,6 +28,8 @@ INT8 oCalibDone = 1;
 
 extern volatile UINT32 nTurns;
 
+extern volatile sButtonStates_t buttons;
+
 // Mast general value
 volatile INT8  mastCurrentPos = 0        // Actual position of Mast
               ,Mast_consigne  = 0        // New value of Mast
@@ -37,23 +39,20 @@ extern volatile BOOL oCapture1
                     ,oCapture2
                     ,oCapture3
                     ,oCapture4
-                    ,oChangeMode
+                    ,oTimer1
                     ,oTimer5
                     ;
 
-volatile BOOL  oFirstTimeInStateRight   = 1
-              ,oFirstTimeInStateLeft    = 1
-              ,oFirstTimeInStateStop    = 1
-              ,oManualMode              = 0
+volatile BOOL  oManualMode            = 1
+              ,oCountTimeToChngMode   = 0
+              ,oManualFlagChng        = 0
+              ,oCapture1Acquired      = 0
+              ,oCapture2Acquired      = 0
+              ,oCapture3Acquired      = 0
+              ,oCapture4Acquired      = 0
+              ,oManualMastRight       = 0
+              ,oManualMastLeft        = 0
               ;
-
-BOOL  oCapture1Acquired = 0
-     ,oCapture2Acquired = 0
-     ,oCapture3Acquired = 0
-     ,oCapture4Acquired = 0
-     ,oManualMastRight  = 0
-     ,oManualMastLeft   = 0
-     ;
 
 
 //==============================================================================
@@ -76,21 +75,13 @@ void StateScheduler(void)
     {
       pStateMast = &StateCalib;   // calib state
     }
-    else if (INIT_2_STOP)
+    else if (INIT_2_ACQ)
     {
-      pStateMast = &StateManualStop;    // stop state
-    }
-    else if (INIT_2_LEFT)
-    {
-      pStateMast = &StateManualLeft;    // Down state
-    }
-    else if (INIT_2_RIGHT)
-    {
-      pStateMast = &StateManualRight;      // Up state
+      pStateMast = &StateAcq;
     }
     else
     {
-      pStateMast = &StateInit;    // Go to Error state by default
+      pStateMast = &StateInit;    // Stay in current state
     }
   }
 
@@ -99,106 +90,96 @@ void StateScheduler(void)
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   else if (pStateMast == &StateCalib)
   {
-    if (CALIB_2_INIT)
+    if (CALIB_2_ACQ)
     {
-      pStateMast = &StateInit;       // Init state
-    }
-    else if (CALIB_2_STOP)
-    {
-      pStateMast = &StateManualStop;     // Stop state
-    }
-    else if (CALIB_2_LEFT)
-    {
-      pStateMast = &StateManualLeft;     // Down state
-    }
-    else if (CALIB_2_RIGHT)
-    {
-      pStateMast = &StateManualRight;     // Up state
+      pStateMast = &StateAcq;
     }
     else
     {
-      pStateMast = &StateCalib;   // Go to Error state by default
+      pStateMast = &StateCalib;    // Stay in current state
     }
   }
-  
+
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  // Current state = StateManualStop
+  // Current state = StateAcq
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  else if (pStateMast == &StateManualStop)
+  else if (pStateMast == &StateAcq)
   {
-    if (STOP_2_INIT)
+    if (ACQ_2_DISCONNECT)
     {
-      pStateMast = &StateInit;       // Init state
+      pStateMast = &StateDisconnect;
     }
-    else if (STOP_2_CALIB)
+    else if (ACQ_2_MANUAL)
     {
-      pStateMast = &StateCalib;     // Calib state
+      pStateMast = &StateManual;
     }
-    else if (STOP_2_LEFT)
+    else if (ACQ_2_REG)
     {
-      pStateMast = &StateManualLeft;     // Down state
-    }
-    else if (STOP_2_RIGHT)
-    {
-      pStateMast = &StateManualRight;     // Up state
+      pStateMast = &StateReg;
     }
     else
     {
-      pStateMast = &StateManualStop;   // Go to Error state by default
+      pStateMast = &StateAcq;    // Stay in current state
     }
   }
-  
+
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  // Current state = StateManualLeft
+  // Current state = StateReg
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  else if (pStateMast == &StateManualLeft)
+  else if (pStateMast == &StateReg)
   {
-    if (LEFT_2_INIT)
+    if (REG_2_ACQ)
     {
-      pStateMast = &StateInit;       // Init state
-    }
-    else if (LEFT_2_CALIB)
-    {
-      pStateMast = &StateCalib;     // Calib state
-    }
-    else if (LEFT_2_STOP)
-    {
-      pStateMast = &StateManualStop;     // Stop state
-    }
-    else if (LEFT_2_RIGHT)
-    {
-      pStateMast = &StateManualRight;     // UP state
+      pStateMast = &StateAcq;
     }
     else
     {
-      pStateMast = &StateManualLeft;   // Go to Error state by default
+      pStateMast = &StateReg;    // Stay in current state
     }
   }
-  
+
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  // Current state = StateManualRight
+  // Current state = StateDisconnect
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  else if (pStateMast == &StateManualRight)
+  else if (pStateMast == &StateDisconnect)
   {
-    if (RIGHT_2_INIT)
+    if (DISCONNECT_2_CLOSE)
     {
-      pStateMast = &StateInit;       // Init state
-    }
-    else if (RIGHT_2_CALIB)
-    {
-      pStateMast = &StateCalib;     // Calib state
-    }
-    else if (RIGHT_2_STOP)
-    {
-      pStateMast = &StateManualStop;     // Stop state
-    }
-    else if (RIGHT_2_LEFT)
-    {
-      pStateMast = &StateManualLeft;     // Down state
+      pStateMast = &StateClose;
     }
     else
     {
-      pStateMast = &StateManualRight;   // Go to Error state by default
+      pStateMast = &StateDisconnect;    // Stay in current state
+    }
+  }
+
+  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  // Current state = StateClose
+  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  else if (pStateMast == &StateClose)
+  {
+    if (CLOSE_2_IDLE)
+    {
+      pStateMast = &StateIdle;
+    }
+    else
+    {
+      pStateMast = &StateClose;    // Stay in current state
+    }
+  }
+
+  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  // Current state = StateIDLE
+  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  else if (pStateMast == &StateIdle)
+  {
+    if (IDLE_2_INIT)
+    {
+      pStateMast = &StateInit;
+    }
+    else
+    {
+      pStateMast = &StateIdle;    // Stay in current state
     }
   }
 
@@ -241,6 +222,15 @@ void StateInit(void)
   SEND_ID_TO_BACKPLANE;
 
   mastCurrentPos = ReadMastPosFromEeprom();
+
+//  sUartLineBuffer_t buffer =
+//  {
+//    .buffer = {0}
+//   ,.length =  0
+//  };
+//
+//    buffer.length = sprintf(buffer.buffer, "Left = %x, Right = %x, oCounting = %x, oTimer5 = %x\r\n", buttons.buttons.bits.steerWheelSw1, buttons.buttons.bits.steerWheelSw10, oCountTimeToChngMode, oTimer5);
+//  Uart.PutTxFifoBuffer(UART6, &buffer);
   
 //  I2c.EepromSendByte(I2C4, 0x0100, -45);
 //  I2c.EepromReadByte(I2C4, 0x0100, &angle);mastCurrentPos
@@ -251,31 +241,31 @@ void StateInit(void)
 
 
 //===============================================================
-// Name     : StateManualStop
-// Purpose  : Stop stepper Mast when good Mast or problem
+// Name     : StateManual
+// Purpose  : Assess manual flags and adjust the mast in consequence
 //===============================================================
-void StateManualStop(void)
+void StateManual(void)
 {
-//  DRVA_SLEEP = 0;
-  DRVB_SLEEP = 0;
-  
-  if (oFirstTimeInStateStop)
-  {
-    oFirstTimeInStateRight = 1;
-    oFirstTimeInStateLeft = 1;
-    oFirstTimeInStateStop = 0;
+  oManualFlagChng = 0;
 
-    Pwm.SetDutyCycle(PWM_2, 500);
-    Pwm.SetDutyCycle(PWM_3, 500);
-    WriteMastPos2Eeprom(mastCurrentPos);
+  if (!oManualMastLeft && !oManualMastRight)
+  {
+    MastManualStop();
   }
-//  WriteDrive(DRVA, STATUS_Mastw);
+  else if (oManualMastLeft)
+  {
+    MastManualLeft();
+  }
+  else if (oManualMastRight)
+  {
+    MastManualRight();
+  }
 }
 
 
 //===============================================================
 // Name     : StateCalib
-// Purpose  : calib mode will search max and min Mast of transmission
+// Purpose  : Calibrate the mast
 //===============================================================
 void StateCalib(void)
 {
@@ -284,77 +274,67 @@ void StateCalib(void)
 
 
 //===============================================================
-// Name     : StateManualLeft
-// Purpose  : Error state of the system. Used to assess and
-//            correct errors in the system.
+// Name     : StateReg
+// Purpose  : Regulate the mast
 //===============================================================
-void StateManualLeft(void)
+void StateReg(void)
 {
-//  DRVA_SLEEP = 1;
-  DRVB_SLEEP = 1;
-  
-  if (oFirstTimeInStateLeft)
-  {
-    oFirstTimeInStateRight = 1;
-    oFirstTimeInStateStop = 1;
-    oFirstTimeInStateLeft = 0;
-
-//    Pwm.SetDutyCycle(PWM_2, 800);
-//    Pwm.SetDutyCycle(PWM_3, 200);
-    Pwm.SetDutyCycle(PWM_2, 750);
-    Pwm.SetDutyCycle(PWM_3, 250);
-  }
-//  mastCurrentPos--;
-//  WriteDrive(DRVA, STATUS_Mastw);
-  WriteDrive(DRVB, STATUS_Mastw);
+  return;
 }
 
 
 //===============================================================
-// Name     : StateManualRight
-// Purpose  : Error state of the system. Used to assess and
-//            correct errors in the system.
+// Name     : StateDisconnect
+// Purpose  : Send a disconnect message to the backplane
 //===============================================================
-void StateManualRight(void)
+void StateDisconnect(void)
 {
-//  DRVA_SLEEP = 1;
-  DRVB_SLEEP = 1;
-
-  if (oFirstTimeInStateRight)
-  {
-    oFirstTimeInStateStop = 1;
-    oFirstTimeInStateLeft = 1;
-    oFirstTimeInStateRight = 0;
-//    Pwm.SetDutyCycle(PWM_2, 200);
-//    Pwm.SetDutyCycle(PWM_3, 800);
-    Pwm.SetDutyCycle(PWM_2, 250);
-    Pwm.SetDutyCycle(PWM_3, 750);
-  }
-//  mastCurrentPos++;
-//  WriteDrive(DRVA, STATUS_Mastw);
-  WriteDrive(DRVB, STATUS_Mastw);
+  return;
 }
 
 
 //===============================================================
-// Name     : StateAcquisition
+// Name     : StateClose
+// Purpose  : Close all peripherals
+//===============================================================
+void StateClose(void)
+{
+  oCalibDone = 0;
+}
+
+
+//===============================================================
+// Name     : StateIdle
+// Purpose  : Wait for power-off
+//===============================================================
+void StateIdle(void)
+{
+  oCalibDone = 0;
+}
+
+
+//===============================================================
+// Name     : StateAcq
 // Purpose  : Get data from peripherals
 //===============================================================
-void StateAcquisition(void)
+void StateAcq(void)
 {
-  if (oTimer5)
+
+  sUartLineBuffer_t buffer =
   {
-    oManualMode ^= 1;
-    oTimer5      = 0;
-    Timer.DisableInterrupt(TIMER_5);
-  }
+    .buffer = {0}
+   ,.length =  0
+  };
+
   if (oManualMode)
   {
     LED_DEBUG0_ON;
+    LED_DEBUG1_OFF;
   }
   else
   {
     LED_DEBUG0_OFF;
+    LED_DEBUG1_ON;
   }
   
   if (buttons.buttons.bits.boardSw1 != SW1)
@@ -369,80 +349,204 @@ void StateAcquisition(void)
     buttons.chng.bits.boardSw2     = 1;
   }
 
-  if (buttons.buttons.bits.boardSw3 != SW1)
+  if (buttons.buttons.bits.boardSw3 != SW3)
   {
-    buttons.buttons.bits.boardSw3  = SW1;
+    buttons.buttons.bits.boardSw3  = SW3;
     buttons.chng.bits.boardSw3     = 1;
   }
 
-  if (buttons.chng.byte)
-  {
-    if (buttons.chng.bits.boardSw1)
-    {
-      buttons.chng.bits.boardSw1 = 0;
+  AssessButtons();
 
-      if (buttons.buttons.bits.boardSw1)
-      {
-        mastCurrentPos = 0;
-        WriteMastPos2Eeprom (mastCurrentPos);
-      }
-    }
-
-    if (buttons.chng.bits.boardSw2)
-    {
-      buttons.chng.bits.boardSw2 = 0;
-
-      if (buttons.buttons.bits.boardSw2)
-      {
-        if (!buttons.chng.bits.boardSw3 && buttons.buttons.bits.boardSw3)   // Start procedure to change manual mode
-        {
-          oChangingMode = 1;
-        }
-      }
-    }
-  }
-
-  if ( (!SW3 || oButtonRight) && (!SW2 || oButtonLeft) )
-  {
-    if (oFirstTimeForChangeMode)
-    {
-      WriteTimer5(0);
-      Timer.EnableInterrupt(TIMER_5);
-      oFirstTimeForChangeMode = 0;
-    }
-    else
-    {
-      if (oChangeMode)
-      {
-        oChangeMode = 0;
-        oFirstTimeForChangeMode = 1;
-        Timer.DisableInterrupt(TIMER_5);
-        oManualMode ^= 1;
-      }
-    }
-    oManualMastLeft  = 0;
-    oManualMastRight = 0;
-  }
-  else
-  {
-    if ( (!SW2 && !oManualMastLeft) || (oButtonLeft && !oManualMastLeft) )
-    {
-      oManualMastLeft = 1;
-    }
-    else if (SW2 && !oButtonLeft)
-    {
-      oManualMastLeft = 0;
-    }
-
-    if ( (!SW3 && !oManualMastRight) || (oButtonRight && !oManualMastRight) )
-    {
-      oManualMastRight = 1;
-    }
-    else if (SW3 && !oButtonRight)
-    {
-      oManualMastRight = 0;
-    }
-  }
+//  if (buttons.chng.byte)
+//  {
+//
+//    if (buttons.chng.bits.boardSw1)
+//    {
+//      buttons.chng.bits.boardSw1 = 0;
+//
+//      if (!buttons.buttons.bits.boardSw1)     // If SW1 is pressed
+//      {
+//        mastCurrentPos = 0;
+//        WriteMastPos2Eeprom (mastCurrentPos); // Write zero to EEPROM
+//      }
+//    }
+//
+//
+//    if (buttons.chng.bits.boardSw2)
+//    {
+//      buttons.chng.bits.boardSw2 = 0;
+//
+//      if (!buttons.buttons.bits.boardSw2)     // If SW2 is pressed
+//      {
+//        if (!buttons.buttons.bits.boardSw3)   // And SW3 is pressed
+//        {
+//          oCountTimeToChngMode = 1;           // Start procedure to change manual mode
+//          Timer.EnableInterrupt(TIMER_5);
+//          Timer.Reset(TIMER_5);
+//          oTimer5 = 0;
+//
+//          oManualMastLeft  = 0;               // Stop moving
+//          oManualMastRight = 0;
+//          oManualFlagChng = 1;
+//        }
+//        else if (oManualMode)
+//        {
+//          oManualMastLeft = 1;
+//          oManualFlagChng = 1;
+//        }
+//      }
+//      else                          // If SW2 is not pressed
+//      {
+//        if (oCountTimeToChngMode)   // And the procedure ot change mode was occuring
+//        {
+//          oCountTimeToChngMode = 0;
+//          Timer.DisableInterrupt(TIMER_5);
+//
+//          if (oTimer5)              // If at least one second has passed
+//          {
+//            oManualMode ^= 1;       // Change mode
+//          }
+//        }
+//        else if (oManualMode)
+//        {
+//          oManualMastLeft = 0;
+//          oManualFlagChng = 1;
+//        }
+//      }
+//    }
+//
+//
+//    if (buttons.chng.bits.boardSw3)
+//    {
+//      buttons.chng.bits.boardSw3 = 0;
+//
+//      if (!buttons.buttons.bits.boardSw3)     // If SW3 is pressed
+//      {
+//        if (!buttons.buttons.bits.boardSw2)   // And SW2 is pressed
+//        {
+//          oCountTimeToChngMode = 1;           // Start procedure to change manual mode
+//          Timer.EnableInterrupt(TIMER_5);
+//          Timer.Reset(TIMER_5);
+//          oTimer5 = 0;
+//
+//          oManualMastLeft  = 0;               // Stop moving
+//          oManualMastRight = 0;
+//          oManualFlagChng = 1;
+//        }
+//        else if (oManualMode)
+//        {
+//          oManualMastRight = 1;
+//          oManualFlagChng = 1;
+//        }
+//      }
+//      else                          // If SW3 is not pressed
+//      {
+//        if (oCountTimeToChngMode)   // And the procedure ot change mode was occuring
+//        {
+//          oCountTimeToChngMode = 0;
+//          Timer.DisableInterrupt(TIMER_5);
+//
+//          if (oTimer5)              // If at least one second has passed
+//          {
+//            oManualMode ^= 1;       // Change mode
+//          }
+//        }
+//        else if (oManualMode)
+//        {
+//          oManualMastRight = 0;
+//          oManualFlagChng = 1;
+//        }
+//      }
+//    }
+//
+//
+//    if (buttons.chng.bits.steerWheelSw1)
+//    {
+//      buttons.chng.bits.steerWheelSw1 = 0;
+//
+//      if (buttons.buttons.bits.steerWheelSw1)       // If left switch on steering wheel is pressed
+//      {
+//        if (buttons.buttons.bits.steerWheelSw10)    // And right switch on steering wheel is pressed
+//        {
+//          oCountTimeToChngMode = 1;                 // Start procedure to change manual mode
+//          Timer.EnableInterrupt(TIMER_5);
+//          Timer.Reset(TIMER_5);
+//          oTimer5 = 0;
+//
+//          oManualMastLeft  = 0;                     // Stop moving
+//          oManualMastRight = 0;
+//          oManualFlagChng = 1;
+//        }
+//        else if (oManualMode)
+//        {
+//          oManualMastLeft = 1;
+//          oManualFlagChng = 1;
+//        }
+//      }
+//      else                          // If left switch on steering wheel is not pressed
+//      {
+//        if (oCountTimeToChngMode)   // And the procedure ot change mode was occuring
+//        {
+//          oCountTimeToChngMode = 0;
+//          Timer.DisableInterrupt(TIMER_5);
+//
+//          if (oTimer5)              // If at least one second has passed
+//          {
+//            oManualMode ^= 1;       // Change mode
+//          }
+//        }
+//        else if (oManualMode)
+//        {
+//          oManualMastLeft = 0;
+//          oManualFlagChng = 1;
+//        }
+//      }
+//    }
+//
+//
+//    if (buttons.chng.bits.steerWheelSw10)
+//    {
+//      buttons.chng.bits.steerWheelSw10 = 0;
+//
+//      if (buttons.buttons.bits.steerWheelSw10)      // If right switch on steering wheel is pressed
+//      {
+//        if (buttons.buttons.bits.steerWheelSw1)     // And left switch on steering wheel is pressed
+//        {
+//          oCountTimeToChngMode = 1;                 // Start procedure to change manual mode
+//          Timer.EnableInterrupt(TIMER_5);
+//          Timer.Reset(TIMER_5);
+//          oTimer5 = 0;
+//
+//          oManualMastLeft  = 0;                     // Stop moving
+//          oManualMastRight = 0;
+//          oManualFlagChng = 1;
+//        }
+//        else if (oManualMode)
+//        {
+//          oManualMastRight = 1;
+//          oManualFlagChng = 1;
+//        }
+//      }
+//      else                          // If right switch on steering wheel is not pressed
+//      {
+//        if (oCountTimeToChngMode)   // And the procedure ot change mode was occuring
+//        {
+//          oCountTimeToChngMode = 0;
+//          Timer.DisableInterrupt(TIMER_5);
+//
+//          if (oTimer5)              // If at least one second has passed
+//          {
+//            oManualMode ^= 1;       // Change mode
+//          }
+//        }
+//        else if (oManualMode)
+//        {
+//          oManualMastRight = 0;
+//          oManualFlagChng = 1;
+//        }
+//      }
+//    }
+//  }
 
 //  if (oCapture2)
 //  {

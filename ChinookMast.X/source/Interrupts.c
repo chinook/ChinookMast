@@ -26,20 +26,24 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #include "..\headers\Interrupts.h"
+#include "..\headers\StateFunctions.h"
 
-volatile BOOL  oFlagMainWhile = 0
-              ,oCapture1      = 0
-              ,oCapture2      = 0
-              ,oCapture3      = 0
-              ,oCapture4      = 0
-              ,oTimer5        = 0
+volatile BOOL  oCapture1  = 0
+              ,oCapture2  = 0
+              ,oCapture3  = 0
+              ,oCapture4  = 0
+              ,oTimer1    = 0
+              ,oTimer5    = 0
               ;
 
 extern volatile BOOL  oButtonLeft
                      ,oButtonRight
+                     ,oCountTimeToChngMode
                      ;
 
 volatile UINT32 nTurns;
+
+extern volatile sButtonStates_t buttons;
 
 //==============================================================================
 //	TIMER INTERRUPTS
@@ -50,7 +54,7 @@ volatile UINT32 nTurns;
 //=============================================
 void __ISR(_TIMER_1_VECTOR, T1_INTERRUPT_PRIORITY) Timer1InterruptHandler(void)
 {
-  oFlagMainWhile = 1;
+  oTimer1 = 1;
 
   // Increment the number of overflows from this timer. Used primarily by Input Capture
   Timer.Var.nOverflows[0]++;

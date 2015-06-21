@@ -26,14 +26,33 @@
 #define	__STATE_FUNCTIONS_H__
 
 #include "Setup.h"
+#include "DRV8711_Para.h"
 
 
 //==============================================================================
 // State Machine public functions prototypes
 //==============================================================================
-void WriteMastPos2Eeprom (UINT8 pos);
 
+// EEPROM functions
+// =======================================
+void  WriteMastPos2Eeprom   (UINT8 pos);
 UINT8 ReadMastPosFromEeprom (void);
+// =======================================
+
+
+// Mast manual functions
+// =======================================
+void MastManualStop  (void);
+void MastManualLeft  (void);
+void MastManualRight (void);
+// =======================================
+
+
+// Buttons functions
+// =======================================
+void AssessButtons (void);
+// =======================================
+
 
 //==============================================================================
 // Macro definitions

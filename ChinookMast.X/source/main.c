@@ -42,7 +42,7 @@ void sendUART();
 //==============================================================================
 // VARIABLE DECLARATIONS
 //==============================================================================
-extern volatile BOOL oFlagMainWhile;       // From Interrupt.c
+
 
 //==============================================================================
 // MAIN CODE
@@ -96,8 +96,6 @@ void main(void)
 
   pBuffStateMast  = pStateMast;
   
-  oFlagMainWhile = 1;
-  
 	while(1)  //infinite loop
 	{
 
@@ -105,7 +103,7 @@ void main(void)
     // Mast State machine with Drive A
     //======================================
     (*pStateMast)();          // jump to next state
-    StateAcquisition();
+    StateAcq();
     StateScheduler();   // Decides which state will be next
 
 //    if(oFlagMainWhile)
@@ -123,9 +121,9 @@ void sendUART()
   int i=0;
   if(pStateMast==&StateInit) Uart.SendDataBuffer(UART6, "State Mast : Init\t\t", 19);
   else if(pStateMast==&StateCalib) Uart.SendDataBuffer(UART6, "State Mast : Calib\t\t", 20);
-  else if(pStateMast==&StateManualStop) Uart.SendDataBuffer(UART6, "State Mast : Stop\t\t", 19);
-  else if(pStateMast==&StateManualLeft) Uart.SendDataBuffer(UART6, "State Mast : Down\t\t", 19);
-  else if(pStateMast==&StateManualRight) Uart.SendDataBuffer(UART6, "State Mast : Up  \t\t", 19);
+//  else if(pStateMast==&StateManualStop) Uart.SendDataBuffer(UART6, "State Mast : Stop\t\t", 19);
+//  else if(pStateMast==&StateManualLeft) Uart.SendDataBuffer(UART6, "State Mast : Down\t\t", 19);
+//  else if(pStateMast==&StateManualRight) Uart.SendDataBuffer(UART6, "State Mast : Up  \t\t", 19);
 
 //  sprintf(Text, "Mast Now = %d\t\tMast Consigne = %d\n\r", mastCurrentPos, Mast_consigne);
   Uart.SendDataBuffer(UART6, Text, sizeof(Text));
