@@ -286,5 +286,7 @@ BYTE Can1MessageFifoArea [ CAN_NB_CHANNELS     // Space used by CAN
 // Message 1 : Disconnect
 #define SEND_DISCONNECT_TO_BACKPLANE  Can.SendByte(CAN1, 0x31, 0x00)
 
+#define MAST_DIRECTION_SID    0x55
+
 
 #endif	/* __SETUP_H__ */

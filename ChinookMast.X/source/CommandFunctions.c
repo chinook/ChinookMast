@@ -38,12 +38,14 @@ const float  pwmMaxDutyCycle  = 0.98
             ,pwmMinDutyCycle  = 0.2
             ;
 
-volatile sCmdValue_t windAngle  = {0}
+volatile sCmdValue_t windAngle  = {.currentValue = 60, .previousValue = 60}
                     ,mastAngle  = {0}
                     ,mastSpeed  = {0}
-                    ,inPi       = {0}
-                    ,outPi      = {0}
                     ;
+
+sCmdValue_t  inPi   = {0}
+            ,outPi  = {0}
+            ;
 
 // Mast general value
 extern volatile float mastCurrentPos     // Actual position of Mast
@@ -83,15 +85,15 @@ void SetPwm (float cmd)
 
     if (SIGN(cmd) == MAST_DIR_LEFT)
     {
+      DRVB_SLEEP = 1;
       Pwm.SetDutyCycle(PWM_2, 500 + pwm);
       Pwm.SetDutyCycle(PWM_3, 500 - pwm);
-      DRVB_SLEEP = 1;
     }
     else if (SIGN(cmd) == MAST_DIR_RIGHT)
     {
+      DRVB_SLEEP = 1;
       Pwm.SetDutyCycle(PWM_2, 500 - pwm);
       Pwm.SetDutyCycle(PWM_3, 500 + pwm);
-      DRVB_SLEEP = 1;
     }
   }
 }

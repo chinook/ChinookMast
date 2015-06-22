@@ -38,6 +38,7 @@ void StateManual      (void);          // Assess manual flags and adjust the mas
 void StateAcq         (void);    // Get data from peripherals
 void StateDisconnect  (void);
 void StateClose       (void);
+void StateSendData    (void);
 void StateReg         (void);
 void StateIdle        (void);
 void StateScheduler   (void);      // State Scheduler. Decides which state is next
@@ -84,6 +85,7 @@ volatile  INT8  breakFlag   // Flag indicating if the emergency break has been p
 #define MANUAL_FLAG_CHANGE    oManualFlagChng
 #define DISCONNECT_OK         0
 #define REG_TIMER_OK          oTimer1
+#define SEND_DATA_TIMER_OK    oTimer4
 
 #define PULSE_PER_DEGREE      30
 
@@ -92,8 +94,8 @@ volatile  INT8  breakFlag   // Flag indicating if the emergency break has been p
 //==============================================================================
 
 /******* TRANSITION CONDITION INIT **********/
-#define INIT_2_ACQ            1
-#define INIT_2_CALIB          0
+#define INIT_2_ACQ            !MAST_CALIB_MODE
+#define INIT_2_CALIB          MAST_CALIB_MODE
 
 
 /******* TRANSITION CONDITION CALIB **********/
@@ -104,6 +106,11 @@ volatile  INT8  breakFlag   // Flag indicating if the emergency break has been p
 #define ACQ_2_MANUAL          MANUAL_MODE && MANUAL_FLAG_CHANGE && !MAST_CALIB_MODE
 #define ACQ_2_DISCONNECT      DISCONNECT_OK
 #define ACQ_2_REG             !MAST_CALIB_MODE && !MANUAL_MODE && REG_TIMER_OK
+#define ACQ_2_SEND_DATA       SEND_DATA_TIMER_OK
+
+
+/******* TRANSITION CONDITION SEND DATA **********/
+#define SEND_DATA_2_ACQ       1
 
 
 /******* TRANSITION CONDITION MANUAL **********/

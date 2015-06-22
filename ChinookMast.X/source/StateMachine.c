@@ -24,7 +24,11 @@
 #include "..\headers\StateFunctions.h"
 #include "..\headers\CommandFunctions.h"
 
-BOOL oCalibMode = 0;
+BOOL  oCapture1Acquired = 0
+     ,oCapture2Acquired = 0
+     ,oCapture3Acquired = 0
+     ,oCapture4Acquired = 0
+     ;
 
 extern volatile sButtonStates_t buttons;
 
@@ -45,16 +49,14 @@ extern volatile BOOL oCapture1
                     ,oCapture3
                     ,oCapture4
                     ,oTimer1
+                    ,oTimer4
                     ,oTimer5
                     ;
 
-volatile BOOL  oManualMode            = 1
+volatile BOOL  oManualMode            = 0
+              ,oCalibMode             = 0
               ,oCountTimeToChngMode   = 0
               ,oManualFlagChng        = 0
-              ,oCapture1Acquired      = 0
-              ,oCapture2Acquired      = 0
-              ,oCapture3Acquired      = 0
-              ,oCapture4Acquired      = 0
               ,oManualMastRight       = 0
               ,oManualMastLeft        = 0
               ;
@@ -89,6 +91,10 @@ void StateScheduler(void)
     {
       pStateMast = &StateReg;
     }
+    else if (ACQ_2_SEND_DATA)
+    {
+      pStateMast = &StateSendData;
+    }
     else
     {
       pStateMast = &StateAcq;    // Stay in current state
@@ -122,6 +128,21 @@ void StateScheduler(void)
     else
     {
       pStateMast = &StateManual;    // Stay in current state
+    }
+  }
+
+  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  // Current state = StateSendData
+  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  else if (pStateMast == &StateSendData)
+  {
+    if (SEND_DATA_2_ACQ)
+    {
+      pStateMast = &StateAcq;
+    }
+    else
+    {
+      pStateMast = &StateSendData;    // Stay in current state
     }
   }
 
@@ -291,6 +312,8 @@ void StateReg(void)
 
   Regulator();
 
+  mastCurrentPos = mastAngle.currentValue;
+
   WriteMastPos2Eeprom();
 }
 
@@ -357,6 +380,32 @@ void StateIdle(void)
 
 
 //===============================================================
+// Name     : StateSendData
+// Purpose  : Send useful data to other devices
+//===============================================================
+void StateSendData(void)
+{
+  oTimer4 = 0;
+  
+//  BYTE txMastAngle[4];
+//
+//  memcpy(&txMastAngle[0], (void *) &mastCurrentPos, 4);
+//
+//  Can.SendByteArray(CAN1, 0x40, &txMastAngle[0], 4);
+//  
+//  WriteMastPos2Eeprom();
+//
+//  sUartLineBuffer_t buffer =
+//  {
+//    .buffer = {0}
+//   ,.length =  0
+//  };
+//
+//  buffer.length = sprintf(buffer.buffer, "PWM = %\r\n");
+}
+
+
+//===============================================================
 // Name     : StateAcq
 // Purpose  : Get data from peripherals
 //===============================================================
@@ -404,28 +453,20 @@ void StateAcq(void)
   {
     oCapture2 = 0;
     oCapture4 = 0;
+    
     rx2 = InputCapture.GetTimeBetweenCaptures(IC2, SCALE_US);
-    if (rx2 < 0)
-    {
-      buffer.length = sprintf(buffer.buffer, "error\r\n");
-      Uart.PutTxFifoBuffer(UART6, &buffer);
-    }
-    else
-    {
-      oCapture2Acquired = 1;
-    }
 
     rx4 = InputCapture.GetTimeBetweenCaptures(IC4, SCALE_US);
-    if (rx4 < 0)
+
+    if (ABS(100 - rx2*100/rx4) < 10)
     {
-      buffer.length = sprintf(buffer.buffer, "error\r\n");
-      Uart.PutTxFifoBuffer(UART6, &buffer);
+      oCapture2Acquired = 1;
+      oCapture4Acquired = 1;
     }
     else
     {
-//      buffer.length = sprintf(buffer.buffer, "IC4 speed = %d,    capture = %d\r\n", rx4, InputCapture.Var.currentCaptureCountValue[IC4]);
-//      Uart.PutTxFifoBuffer(UART6, &buffer);
-      oCapture4Acquired = 1;
+      oCapture2Acquired = 0;
+      oCapture4Acquired = 0;
     }
   }
   
@@ -437,21 +478,26 @@ void StateAcq(void)
     oCapture4Acquired = 0;
 
     firstIc = InputCapture.GetDirection(IC2, IC4, rx4, SCALE_US);
+    
     if (firstIc == IC2)
     {
-      buffer.length = sprintf(buffer.buffer, "DROITE\r\n");
-      Uart.PutTxFifoBuffer(UART6, &buffer);
+//      buffer.length = sprintf(buffer.buffer, "DROITE\r\n");
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
+//      mastCurrentSpeed = (rx2 + rx4) / (2*49);
+      mastCurrentSpeed = (rx2 + rx4) / 98;
     }
     else if (firstIc == IC4)
     {
-      buffer.length = sprintf(buffer.buffer, "GAUCHE\r\n");
-      Uart.PutTxFifoBuffer(UART6, &buffer);
+//      buffer.length = sprintf(buffer.buffer, "GAUCHE\r\n");
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
+//      mastCurrentSpeed = - (rx2 + rx4) / (2*49);
+      mastCurrentSpeed = - (rx2 + rx4) / 98;
     }
-    else
-    {
-      buffer.length = sprintf(buffer.buffer, "ERREUR\r\n");
-      Uart.PutTxFifoBuffer(UART6, &buffer);
-    }
+//    else
+//    {
+//      buffer.length = sprintf(buffer.buffer, "ERREUR\r\n");
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
+//    }
   }
 
   oCapture2Acquired = 0;

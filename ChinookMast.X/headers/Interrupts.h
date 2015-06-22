@@ -50,7 +50,7 @@
  * |----------+-------------+-------------------|
  * | 2        | 0           | Input Capture 2   |
  * | 2        | 1           |                   |
- * | 2        | 2           |                   |
+ * | 2        | 2           | Timer 4           |
  * | 2        | 3           |                   |
  * |----------+-------------+-------------------|
  * | 3        | 0           | Input Capture 4   |
@@ -90,12 +90,15 @@
 #define T2_INTERRUPT_PRIORITY           ipl4auto  // Used in ISR
 #define TIMER3_INTERRUPT_PRIORITY       3         // Used in ChinookLib function
 #define T3_INTERRUPT_PRIORITY           ipl3auto  // Used in ISR
+#define TIMER4_INTERRUPT_PRIORITY       2         // Used in ChinookLib function
+#define T4_INTERRUPT_PRIORITY           ipl2auto  // Used in ISR
 #define TIMER5_INTERRUPT_PRIORITY       4         // Used in ChinookLib function
 #define T5_INTERRUPT_PRIORITY           ipl4auto  // Used in ISR
 
 #define TIMER1_INTERRUPT_SUBPRIORITY    3         // Highest subpriority
 #define TIMER2_INTERRUPT_SUBPRIORITY    0
 #define TIMER3_INTERRUPT_SUBPRIORITY    1         // Highest subpriority
+#define TIMER4_INTERRUPT_SUBPRIORITY    2         // Highest subpriority
 #define TIMER5_INTERRUPT_SUBPRIORITY    4         // Highest subpriority
 //===============================================
 

@@ -33,6 +33,7 @@ volatile BOOL  oCapture1  = 0
               ,oCapture3  = 0
               ,oCapture4  = 0
               ,oTimer1    = 0
+              ,oTimer4    = 0
               ,oTimer5    = 0
               ;
 
@@ -87,6 +88,19 @@ void __ISR(_TIMER_3_VECTOR, T3_INTERRUPT_PRIORITY) Timer3InterruptHandler(void)
 }
 
 //=============================================
+// Configure the Timer 4 interrupt handler
+//=============================================
+void __ISR(_TIMER_4_VECTOR, T4_INTERRUPT_PRIORITY) Timer4InterruptHandler(void)
+{
+  oTimer4 = 1;
+
+  // Increment the number of overflows from this timer. Used primarily by Input Capture
+  Timer.Var.nOverflows[3]++;
+
+  mT4ClearIntFlag();
+}
+
+//=============================================
 // Configure the Timer 5 interrupt handler
 //=============================================
 void __ISR(_TIMER_5_VECTOR, T5_INTERRUPT_PRIORITY) Timer5InterruptHandler(void)
@@ -121,7 +135,6 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 
     CANRxMessageBuffer *message;
 
-
     /*
      * CHANNEL 1 = SWITCHES STATES
      */
@@ -152,7 +165,6 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
       CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
 
     }
-
 
     /*
      * CHANNEL 2 = TELEMETRY

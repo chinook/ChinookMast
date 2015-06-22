@@ -58,10 +58,10 @@ void InitTimer(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //	Open timers
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  timerCounterValue = Timer.Open(TIMER_1, 200 , SCALE_MS);   // Open Timer 1 with a period of 500 ms
-  timerCounterValue = Timer.Open(TIMER_2, 378, SCALE_MS);   // Open Timer 2 with a period of 500 us
-  timerCounterValue = Timer.Open(TIMER_3, 500, SCALE_US);    // Open Timer 3 with a period of 500 ms
-//  timerCounterValue = Timer.Open(TIMER_4, 500, SCALE_MS);   // Open Timer 4 with a period of 500 ms
+  timerCounterValue = Timer.Open(TIMER_1,  200, SCALE_MS);   // Open Timer 1 with a period of 500 ms
+  timerCounterValue = Timer.Open(TIMER_2,  378, SCALE_MS);   // Open Timer 2 with a period of 500 us
+  timerCounterValue = Timer.Open(TIMER_3,  500, SCALE_US);    // Open Timer 3 with a period of 500 ms
+  timerCounterValue = Timer.Open(TIMER_4,   15, SCALE_MS);   // Open Timer 4 with a period of 500 ms
   timerCounterValue = Timer.Open(TIMER_5, 1500, SCALE_MS);   // Open Timer 5 with a period of 500 us
   
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -70,7 +70,7 @@ void InitTimer(void)
   Timer.ConfigInterrupt(TIMER_1, TIMER1_INTERRUPT_PRIORITY, TIMER1_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_1 to the values specified in Interrupt.h
   Timer.ConfigInterrupt(TIMER_2, TIMER2_INTERRUPT_PRIORITY, TIMER2_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_2 to the values specified in Interrupt.h
   Timer.ConfigInterrupt(TIMER_3, TIMER3_INTERRUPT_PRIORITY, TIMER3_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_3 to the values specified in Interrupt.h
-//  Timer.ConfigInterrupt(TIMER_4, TIMER4_INTERRUPT_PRIORITY, TIMER4_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_4 to the values specified in Interrupt.h
+  Timer.ConfigInterrupt(TIMER_4, TIMER4_INTERRUPT_PRIORITY, TIMER4_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_4 to the values specified in Interrupt.h
   Timer.ConfigInterrupt(TIMER_5, TIMER5_INTERRUPT_PRIORITY, TIMER5_INTERRUPT_SUBPRIORITY); // Sets the priority of the TIMER_5 to the values specified in Interrupt.h
 
 }

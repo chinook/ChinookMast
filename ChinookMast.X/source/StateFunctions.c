@@ -21,6 +21,7 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #include "..\headers\StateFunctions.h"
+#include "..\headers\CommandFunctions.h"
 
 
 //==============================================================================
@@ -53,6 +54,8 @@ extern volatile BOOL oCapture1
                     ,oManualMastLeft
                     ;
 
+extern volatile sCmdValue_t mastAngle;
+
 //==============================================================================
 // State Machine private functions prototypes
 //==============================================================================
@@ -71,7 +74,6 @@ void WriteMastPos2Eeprom (void)
 //  dataBuffer[2] = 0x00;
 
   memcpy(&dataBuffer[3], (void *) &mastCurrentPos, 4);
-  dataBuffer[3] = mastCurrentPos;
 
   while(I2c.Var.oI2cReadIsRunning[I2C4]);  // Wait for any I2C4 read sequence to end
   while(I2c.Var.oI2cWriteIsRunning[I2C4]); // Wait for any I2C4 write sequence to end
@@ -101,6 +103,9 @@ void ReadMastPosFromEeprom (void)
   I2c.ReadRxFifo(I2C4, &mastPos[0], 4);
 
   memcpy((void *) &mastCurrentPos, &mastPos[0], 4);
+
+  mastAngle.previousValue = mastAngle.currentValue;
+  mastAngle.currentValue  = mastCurrentPos;
 }
 
 
