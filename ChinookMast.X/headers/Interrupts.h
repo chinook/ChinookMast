@@ -99,7 +99,7 @@
 #define TIMER2_INTERRUPT_SUBPRIORITY    0
 #define TIMER3_INTERRUPT_SUBPRIORITY    1         // Highest subpriority
 #define TIMER4_INTERRUPT_SUBPRIORITY    2         // Highest subpriority
-#define TIMER5_INTERRUPT_SUBPRIORITY    4         // Highest subpriority
+#define TIMER5_INTERRUPT_SUBPRIORITY    1         // Highest subpriority
 //===============================================
 
 

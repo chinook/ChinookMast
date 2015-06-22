@@ -32,9 +32,7 @@ const float  KP = 0.02
             ,KI = 0.08
             ,K  = 0.2
             ,T  = 0.2
-            ;
-
-const float  pwmMaxDutyCycle  = 0.98
+            ,pwmMaxDutyCycle  = 0.98
             ,pwmMinDutyCycle  = 0.2
             ;
 
