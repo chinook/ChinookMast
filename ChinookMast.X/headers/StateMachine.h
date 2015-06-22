@@ -79,7 +79,7 @@ volatile  INT8  breakFlag   // Flag indicating if the emergency break has been p
 #define MAST_MIN_OK           (mastCurrentPos <= MAST_MIN)
 #define MAST_DIR_DOWN         SW1
 #define MAST_DIR_UP           !MAST_DIR_DOWN
-#define MAST_CALIB_MODE       !oCalibDone
+#define MAST_CALIB_MODE       oCalibMode
 #define MANUAL_MODE           oManualMode
 #define MANUAL_FLAG_CHANGE    oManualFlagChng
 #define DISCONNECT_OK         0

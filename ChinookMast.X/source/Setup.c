@@ -58,7 +58,7 @@ void InitTimer(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //	Open timers
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  timerCounterValue = Timer.Open(TIMER_1, 25 , SCALE_MS);   // Open Timer 1 with a period of 500 ms
+  timerCounterValue = Timer.Open(TIMER_1, 200 , SCALE_MS);   // Open Timer 1 with a period of 500 ms
   timerCounterValue = Timer.Open(TIMER_2, 378, SCALE_MS);   // Open Timer 2 with a period of 500 us
   timerCounterValue = Timer.Open(TIMER_3, 500, SCALE_US);    // Open Timer 3 with a period of 500 ms
 //  timerCounterValue = Timer.Open(TIMER_4, 500, SCALE_MS);   // Open Timer 4 with a period of 500 ms

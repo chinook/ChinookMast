@@ -51,7 +51,7 @@
  * | 2        | 0           | Input Capture 2   |
  * | 2        | 1           |                   |
  * | 2        | 2           |                   |
- * | 2        | 3           | Timer 1           |
+ * | 2        | 3           |                   |
  * |----------+-------------+-------------------|
  * | 3        | 0           | Input Capture 4   |
  * | 3        | 1           | Timer 3           |
@@ -76,7 +76,7 @@
  * | 7        | 0           |                   |
  * | 7        | 1           | CAN 1             |
  * | 7        | 2           |                   |
- * | 7        | 3           |                   |
+ * | 7        | 3           | Timer 1           |
  * +----------+-------------+-------------------+
  * 
  */
@@ -84,8 +84,8 @@
 //===============================================
 // Timer interrupts priorities and subpriorities
 //===============================================
-#define TIMER1_INTERRUPT_PRIORITY       2         // Used in ChinookLib function
-#define T1_INTERRUPT_PRIORITY           ipl2auto  // Used in ISR
+#define TIMER1_INTERRUPT_PRIORITY       7         // Used in ChinookLib function
+#define T1_INTERRUPT_PRIORITY           ipl7auto  // Used in ISR
 #define TIMER2_INTERRUPT_PRIORITY       4         // Used in ChinookLib function
 #define T2_INTERRUPT_PRIORITY           ipl4auto  // Used in ISR
 #define TIMER3_INTERRUPT_PRIORITY       3         // Used in ChinookLib function
@@ -96,7 +96,7 @@
 #define TIMER1_INTERRUPT_SUBPRIORITY    3         // Highest subpriority
 #define TIMER2_INTERRUPT_SUBPRIORITY    0
 #define TIMER3_INTERRUPT_SUBPRIORITY    1         // Highest subpriority
-#define TIMER5_INTERRUPT_SUBPRIORITY    1         // Highest subpriority
+#define TIMER5_INTERRUPT_SUBPRIORITY    4         // Highest subpriority
 //===============================================
 
 

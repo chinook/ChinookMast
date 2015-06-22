@@ -38,10 +38,7 @@ volatile sButtonStates_t buttons =
  ,.buttons.bits.boardSw3 = 1
 };
 
-
-extern volatile INT8  mastCurrentPos        // Actual position of Mast
-                     ,Mast_consigne         // New value of Mast
-                     ;
+extern volatile float mastCurrentPos;       // Actual position of Mast
 
 extern volatile BOOL oCapture1
                     ,oCapture2
@@ -56,8 +53,6 @@ extern volatile BOOL oCapture1
                     ,oManualMastLeft
                     ;
 
-extern volatile UINT32 nTurns;
-
 //==============================================================================
 // State Machine private functions prototypes
 //==============================================================================
@@ -66,44 +61,46 @@ extern volatile UINT32 nTurns;
 //==============================================================================
 // EEPROM functions
 //==============================================================================
-void WriteMastPos2Eeprom (UINT8 pos)
+void WriteMastPos2Eeprom (void)
 {
-   UINT8 dataBuffer[4];
-   dataBuffer[0] = I2c.Var.eepromAddress.byte;
-//   dataBuffer[1] = EEPROM_POS_REGISTER >> 8;
-//   dataBuffer[2] = EEPROM_POS_REGISTER;
-   dataBuffer[1] = 0x01;
-   dataBuffer[2] = 0x00;
-   dataBuffer[3] = pos;
+  UINT8 dataBuffer[7];
+  dataBuffer[0] = I2c.Var.eepromAddress.byte;
+  dataBuffer[1] = EEPROM_POS_REGISTER >> 8;
+  dataBuffer[2] = EEPROM_POS_REGISTER;
+//  dataBuffer[1] = 0x01;
+//  dataBuffer[2] = 0x00;
 
-   while(I2c.Var.oI2cReadIsRunning[I2C4]);  // Wait for any I2C4 read sequence to end
-   while(I2c.Var.oI2cWriteIsRunning[I2C4]); // Wait for any I2C4 write sequence to end
+  memcpy(&dataBuffer[3], (void *) &mastCurrentPos, 4);
+  dataBuffer[3] = mastCurrentPos;
 
-   I2c.AddDataToFifoWriteQueue(I2C4, &dataBuffer[0], 4, TRUE);
+  while(I2c.Var.oI2cReadIsRunning[I2C4]);  // Wait for any I2C4 read sequence to end
+  while(I2c.Var.oI2cWriteIsRunning[I2C4]); // Wait for any I2C4 write sequence to end
+
+  I2c.AddDataToFifoWriteQueue(I2C4, &dataBuffer[0], 7, TRUE);
 }
 
 
-UINT8 ReadMastPosFromEeprom (void)
+void ReadMastPosFromEeprom (void)
 {
-  UINT8 mastPos;
+  UINT8 mastPos[4];
   UINT8 slaveAddPlusRegBuf[3];
 
   slaveAddPlusRegBuf[0] = I2c.Var.eepromAddress.byte;
-//  slaveAddPlusRegBuf[1] = EEPROM_POS_REGISTER >> 8;
-//  slaveAddPlusRegBuf[2] = EEPROM_POS_REGISTER;
-  slaveAddPlusRegBuf[1] = 0x01;
-  slaveAddPlusRegBuf[2] = 0x00;
+  slaveAddPlusRegBuf[1] = EEPROM_POS_REGISTER >> 8;
+  slaveAddPlusRegBuf[2] = EEPROM_POS_REGISTER;
+//  slaveAddPlusRegBuf[1] = 0x01;
+//  slaveAddPlusRegBuf[2] = 0x00;
 
   while(I2c.Var.oI2cWriteIsRunning[I2C4]);  // Wait for any I2C4 write sequence to end
-   while(I2c.Var.oI2cReadIsRunning[I2C4]);  // Wait for any I2C4 read sequence to end
+  while(I2c.Var.oI2cReadIsRunning[I2C4]);  // Wait for any I2C4 read sequence to end
 
-  I2c.AddDataToFifoReadQueue(I2C4, &slaveAddPlusRegBuf[0], 3, 1);
+  I2c.AddDataToFifoReadQueue(I2C4, &slaveAddPlusRegBuf[0], 3, 4);
 
   while(I2c.Var.oI2cReadIsRunning[I2C4]); // Wait for the read sequence to end
 
-  I2c.ReadRxFifo(I2C4, &mastPos, 1);
-  
-  return mastPos;
+  I2c.ReadRxFifo(I2C4, &mastPos[0], 4);
+
+  memcpy((void *) &mastCurrentPos, &mastPos[0], 4);
 }
 
 
@@ -117,8 +114,6 @@ void MastManualLeft (void)
   Pwm.SetDutyCycle(PWM_2, 750);
   Pwm.SetDutyCycle(PWM_3, 250);
 
-//  mastCurrentPos--;
-
   WriteDrive(DRVB, STATUS_Mastw);
 }
 
@@ -129,8 +124,6 @@ void MastManualRight (void)
 
   Pwm.SetDutyCycle(PWM_2, 250);
   Pwm.SetDutyCycle(PWM_3, 750);
-
-//  mastCurrentPos++;
 
   WriteDrive(DRVB, STATUS_Mastw);
 }
@@ -143,7 +136,7 @@ void MastManualStop (void)
   Pwm.SetDutyCycle(PWM_2, 500);
   Pwm.SetDutyCycle(PWM_3, 500);
 
-  WriteMastPos2Eeprom(mastCurrentPos);
+  WriteMastPos2Eeprom();
 }
 
 
@@ -162,7 +155,7 @@ void AssessButtons (void)
       if (!buttons.buttons.bits.boardSw1)     // If SW1 is pressed
       {
         mastCurrentPos = 0;
-        WriteMastPos2Eeprom (mastCurrentPos); // Write zero to EEPROM
+        WriteMastPos2Eeprom (); // Write zero to EEPROM
       }
     }
 

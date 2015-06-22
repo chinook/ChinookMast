@@ -1,17 +1,16 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //
-// Chinook Project Template
+// Project : ChinookMast
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //
-// File    : StateFunctions.h
+// File    : CommandFunctions.h
 // Author  : Frederic Chasse
-// Date    : 2015-01-03
+// Date    : 2015-06-21
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //
-// Purpose : This is the header file for the functions of the state machine
-//           of the system.
+// Purpose : This is the header file for the functions of the Mast regulation
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //
@@ -28,10 +27,13 @@
 
 
 /*
- * _____________                ________     _____               ________
- * | wind angle |---> (+- ) --->| 1 / s |--->| ki |---> +    --->| Motor |
- * |____________|       ^       |_______|    |____|              |_______|
- *                      |______
+ * _____________     ___  error  ____    ___      ________inPi  _____outPi   ___     ________
+ * | wind angle |-> /+  \ ----->| K |-> /+  \ -> | 1 / s |---->| ki |-----> /+  \ ->| Motor |
+ * |____________|   \_-_/       |___|   \_-_/    |_______| |   |____|       \_+_/   |_______|
+ *                    ^                                    |    _____         ^
+ *                    |                                    |   | kp |         |
+ *                    |                                     -->|____|---------
+ *                    |______
  *
  */
 
@@ -39,40 +41,31 @@
 //==============================================================================
 // Macro definitions
 //==============================================================================
-#define MAST_DIR_LEFT  -1
-#define MAST_DIR_RIGHT  1
+#define MAST_DIR_LEFT     -1
+#define MAST_DIR_RIGHT     1
+#define ERROR_THRESHOLD    0.1
 
 typedef struct sCmdValue
 {
-  double  previousValue
-         ,currentValue
-         ;
+  float  previousValue
+        ,currentValue
+        ;
 } sCmdValue_t;
-
 
 //==============================================================================
 // Variable declarations
 //==============================================================================
-const float  KP
-            ,KI
-            ,K
-            ,T
-            ;
-
-const UINT8  pwmMaxDutyCycle
-            ,pwmMinDutyCycle
-            ;
-
-sCmdValue_t windAngle
-           ,mastAngle
-           ;
-
 
 
 //==============================================================================
-// State Machine public functions prototypes
+// Mast regulation public functions prototypes
 //==============================================================================
-void TustinZ (sCmdValue_t *input, sCmdValue_t *output);
+void TustinZ    (sCmdValue_t *input, sCmdValue_t *output);
+void SetPwm     (float cmd);
+void Regulator  (void);
+
+#define ABS(x)  (x > 0)?  x : -x
+#define SIGN(x) (x > 0)?  1 : -1
 
 #endif	/* __COMMAND_FUNCTIONS_H__ */
 

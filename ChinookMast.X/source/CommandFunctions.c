@@ -24,12 +24,40 @@
 
 
 //==============================================================================
-// State Machine private functions prototypes
+// Mast regulation variables
+//==============================================================================
+extern volatile UINT32 rxWindAngle;
+
+const float  KP = 0.02
+            ,KI = 0.08
+            ,K  = 0.2
+            ,T  = 0.2
+            ;
+
+const float  pwmMaxDutyCycle  = 0.98
+            ,pwmMinDutyCycle  = 0.2
+            ;
+
+volatile sCmdValue_t windAngle  = {0}
+                    ,mastAngle  = {0}
+                    ,mastSpeed  = {0}
+                    ,inPi       = {0}
+                    ,outPi      = {0}
+                    ;
+
+// Mast general value
+extern volatile float mastCurrentPos     // Actual position of Mast
+                     ,mastCurrentSpeed   // Actual speed of Mast
+                     ;
+
+
+//==============================================================================
+// Mast regulation private functions prototypes
 //==============================================================================
 
 
 //==============================================================================
-// State Machine functions
+// Mast regulation functions
 //==============================================================================
 
 void TustinZ (sCmdValue_t *input, sCmdValue_t *output)
@@ -41,7 +69,74 @@ void TustinZ (sCmdValue_t *input, sCmdValue_t *output)
   output->currentValue = output->previousValue + T/2 * (input->currentValue + input->previousValue);
 }
 
+void SetPwm (float cmd)
+{
+  if (cmd == 0)
+  {
+    DRVB_SLEEP = 0;
+    Pwm.SetDutyCycle(PWM_2, 500);
+    Pwm.SetDutyCycle(PWM_3, 500);
+  }
+  else
+  {
+    UINT16 pwm = ABS(cmd) * 500;
+
+    if (SIGN(cmd) == MAST_DIR_LEFT)
+    {
+      Pwm.SetDutyCycle(PWM_2, 500 + pwm);
+      Pwm.SetDutyCycle(PWM_3, 500 - pwm);
+      DRVB_SLEEP = 1;
+    }
+    else if (SIGN(cmd) == MAST_DIR_RIGHT)
+    {
+      Pwm.SetDutyCycle(PWM_2, 500 - pwm);
+      Pwm.SetDutyCycle(PWM_3, 500 + pwm);
+      DRVB_SLEEP = 1;
+    }
+  }
+}
+
 void Regulator (void)
 {
-//  double error = 
+  float  cmd
+        ,error
+        ;
+
+  // Update wind angle
+  windAngle.previousValue = windAngle.currentValue;
+  memcpy((void *) &windAngle.currentValue, (void *) &rxWindAngle, 4);
+
+  // Update mast speed
+  mastSpeed.previousValue = mastSpeed.currentValue;
+  mastSpeed.currentValue  = mastCurrentSpeed;
+
+  // Get mast position from mast speed
+  TustinZ((void *) &mastSpeed, (void *) &mastAngle); 
+
+  error = windAngle.currentValue - mastAngle.currentValue;
+
+  if (ABS(error) <= ERROR_THRESHOLD)  // Don't need to move the mast
+  {
+    cmd = 0;
+  }
+  else
+  {
+    inPi.previousValue = inPi.currentValue;
+    inPi.currentValue  = K * error - mastSpeed.currentValue;
+
+    TustinZ((void *) &inPi, (void *) &outPi);
+
+    cmd = inPi.currentValue * KP + outPi.currentValue * KI;
+
+    if (ABS(cmd) > pwmMaxDutyCycle)
+    {
+      cmd = SIGN(cmd) * pwmMaxDutyCycle;
+    }
+    else if (ABS(cmd) < pwmMinDutyCycle)
+    {
+      cmd = SIGN(cmd) * pwmMinDutyCycle;
+    }
+  }
+
+  SetPwm(cmd);
 }

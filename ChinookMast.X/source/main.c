@@ -103,7 +103,7 @@ void main(void)
     // Mast State machine with Drive A
     //======================================
     (*pStateMast)();          // jump to next state
-    StateAcq();
+//    StateAcq();
     StateScheduler();   // Decides which state will be next
 
 //    if(oFlagMainWhile)

@@ -35,8 +35,8 @@
 
 // EEPROM functions
 // =======================================
-void  WriteMastPos2Eeprom   (UINT8 pos);
-UINT8 ReadMastPosFromEeprom (void);
+void  WriteMastPos2Eeprom   (void);
+void ReadMastPosFromEeprom (void);
 // =======================================
 
 

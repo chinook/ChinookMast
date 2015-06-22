@@ -36,12 +36,12 @@ volatile BOOL  oCapture1  = 0
               ,oTimer5    = 0
               ;
 
+volatile UINT32 rxWindAngle = 0;
+
 extern volatile BOOL  oButtonLeft
                      ,oButtonRight
                      ,oCountTimeToChngMode
                      ;
-
-volatile UINT32 nTurns;
 
 extern volatile sButtonStates_t buttons;
 
@@ -118,6 +118,10 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 
   if ((CANGetModuleEvent(CAN1) & CAN_RX_EVENT) != 0) 
   {
+
+    CANRxMessageBuffer *message;
+
+
     /*
      * CHANNEL 1 = SWITCHES STATES
      */
@@ -126,9 +130,7 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 
       CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
 
-      CANRxMessageBuffer *message;
-
-      message = CANGetRxMessage(CAN1,CAN_CHANNEL1);
+      message = CANGetRxMessage(CAN1, CAN_CHANNEL1);
 
       CanSwitches_t switches;
       switches.bytes.low  = message->data[0];
@@ -150,7 +152,8 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
       CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
 
     }
-    
+
+
     /*
      * CHANNEL 2 = TELEMETRY
      */
@@ -159,11 +162,9 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 
       CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
 
-      CANRxMessageBuffer *message;
+      message = CANGetRxMessage(CAN1, CAN_CHANNEL2);
 
-      message = CANGetRxMessage(CAN1,CAN_CHANNEL2);
-
-      INT8 windAngle = message->data[0];
+      memcpy((void *) &rxWindAngle, &message->data[0], 4);
 
       CANUpdateChannel(CAN1, CAN_CHANNEL2);
       CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
