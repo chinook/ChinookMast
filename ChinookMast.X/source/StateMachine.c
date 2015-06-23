@@ -24,12 +24,6 @@
 #include "..\headers\StateFunctions.h"
 #include "..\headers\CommandFunctions.h"
 
-BOOL  oCapture1Acquired = 0
-     ,oCapture2Acquired = 0
-     ,oCapture3Acquired = 0
-     ,oCapture4Acquired = 0
-     ;
-
 extern volatile sButtonStates_t buttons;
 
 extern volatile UINT32 rxWindAngle;
@@ -250,12 +244,12 @@ void StateInit(void)
 //  INIT_WDT;
   INIT_TIMER;
   INIT_INPUT_CAPTURE;
-  INIT_CAN;
 //  INIT_UART;
 //  INIT_SKADI;
   INIT_SPI;
   INIT_PWM;
   INIT_I2C;
+  INIT_CAN;
   START_INTERRUPTS;
 
   // Send ID to backplane by CAN protocol
@@ -446,6 +440,8 @@ void StateAcq(void)
   }
 
   AssessButtons();
+
+  AssessMastSpeed();
   
 //  INT64 rx2, rx4;
 //

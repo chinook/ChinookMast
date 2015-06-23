@@ -20,30 +20,35 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-#ifndef __COMMAND_FUNCTIONS_H__
-#define	__COMMAND_FUNCTIONS_H__
+#ifndef __COMMAND_FUNCTIONS__
+#define	__COMMAND_FUNCTIONS__
 
 #include "Setup.h"
 
 
 /*
- * _____________     ___  error  ____    ___      ________inPi  _____outPi   ___     ________
- * | wind angle |-> /+  \ ----->| K |-> /+  \ -> | 1 / s |---->| ki |-----> /+  \ ->| Motor |
- * |____________|   \_-_/       |___|   \_-_/    |_______| |   |____|       \_+_/   |_______|
- *                    ^                                    |    _____         ^
- *                    |                                    |   | kp |         |
- *                    |                                     -->|____|---------
- *                    |______
- *
+ *  ____________     ___  error  ___     ___      _______ inPi  ____ outPi   ___     ________   __________      _______
+ * | wind angle |-> /+  \ ----->| K |-> /+  \ -> | 1 / s |---->| ki |-----> /+  \ ->| Motor |->| Encodeur |--->| 1 / s |__
+ * |____________|   \_-_/       |___|   \_-_/    |_______| |   |____|       \_+_/   |_______|  |__________| |  |_______|  |
+ *                    ^                   ^                |    _____         ^                             |             |
+ *                    |                   |                |   | kp |         |                             |             |
+ *                    |                   |                 -->|____|---------            mastCurrentSpeed  |             |
+ *                    |                   |_________________________________________________________________|             |
+ *                    |___________________________________________________________________________________________________|
+ *                                                                                        mastCurrentPos
  */
 
 
 //==============================================================================
 // Macro definitions
 //==============================================================================
-#define MAST_DIR_LEFT     -1
-#define MAST_DIR_RIGHT     1
-#define ERROR_THRESHOLD    0.1
+#define MAST_DIR_LEFT         -1
+#define MAST_DIR_RIGHT         1
+
+#define ERROR_THRESHOLD        5
+
+#define MOTOR_ENCODER_RATIO   49
+#define MAST_MOTOR_RATIO      50
 
 typedef struct sCmdValue
 {
@@ -67,5 +72,5 @@ void Regulator  (void);
 #define ABS(x)  (x > 0)?  x : -x
 #define SIGN(x) (x > 0)?  1 : -1
 
-#endif	/* __COMMAND_FUNCTIONS_H__ */
+#endif	/* __COMMAND_FUNCTIONS__ */
 
