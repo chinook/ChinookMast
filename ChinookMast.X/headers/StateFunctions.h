@@ -54,17 +54,9 @@ void AssessButtons (void);
 // =======================================
 
 
-// Input capture functions
-// =======================================
-void AssessMastSpeed (void);
-// =======================================
-
-
 //==============================================================================
 // Macro definitions
 //==============================================================================
-
-#define INP_CAP_EVENTS_FOR_AVERAGE  30
 
 // Typedef for mapping the steering wheel switches and the buttons on the board
 typedef union
@@ -106,15 +98,6 @@ typedef struct sButtonStates
   Buttons_t buttons;
   Chng_t    chng;
 } sButtonStates_t;
-
-
-typedef struct sInpCapValues
-{
-  UINT32 inpCapSpeed2 [INP_CAP_EVENTS_FOR_AVERAGE + 10];
-  UINT32 inpCapSpeed4 [INP_CAP_EVENTS_FOR_AVERAGE + 10];
-  INT8   dir          [INP_CAP_EVENTS_FOR_AVERAGE + 10];
-  UINT16 n;
-} sInpCapValues_t;
 
 
 //==============================================================================

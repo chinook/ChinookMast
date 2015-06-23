@@ -23,4 +23,5 @@ source/../headers//Setup.h  \
 source/../headers/Interrupts.h  \
  source/../headers/StateFunctions.h  \
 source/../headers//DRV8711_Para.h  \
- source/../headers/CommandFunctions.h 
+ source/../headers/CommandFunctions.h  \
+source/../headers//StateMachine.h 

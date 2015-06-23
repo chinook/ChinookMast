@@ -39,8 +39,6 @@ volatile sButtonStates_t buttons =
  ,.buttons.bits.boardSw3 = 1
 };
 
-sInpCapValues_t inpCapSpeeds = {0};
-
 extern volatile float  mastCurrentPos        // Actual position of Mast
                       ,mastCurrentSpeed      // Actual speed of Mast
                       ;
@@ -108,7 +106,7 @@ void ReadMastPosFromEeprom (void)
 
   memcpy((void *) &mastCurrentPos, &mastPos[0], 4);
 
-  mastAngle.previousValue = mastAngle.currentValue;
+  mastAngle.previousValue = mastCurrentPos;
   mastAngle.currentValue  = mastCurrentPos;
 }
 
@@ -164,6 +162,9 @@ void AssessButtons (void)
       if (!buttons.buttons.bits.boardSw1)     // If SW1 is pressed
       {
         mastCurrentPos = 0;
+        mastAngle.currentValue = 0;
+        mastAngle.previousValue = 0;
+        
         WriteMastPos2Eeprom (); // Write zero to EEPROM
       }
     }
@@ -358,62 +359,6 @@ void AssessButtons (void)
           oManualFlagChng = 1;
         }
       }
-    }
-  }
-}
-
-
-//==============================================================================
-// Input Capture functions
-//==============================================================================
-void AssessMastSpeed (void)
-{
-  INT64 rx2, rx4;
-  INT8 firstIc;
-
-  if (oCapture2 && oCapture4)
-  {
-    oCapture2 = 0;
-    oCapture4 = 0;
-
-    rx2 = InputCapture.GetTimeBetweenCaptures(IC2, SCALE_US);
-
-    rx4 = InputCapture.GetTimeBetweenCaptures(IC4, SCALE_US);
-
-    if (ABS(100 - rx2*100/rx4) < 10)
-    {
-      inpCapSpeeds.inpCapSpeed2[inpCapSpeeds.n] = rx2;
-      inpCapSpeeds.inpCapSpeed4[inpCapSpeeds.n] = rx4;
-
-      firstIc = InputCapture.GetDirection(IC2, IC4, rx4, SCALE_US);
-
-      if (firstIc == IC2)
-      {
-        inpCapSpeeds.dir[inpCapSpeeds.n] = MAST_DIR_RIGHT;
-        inpCapSpeeds.n++;
-      }
-      else if (firstIc == IC4)
-      {
-        inpCapSpeeds.dir[inpCapSpeeds.n] = MAST_DIR_LEFT;
-        inpCapSpeeds.n++;
-      }
-    }
-
-    if (inpCapSpeeds.n >= INP_CAP_EVENTS_FOR_AVERAGE)
-    {
-      UINT64 meanSpeed  = 0;
-      INT16  meanDir    = 0;
-      UINT8  i          = 0;
-
-      for (i = 0; i < inpCapSpeeds.n; i++)
-      {
-        meanSpeed += inpCapSpeeds.inpCapSpeed2[i] + inpCapSpeeds.inpCapSpeed4[i];
-        meanDir   += inpCapSpeeds.dir[i];
-      }
-      
-      mastCurrentSpeed = SIGN(meanDir) * meanSpeed / (2*inpCapSpeeds.n * MOTOR_ENCODER_RATIO * MAST_MOTOR_RATIO);
-
-      inpCapSpeeds.n = 0;
     }
   }
 }

@@ -29,19 +29,17 @@
 //==============================================================================
 // State Machine public function prototypes
 //==============================================================================
-void StateInit        (void);           // Initialization state of the system
-void StateCalib       (void);          // Stop pitch if pitch is on good position
-void StateManual      (void);          // Assess manual flags and adjust the mast in consequence
-//void StateManualStop  (void);           // Stop motor if problem or if Mast = consigne
-//void StateManualLeft  (void);           // Down Mast with stepper motor and a gage feedback.
-//void StateManualRight (void);             // Up Mast with stepper motor and a gage feedback.
-void StateAcq         (void);    // Get data from peripherals
-void StateDisconnect  (void);
-void StateClose       (void);
-void StateSendData    (void);
-void StateReg         (void);
-void StateIdle        (void);
-void StateScheduler   (void);      // State Scheduler. Decides which state is next
+void StateInit        (void);     // Initialization state of the system
+void StateCalib       (void);     // Stop pitch if pitch is on good position
+void StateManual      (void);     // Assess manual flags and adjust the mast in consequence
+void StateAcq         (void);     // Get data from peripherals
+void StateDisconnect  (void);     // Send disconnect msg to backplane
+void StateClose       (void);     // Close all peripheral and enter sleep mode
+void StateSendData    (void);     // Send various data to other devices
+void StateReg         (void);     // Regulate the mast
+void StateIdle        (void);     // Wait for power-down
+void StateGetMastData (void);     // Get position of mast if in manual mode
+void StateScheduler   (void);     // State Scheduler. Decides which state is next
 
 
 
@@ -76,8 +74,8 @@ volatile  INT8  breakFlag   // Flag indicating if the emergency break has been p
 #define MAST_LEFT             (oManualMastLeft)
 #define MAST_RIGHT            (oManualMastRight)
 #define MAST_OK               (!oManualMastLeft && !oManualMastRight)
-#define MAST_MAX_OK           (mastCurrentPos >= MAST_MAX)
-#define MAST_MIN_OK           (mastCurrentPos <= MAST_MIN)
+#define MAST_MAX_OK           (mastSpeed.currentValue <= MAST_MAX)
+#define MAST_MIN_OK           (mastSpeed.currentValue >= MAST_MIN)
 #define MAST_DIR_DOWN         SW1
 #define MAST_DIR_UP           !MAST_DIR_DOWN
 #define MAST_CALIB_MODE       oCalibMode
@@ -95,7 +93,7 @@ volatile  INT8  breakFlag   // Flag indicating if the emergency break has been p
 
 /******* TRANSITION CONDITION INIT **********/
 #define INIT_2_ACQ            !MAST_CALIB_MODE
-#define INIT_2_CALIB          MAST_CALIB_MODE
+#define INIT_2_CALIB           MAST_CALIB_MODE
 
 
 /******* TRANSITION CONDITION CALIB **********/
@@ -103,10 +101,15 @@ volatile  INT8  breakFlag   // Flag indicating if the emergency break has been p
 
 
 /******* TRANSITION CONDITION ACQ **********/
-#define ACQ_2_MANUAL          MANUAL_MODE && MANUAL_FLAG_CHANGE && !MAST_CALIB_MODE
-#define ACQ_2_DISCONNECT      DISCONNECT_OK
+#define ACQ_2_MANUAL          !MAST_CALIB_MODE &&  MANUAL_MODE && MANUAL_FLAG_CHANGE
+#define ACQ_2_DISCONNECT       DISCONNECT_OK
 #define ACQ_2_REG             !MAST_CALIB_MODE && !MANUAL_MODE && REG_TIMER_OK
-#define ACQ_2_SEND_DATA       SEND_DATA_TIMER_OK
+#define ACQ_2_GET_MAST_DATA   !MAST_CALIB_MODE &&  MANUAL_MODE && REG_TIMER_OK
+#define ACQ_2_SEND_DATA        SEND_DATA_TIMER_OK
+
+
+/******* TRANSITION CONDITION GET MAST DATA **********/
+#define GET_MAST_DATA_2_ACQ       1
 
 
 /******* TRANSITION CONDITION SEND DATA **********/

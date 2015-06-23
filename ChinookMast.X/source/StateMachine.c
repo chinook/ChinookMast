@@ -34,8 +34,8 @@ extern volatile sCmdValue_t windAngle
                            ;
 
 // Mast general value
-volatile float mastCurrentPos   = 0   // Actual position of Mast
-              ,mastCurrentSpeed = 0   // Actual speed of Mast
+volatile float mastCurrentPos     = 0   // Actual position of Mast
+              ,mastCurrentSpeed   = 0   // Actual speed of Mast
               ;
 
 extern volatile BOOL oCapture1
@@ -85,6 +85,10 @@ void StateScheduler(void)
     {
       pStateMast = &StateReg;
     }
+    else if (ACQ_2_GET_MAST_DATA)
+    {
+      pStateMast = &StateGetMastData;
+    }
     else if (ACQ_2_SEND_DATA)
     {
       pStateMast = &StateSendData;
@@ -122,6 +126,21 @@ void StateScheduler(void)
     else
     {
       pStateMast = &StateManual;    // Stay in current state
+    }
+  }
+
+  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  // Current state = StateGetMastData
+  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  else if (pStateMast == &StateGetMastData)
+  {
+    if (GET_MAST_DATA_2_ACQ)
+    {
+      pStateMast = &StateAcq;
+    }
+    else
+    {
+      pStateMast = &StateGetMastData;    // Stay in current state
     }
   }
 
@@ -271,7 +290,12 @@ void StateManual(void)
 {
   oManualFlagChng = 0;
 
-  if (!oManualMastLeft && !oManualMastRight)
+  if (!MAST_MAX_OK || !MAST_MIN_OK)   // Mast is too far
+  {
+    MastManualStop();
+  }
+  else if (!oManualMastLeft && !oManualMastRight)
+//  if (!oManualMastLeft && !oManualMastRight)
   {
     MastManualStop();
   }
@@ -282,6 +306,32 @@ void StateManual(void)
   else if (oManualMastRight)
   {
     MastManualRight();
+  }
+  else
+  {
+    MastManualStop();
+  }
+}
+
+
+//===============================================================
+// Name     : StateGetMastData
+// Purpose  : Get position of mast if in manual mode
+//===============================================================
+void StateGetMastData(void)
+{
+  // Update mast speed
+  mastSpeed.previousValue = mastSpeed.currentValue;
+  mastSpeed.currentValue  = mastCurrentSpeed;
+
+  // Get mast position from mast speed
+  TustinZ((void *) &mastSpeed, (void *) &mastAngle);
+
+  mastCurrentPos = mastAngle.currentValue;
+  
+  if (!MAST_MAX_OK || !MAST_MIN_OK)   // Mast is too far
+  {
+    MastManualStop();
   }
 }
 
@@ -441,7 +491,7 @@ void StateAcq(void)
 
   AssessButtons();
 
-  AssessMastSpeed();
+  AssessMastValues();
   
 //  INT64 rx2, rx4;
 //

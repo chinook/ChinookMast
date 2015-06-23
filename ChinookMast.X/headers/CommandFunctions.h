@@ -24,6 +24,7 @@
 #define	__COMMAND_FUNCTIONS__
 
 #include "Setup.h"
+#include "StateMachine.h"
 
 
 /*
@@ -42,13 +43,17 @@
 //==============================================================================
 // Macro definitions
 //==============================================================================
-#define MAST_DIR_LEFT         -1
-#define MAST_DIR_RIGHT         1
+#define MAST_DIR_LEFT               -1
+#define MAST_DIR_RIGHT               1
 
-#define ERROR_THRESHOLD        5
+#define ERROR_THRESHOLD              5
 
-#define MOTOR_ENCODER_RATIO   49
-#define MAST_MOTOR_RATIO      50
+#define MOTOR_ENCODER_RATIO         49
+#define MAST_MOTOR_RATIO            50
+
+#define INP_CAP_EVENTS_FOR_AVERAGE  30
+
+#define MOTOR_DEG_PER_PULSE         360.0f/980
 
 typedef struct sCmdValue
 {
@@ -56,6 +61,15 @@ typedef struct sCmdValue
         ,currentValue
         ;
 } sCmdValue_t;
+
+
+typedef struct sInpCapValues
+{
+  UINT32 inpCapSpeed2 [INP_CAP_EVENTS_FOR_AVERAGE + 10];
+  UINT32 inpCapSpeed4 [INP_CAP_EVENTS_FOR_AVERAGE + 10];
+  INT8   dir          [INP_CAP_EVENTS_FOR_AVERAGE + 10];
+  UINT16 n;
+} sInpCapValues_t;
 
 //==============================================================================
 // Variable declarations
@@ -68,6 +82,11 @@ typedef struct sCmdValue
 void TustinZ    (sCmdValue_t *input, sCmdValue_t *output);
 void SetPwm     (float cmd);
 void Regulator  (void);
+
+// Input capture functions
+// =======================================
+void AssessMastValues (void);
+// =======================================
 
 #define ABS(x)  (x > 0)?  x : -x
 #define SIGN(x) (x > 0)?  1 : -1

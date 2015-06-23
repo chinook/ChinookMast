@@ -36,20 +36,29 @@ const float  KP = 0.02
             ,pwmMinDutyCycle  = 0.2
             ;
 
-volatile sCmdValue_t windAngle  = {.currentValue = 60, .previousValue = 60}
-                    ,mastAngle  = {0}
-                    ,mastSpeed  = {0}
+volatile sCmdValue_t windAngle          = {.currentValue = 60, .previousValue = 60}
+                    ,mastAngle          = {0}
+                    ,mastSpeed          = {0}
+                    ,mastSpeedRealTime  = {0}   // Used as fast as possible
+                    ,mastPosRealTime    = {0}   // Used as fast as possible
                     ;
 
 sCmdValue_t  inPi   = {0}
             ,outPi  = {0}
             ;
 
-// Mast general value
-extern volatile float mastCurrentPos     // Actual position of Mast
-                     ,mastCurrentSpeed   // Actual speed of Mast
-                     ;
+sInpCapValues_t inpCapSpeeds = {0};
 
+// Mast general value
+extern volatile float  mastCurrentPos        // Actual position of Mast
+                      ,mastCurrentSpeed      // Actual speed of Mast
+                      ;
+
+extern volatile BOOL oCapture1
+                    ,oCapture2
+                    ,oCapture3
+                    ,oCapture4
+                    ;
 
 //==============================================================================
 // Mast regulation private functions prototypes
@@ -119,6 +128,10 @@ void Regulator (void)
   {
     cmd = 0;
   }
+  else if (!MAST_MAX_OK || !MAST_MIN_OK)  // Mast is too far
+  {
+    cmd = 0;
+  }
   else
   {
     inPi.previousValue = inPi.currentValue;
@@ -139,4 +152,61 @@ void Regulator (void)
   }
 
   SetPwm(cmd);
+}
+
+
+//==============================================================================
+// Input Capture functions
+//==============================================================================
+void AssessMastValues (void)
+{
+  INT64 rx2, rx4;
+  INT8 firstIc;
+
+  if (oCapture2 && oCapture4)
+  {
+    oCapture2 = 0;
+    oCapture4 = 0;
+
+    rx2 = InputCapture.GetTimeBetweenCaptures(IC2, SCALE_US);
+
+    rx4 = InputCapture.GetTimeBetweenCaptures(IC4, SCALE_US);
+
+    if (ABS(100 - rx2*100/rx4) < 10)
+    {
+      inpCapSpeeds.inpCapSpeed2[inpCapSpeeds.n] = rx2;
+      inpCapSpeeds.inpCapSpeed4[inpCapSpeeds.n] = rx4;
+
+      firstIc = InputCapture.GetDirection(IC2, IC4, rx4, SCALE_US);
+
+      if (firstIc == IC2)
+      {
+        inpCapSpeeds.dir[inpCapSpeeds.n] = MAST_DIR_RIGHT;
+        inpCapSpeeds.n++;
+      }
+      else if (firstIc == IC4)
+      {
+        inpCapSpeeds.dir[inpCapSpeeds.n] = MAST_DIR_LEFT;
+        inpCapSpeeds.n++;
+      }
+    }
+
+    if (inpCapSpeeds.n >= INP_CAP_EVENTS_FOR_AVERAGE)
+    {
+      UINT64 meanSpeed  = 0;
+      INT16  meanDir    = 0;
+      UINT8  i          = 0;
+
+      for (i = 0; i < inpCapSpeeds.n; i++)
+      {
+        meanSpeed += inpCapSpeeds.inpCapSpeed2[i] + inpCapSpeeds.inpCapSpeed4[i];
+        meanDir   += inpCapSpeeds.dir[i];
+      }
+
+      mastCurrentSpeed = SIGN(meanDir) * meanSpeed / (2*inpCapSpeeds.n * MOTOR_ENCODER_RATIO * MAST_MOTOR_RATIO);
+      mastCurrentSpeed = MOTOR_DEG_PER_PULSE * MAST_MOTOR_RATIO / mastCurrentSpeed;
+
+      inpCapSpeeds.n = 0;
+    }
+  }
 }
