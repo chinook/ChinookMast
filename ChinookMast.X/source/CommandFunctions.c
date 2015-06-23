@@ -47,18 +47,20 @@ sCmdValue_t  inPi   = {0}
             ,outPi  = {0}
             ;
 
-sInpCapValues_t inpCapSpeeds = {0};
+sInpCapValues_t inpCapTimes = {0};
 
 // Mast general value
-extern volatile float  mastCurrentPos        // Actual position of Mast
-                      ,mastCurrentSpeed      // Actual speed of Mast
+extern volatile float  mastCurrentSpeed      // Actual speed of Mast
                       ;
 
 extern volatile BOOL oCapture1
                     ,oCapture2
                     ,oCapture3
                     ,oCapture4
+                    ,oTimerReg
                     ;
+
+BOOL oAtLeastOneEventOccured = 0;
 
 //==============================================================================
 // Mast regulation private functions prototypes
@@ -71,20 +73,18 @@ extern volatile BOOL oCapture1
 
 void TustinZ (sCmdValue_t *input, sCmdValue_t *output)
 {
-  INT16 newValue;
-
   output->previousValue = output->currentValue;
-
-  output->currentValue = output->previousValue + T/2 * (input->currentValue + input->previousValue);
+  output->currentValue  = output->previousValue + T/2 * (input->currentValue + input->previousValue);
 }
 
 void SetPwm (float cmd)
 {
   if (cmd == 0)
   {
-    DRVB_SLEEP = 0;
-    Pwm.SetDutyCycle(PWM_2, 500);
-    Pwm.SetDutyCycle(PWM_3, 500);
+    MastManualStop();
+//    DRVB_SLEEP = 0;
+//    Pwm.SetDutyCycle(PWM_2, 500);
+//    Pwm.SetDutyCycle(PWM_3, 500);
   }
   else
   {
@@ -113,22 +113,38 @@ void Regulator (void)
 
   // Update wind angle
   windAngle.previousValue = windAngle.currentValue;
-  memcpy((void *) &windAngle.currentValue, (void *) &rxWindAngle, 4);
+//  memcpy((void *) &windAngle.currentValue, (void *) &rxWindAngle, 4);
+  windAngle.currentValue = 60;
 
   // Update mast speed
   mastSpeed.previousValue = mastSpeed.currentValue;
   mastSpeed.currentValue  = mastCurrentSpeed;
 
   // Get mast position from mast speed
-  TustinZ((void *) &mastSpeed, (void *) &mastAngle); 
+  TustinZ((void *) &mastSpeed, (void *) &mastAngle);
+
+  if (mastAngle.currentValue > 180)
+  {
+    mastAngle.currentValue -= 360;
+  }
+  else if (mastAngle.currentValue < -180)
+  {
+    mastAngle.currentValue += 360;
+  }
 
   error = windAngle.currentValue - mastAngle.currentValue;
 
   if (ABS(error) <= ERROR_THRESHOLD)  // Don't need to move the mast
   {
     cmd = 0;
+    mastCurrentSpeed = 0;
   }
-  else if (!MAST_MAX_OK || !MAST_MIN_OK)  // Mast is too far
+  else if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )   // Mast too far
+  {
+    cmd = 0;
+    mastCurrentSpeed = 0;
+  }
+  else if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
   {
     cmd = 0;
   }
@@ -162,9 +178,10 @@ void AssessMastValues (void)
 {
   INT64 rx2, rx4;
   INT8 firstIc;
-
+  
   if (oCapture2 && oCapture4)
   {
+    oAtLeastOneEventOccured = 1;
     oCapture2 = 0;
     oCapture4 = 0;
 
@@ -172,41 +189,51 @@ void AssessMastValues (void)
 
     rx4 = InputCapture.GetTimeBetweenCaptures(IC4, SCALE_US);
 
-    if (ABS(100 - rx2*100/rx4) < 10)
+    if (ABS(100 - rx2*100/rx4) < 20)
     {
-      inpCapSpeeds.inpCapSpeed2[inpCapSpeeds.n] = rx2;
-      inpCapSpeeds.inpCapSpeed4[inpCapSpeeds.n] = rx4;
+      inpCapTimes.inpCapTime2[inpCapTimes.n] = rx2;
+      inpCapTimes.inpCapTime4[inpCapTimes.n] = rx4;
 
       firstIc = InputCapture.GetDirection(IC2, IC4, rx4, SCALE_US);
 
       if (firstIc == IC2)
       {
-        inpCapSpeeds.dir[inpCapSpeeds.n] = MAST_DIR_RIGHT;
-        inpCapSpeeds.n++;
+        inpCapTimes.dir[inpCapTimes.n] = MAST_DIR_LEFT;
+        inpCapTimes.n++;
       }
       else if (firstIc == IC4)
       {
-        inpCapSpeeds.dir[inpCapSpeeds.n] = MAST_DIR_LEFT;
-        inpCapSpeeds.n++;
+        inpCapTimes.dir[inpCapTimes.n] = MAST_DIR_RIGHT;
+        inpCapTimes.n++;
       }
     }
 
-    if (inpCapSpeeds.n >= INP_CAP_EVENTS_FOR_AVERAGE)
+    if (inpCapTimes.n >= INP_CAP_EVENTS_FOR_AVERAGE)
     {
-      UINT64 meanSpeed  = 0;
+      UINT64 meanTime   = 0;
       INT16  meanDir    = 0;
       UINT8  i          = 0;
 
-      for (i = 0; i < inpCapSpeeds.n; i++)
+      for (i = 3; i < inpCapTimes.n; i++)  // Skip 3 first values
       {
-        meanSpeed += inpCapSpeeds.inpCapSpeed2[i] + inpCapSpeeds.inpCapSpeed4[i];
-        meanDir   += inpCapSpeeds.dir[i];
+        meanTime  += inpCapTimes.inpCapTime2[i] + inpCapTimes.inpCapTime4[i];
+        meanDir   += inpCapTimes.dir[i];
       }
 
-      mastCurrentSpeed = SIGN(meanDir) * meanSpeed / (2*inpCapSpeeds.n * MOTOR_ENCODER_RATIO * MAST_MOTOR_RATIO);
-      mastCurrentSpeed = MOTOR_DEG_PER_PULSE * MAST_MOTOR_RATIO / mastCurrentSpeed;
+//      float mastTime = SIGN(meanDir) * (float) meanTime / ((2*inpCapTimes.n - 6) * MOTOR_ENCODER_RATIO * MAST_MOTOR_RATIO);
 
-      inpCapSpeeds.n = 0;
+//      mastCurrentSpeed = MOTOR_DEG_PER_PULSE * MAST_MOTOR_RATIO / mastTime;
+
+      float mastTime = SIGN(meanDir) * (float) meanTime / ((2*inpCapTimes.n - 6));
+
+//      mastCurrentSpeed = MOTOR_ENCODER_RATIO / (mastTime * 360.0f * TIMER_SCALE_US);
+      mastCurrentSpeed = 980 / (mastTime * 360.0f * TIMER_SCALE_US);
+
+//      float mastTime = SIGN(meanDir) * (float) meanTime / ( (2*inpCapTimes.n - 6) * MOTOR_ENCODER_RATIO);
+//
+//      mastCurrentSpeed = MOTOR_DEG_PER_PULSE / mastTime * TIMER_SCALE_US;
+
+      inpCapTimes.n = 0;
     }
   }
 }

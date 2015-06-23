@@ -46,14 +46,15 @@
 #define MAST_DIR_LEFT               -1
 #define MAST_DIR_RIGHT               1
 
-#define ERROR_THRESHOLD              5
+#define ERROR_THRESHOLD              5.0f
 
-#define MOTOR_ENCODER_RATIO         49
-#define MAST_MOTOR_RATIO            50
+#define MOTOR_ENCODER_RATIO         49.0f
+#define MAST_MOTOR_RATIO            50.0f
 
-#define INP_CAP_EVENTS_FOR_AVERAGE  30
+#define INP_CAP_EVENTS_FOR_AVERAGE  33
 
-#define MOTOR_DEG_PER_PULSE         360.0f/980
+#define MOTOR_DEG_PER_PULSE         360.0f/980.0f
+
 
 typedef struct sCmdValue
 {
@@ -65,8 +66,8 @@ typedef struct sCmdValue
 
 typedef struct sInpCapValues
 {
-  UINT32 inpCapSpeed2 [INP_CAP_EVENTS_FOR_AVERAGE + 10];
-  UINT32 inpCapSpeed4 [INP_CAP_EVENTS_FOR_AVERAGE + 10];
+  UINT32 inpCapTime2  [INP_CAP_EVENTS_FOR_AVERAGE + 10];
+  UINT32 inpCapTime4  [INP_CAP_EVENTS_FOR_AVERAGE + 10];
   INT8   dir          [INP_CAP_EVENTS_FOR_AVERAGE + 10];
   UINT16 n;
 } sInpCapValues_t;
@@ -88,8 +89,8 @@ void Regulator  (void);
 void AssessMastValues (void);
 // =======================================
 
-#define ABS(x)  (x > 0)?  x : -x
-#define SIGN(x) (x > 0)?  1 : -1
+#define ABS(x)  ( (x >= 0)?  x : -x )
+#define SIGN(x) ( (x >= 0)?  1 : -1 )
 
 #endif	/* __COMMAND_FUNCTIONS__ */
 

@@ -34,8 +34,7 @@ extern volatile sCmdValue_t windAngle
                            ;
 
 // Mast general value
-volatile float mastCurrentPos     = 0   // Actual position of Mast
-              ,mastCurrentSpeed   = 0   // Actual speed of Mast
+volatile float mastCurrentSpeed   = 0   // Actual speed of Mast
               ;
 
 extern volatile BOOL oCapture1
@@ -263,7 +262,7 @@ void StateInit(void)
 //  INIT_WDT;
   INIT_TIMER;
   INIT_INPUT_CAPTURE;
-//  INIT_UART;
+  INIT_UART;
 //  INIT_SKADI;
   INIT_SPI;
   INIT_PWM;
@@ -290,22 +289,31 @@ void StateManual(void)
 {
   oManualFlagChng = 0;
 
-  if (!MAST_MAX_OK || !MAST_MIN_OK)   // Mast is too far
-  {
-    MastManualStop();
-  }
-  else if (!oManualMastLeft && !oManualMastRight)
-//  if (!oManualMastLeft && !oManualMastRight)
+  if (!oManualMastLeft && !oManualMastRight)
   {
     MastManualStop();
   }
   else if (oManualMastLeft)
   {
-    MastManualLeft();
+    if (!MAST_MIN_OK)   // Mast too far
+    {
+      MastManualStop();
+    }
+    else
+    {
+      MastManualLeft();
+    }
   }
   else if (oManualMastRight)
   {
-    MastManualRight();
+    if (!MAST_MAX_OK)   // Mast too far
+    {
+      MastManualStop();
+    }
+    else
+    {
+      MastManualRight();
+    }
   }
   else
   {
@@ -320,6 +328,13 @@ void StateManual(void)
 //===============================================================
 void StateGetMastData(void)
 {
+  oTimerReg = 0;
+  
+  // Update wind direction
+  windAngle.previousValue = windAngle.currentValue;
+//  memcpy((void *) &windAngle.currentValue, (void *) &rxWindAngle, 4);
+  windAngle.currentValue = 60;
+
   // Update mast speed
   mastSpeed.previousValue = mastSpeed.currentValue;
   mastSpeed.currentValue  = mastCurrentSpeed;
@@ -327,11 +342,25 @@ void StateGetMastData(void)
   // Get mast position from mast speed
   TustinZ((void *) &mastSpeed, (void *) &mastAngle);
 
-  mastCurrentPos = mastAngle.currentValue;
-  
-  if (!MAST_MAX_OK || !MAST_MIN_OK)   // Mast is too far
+  if (mastAngle.currentValue > 180)
   {
-    MastManualStop();
+    mastAngle.currentValue -= 360;
+  }
+  else if (mastAngle.currentValue < -180)
+  {
+    mastAngle.currentValue += 360;
+  }
+
+  if (mastSpeed.currentValue != 0)
+  {
+    if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )        // Mast too far
+    {
+      MastManualStop();
+    }
+    else if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
+    {
+      MastManualStop();
+    }
   }
 }
 
@@ -355,8 +384,6 @@ void StateReg(void)
   oTimerReg = 0;
 
   Regulator();
-
-  mastCurrentPos = mastAngle.currentValue;
 
   WriteMastPos2Eeprom();
 }
@@ -430,6 +457,13 @@ void StateIdle(void)
 void StateSendData(void)
 {
   oTimerSendData = 0;
+
+  UINT8 msg[100] = {0};
+  UINT8 sizeOfMsg = 0;
+
+  sizeOfMsg = sprintf(msg, "\n\rCurrent speed\t\t= %f\n\rCurrent pos\t\t= %f\n\r", mastSpeed.currentValue, mastAngle.currentValue);
+
+  Uart.SendDataBuffer(UART6, msg, sizeOfMsg);
   
 //  BYTE txMastAngle[4];
 //

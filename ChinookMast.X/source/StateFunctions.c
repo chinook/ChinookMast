@@ -39,8 +39,7 @@ volatile sButtonStates_t buttons =
  ,.buttons.bits.boardSw3 = 1
 };
 
-extern volatile float  mastCurrentPos        // Actual position of Mast
-                      ,mastCurrentSpeed      // Actual speed of Mast
+extern volatile float  mastCurrentSpeed      // Actual speed of Mast
                       ;
 
 extern volatile BOOL oCapture1
@@ -75,7 +74,7 @@ void WriteMastPos2Eeprom (void)
 //  dataBuffer[1] = 0x01;
 //  dataBuffer[2] = 0x00;
 
-  memcpy(&dataBuffer[3], (void *) &mastCurrentPos, 4);
+  memcpy(&dataBuffer[3], (void *) &mastAngle.currentValue, 4);
 
   while(I2c.Var.oI2cReadIsRunning[I2C4]);  // Wait for any I2C4 read sequence to end
   while(I2c.Var.oI2cWriteIsRunning[I2C4]); // Wait for any I2C4 write sequence to end
@@ -104,10 +103,9 @@ void ReadMastPosFromEeprom (void)
 
   I2c.ReadRxFifo(I2C4, &mastPos[0], 4);
 
-  memcpy((void *) &mastCurrentPos, &mastPos[0], 4);
+  memcpy((void *) &mastAngle.currentValue, &mastPos[0], 4);
 
-  mastAngle.previousValue = mastCurrentPos;
-  mastAngle.currentValue  = mastCurrentPos;
+  mastAngle.previousValue = mastAngle.currentValue;
 }
 
 
@@ -138,10 +136,32 @@ void MastManualRight (void)
 
 void MastManualStop (void)
 {
-  DRVB_SLEEP = 0;
+  UINT8 i;
+  if (SIGN(mastCurrentSpeed) == MAST_DIR_LEFT)
+  {
+    for (i = 0; i < 11; i++)
+    {
+      Pwm.SetDutyCycle(PWM_2, 500 + (110 - i*10));
+      Pwm.SetDutyCycle(PWM_3, 500 - (110 - i*10));
+      Timer.DelayMs(20);
+    }
+  }
+  else if (SIGN(mastCurrentSpeed) == MAST_DIR_RIGHT)
+  {
+    for (i = 0; i < 11; i++)
+    {
+      Pwm.SetDutyCycle(PWM_2, 500 - (110 - i*10));
+      Pwm.SetDutyCycle(PWM_3, 500 + (110 - i*10));
+      Timer.DelayMs(20);
+    }
+  }
 
   Pwm.SetDutyCycle(PWM_2, 500);
   Pwm.SetDutyCycle(PWM_3, 500);
+  
+  DRVB_SLEEP = 0;
+
+  mastCurrentSpeed = 0;
 
   WriteMastPos2Eeprom();
 }
@@ -161,7 +181,6 @@ void AssessButtons (void)
 
       if (!buttons.buttons.bits.boardSw1)     // If SW1 is pressed
       {
-        mastCurrentPos = 0;
         mastAngle.currentValue = 0;
         mastAngle.previousValue = 0;
         

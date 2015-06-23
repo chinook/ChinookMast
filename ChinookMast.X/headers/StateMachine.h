@@ -67,15 +67,15 @@ volatile  INT8  breakFlag   // Flag indicating if the emergency break has been p
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 /*********** LIMITS **/
-#define MAST_MAX               90
-#define MAST_MIN              -90
+#define MAST_MAX               500
+#define MAST_MIN              -500
 
 /*********** BASIC CONDITION *****************/
 #define MAST_LEFT             (oManualMastLeft)
 #define MAST_RIGHT            (oManualMastRight)
 #define MAST_OK               (!oManualMastLeft && !oManualMastRight)
-#define MAST_MAX_OK           (mastSpeed.currentValue <= MAST_MAX)
-#define MAST_MIN_OK           (mastSpeed.currentValue >= MAST_MIN)
+#define MAST_MAX_OK           (mastAngle.currentValue <= MAST_MAX)
+#define MAST_MIN_OK           (mastAngle.currentValue >= MAST_MIN)
 #define MAST_DIR_DOWN         SW1
 #define MAST_DIR_UP           !MAST_DIR_DOWN
 #define MAST_CALIB_MODE       oCalibMode
