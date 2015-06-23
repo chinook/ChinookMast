@@ -28,13 +28,13 @@
 #include "..\headers\Interrupts.h"
 #include "..\headers\StateFunctions.h"
 
-volatile BOOL  oCapture1  = 0
-              ,oCapture2  = 0
-              ,oCapture3  = 0
-              ,oCapture4  = 0
-              ,oTimer1    = 0
-              ,oTimer4    = 0
-              ,oTimer5    = 0
+volatile BOOL  oCapture1      = 0
+              ,oCapture2      = 0
+              ,oCapture3      = 0
+              ,oCapture4      = 0
+              ,oTimerReg      = 0
+              ,oTimerSendData = 0
+              ,oTimerChngMode = 0
               ;
 
 volatile UINT32 rxWindAngle = 0;
@@ -55,7 +55,7 @@ extern volatile sButtonStates_t buttons;
 //=============================================
 void __ISR(_TIMER_1_VECTOR, T1_INTERRUPT_PRIORITY) Timer1InterruptHandler(void)
 {
-  oTimer1 = 1;
+  oTimerReg = 1;
 
   // Increment the number of overflows from this timer. Used primarily by Input Capture
   Timer.Var.nOverflows[0]++;
@@ -92,7 +92,7 @@ void __ISR(_TIMER_3_VECTOR, T3_INTERRUPT_PRIORITY) Timer3InterruptHandler(void)
 //=============================================
 void __ISR(_TIMER_4_VECTOR, T4_INTERRUPT_PRIORITY) Timer4InterruptHandler(void)
 {
-  oTimer4 = 1;
+  oTimerSendData = 1;
 
   // Increment the number of overflows from this timer. Used primarily by Input Capture
   Timer.Var.nOverflows[3]++;
@@ -105,91 +105,12 @@ void __ISR(_TIMER_4_VECTOR, T4_INTERRUPT_PRIORITY) Timer4InterruptHandler(void)
 //=============================================
 void __ISR(_TIMER_5_VECTOR, T5_INTERRUPT_PRIORITY) Timer5InterruptHandler(void)
 {
-  oTimer5 = 1;
+  oTimerChngMode = 1;
 
   // Increment the number of overflows from this timer. Used primarily by Input Capture
   Timer.Var.nOverflows[4]++;
 
   mT5ClearIntFlag();
-}
-
-
-/*******************************************************************************
- ***********************                               *************************
- ********************           CAN INTERRUPTS            **********************
- ***********************                               *************************
- ******************************************************************************/
-
-//================================================
-// Configure the CAN1 interrupt handler
-//================================================
-void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
-{
-  // Check if the source of the interrupt is RX_EVENT. This is redundant since
-  // only this event is enabled in this example but this shows one scheme for
-  // handling events
-//  LED_CAN_TOGGLE;
-
-  if ((CANGetModuleEvent(CAN1) & CAN_RX_EVENT) != 0) 
-  {
-
-    CANRxMessageBuffer *message;
-
-    /*
-     * CHANNEL 1 = SWITCHES STATES
-     */
-    if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL1_EVENT)
-    {
-
-      CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
-
-      message = CANGetRxMessage(CAN1, CAN_CHANNEL1);
-
-      CanSwitches_t switches;
-      switches.bytes.low  = message->data[0];
-      switches.bytes.high = message->data[1];
-
-      if (buttons.buttons.bits.steerWheelSw1  != switches.bits.sw1 )
-      {
-        buttons.buttons.bits.steerWheelSw1  = switches.bits.sw1;
-        buttons.chng.bits.steerWheelSw1     = 1;
-      }
-
-      if (buttons.buttons.bits.steerWheelSw10 != switches.bits.sw10)
-      {
-        buttons.buttons.bits.steerWheelSw10 = switches.bits.sw10;
-        buttons.chng.bits.steerWheelSw10    = 1;
-      }
-
-      CANUpdateChannel(CAN1, CAN_CHANNEL1);
-      CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
-
-    }
-
-    /*
-     * CHANNEL 2 = TELEMETRY
-     */
-    if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL2_EVENT)
-    {
-
-      CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
-
-      message = CANGetRxMessage(CAN1, CAN_CHANNEL2);
-
-      memcpy((void *) &rxWindAngle, &message->data[0], 4);
-
-      CANUpdateChannel(CAN1, CAN_CHANNEL2);
-      CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
-
-    }
-  }
-
-  // The CAN1 Interrupt flag is  cleared at the end of the interrupt routine.
-  // This is because the event source that could have caused this interrupt to
-  // occur (CAN_RX_CHANNEL_NOT_EMPTY) is disabled. Attempting to clear the
-  // CAN1 interrupt flag when the the CAN_RX_CHANNEL_NOT_EMPTY interrupt is
-  // enabled will not have any effect because the base event is still present.
-  INTClearFlag(INT_CAN1);
 }
 
 
@@ -210,9 +131,15 @@ void __ISR(_UART_6_VECTOR, U6_INTERRUPT_PRIORITY) Uart6InterruptHandler(void)
         ,data   // used in UartFifoWrite/Read functions
         ;
 
+  LED_DEBUG1_TOGGLE;
+
+  if ( INTGetFlag ( INT_SOURCE_UART_ERROR(UART6)) )
+  {
+    INTClearFlag(INT_SOURCE_UART_ERROR(UART6));
+  }
+  
 	// TX interrupt handling
   //===========================================================
-
   if ( INTGetEnable ( INT_SOURCE_UART_TX(UART6) ) )               // If TX interrupts enabled
   {
     if ( INTGetFlag ( INT_SOURCE_UART_TX(UART6) ) )               // If TX interrupt occured
@@ -653,3 +580,82 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
   }  // end if
 }   // end if
 //=============================================
+
+
+/*******************************************************************************
+ ***********************                               *************************
+ ********************           CAN INTERRUPTS            **********************
+ ***********************                               *************************
+ ******************************************************************************/
+
+//================================================
+// Configure the CAN1 interrupt handler
+//================================================
+void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
+{
+  // Check if the source of the interrupt is RX_EVENT. This is redundant since
+  // only this event is enabled in this example but this shows one scheme for
+  // handling events
+//  LED_CAN_TOGGLE;
+
+  if ((CANGetModuleEvent(CAN1) & CAN_RX_EVENT) != 0)
+  {
+
+    CANRxMessageBuffer *message;
+
+    /*
+     * CHANNEL 1 = SWITCHES STATES
+     */
+    if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL1_EVENT)
+    {
+
+      CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
+
+      message = CANGetRxMessage(CAN1, CAN_CHANNEL1);
+
+      CanSwitches_t switches;
+      switches.bytes.low  = message->data[0];
+      switches.bytes.high = message->data[1];
+
+      if (buttons.buttons.bits.steerWheelSw1  != switches.bits.sw1 )
+      {
+        buttons.buttons.bits.steerWheelSw1  = switches.bits.sw1;
+        buttons.chng.bits.steerWheelSw1     = 1;
+      }
+
+      if (buttons.buttons.bits.steerWheelSw10 != switches.bits.sw10)
+      {
+        buttons.buttons.bits.steerWheelSw10 = switches.bits.sw10;
+        buttons.chng.bits.steerWheelSw10    = 1;
+      }
+
+      CANUpdateChannel(CAN1, CAN_CHANNEL1);
+      CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+
+    }
+
+    /*
+     * CHANNEL 2 = TELEMETRY
+     */
+    if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL2_EVENT)
+    {
+
+      CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
+
+      message = CANGetRxMessage(CAN1, CAN_CHANNEL2);
+
+      memcpy((void *) &rxWindAngle, &message->data[0], 4);
+
+      CANUpdateChannel(CAN1, CAN_CHANNEL2);
+      CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+
+    }
+  }
+
+  // The CAN1 Interrupt flag is  cleared at the end of the interrupt routine.
+  // This is because the event source that could have caused this interrupt to
+  // occur (CAN_RX_CHANNEL_NOT_EMPTY) is disabled. Attempting to clear the
+  // CAN1 interrupt flag when the the CAN_RX_CHANNEL_NOT_EMPTY interrupt is
+  // enabled will not have any effect because the base event is still present.
+  INTClearFlag(INT_CAN1);
+}

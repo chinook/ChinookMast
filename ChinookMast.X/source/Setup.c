@@ -427,13 +427,6 @@ void StartInterrupts(void)
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// Enable UART interrupts             // Not functionnal yet
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  Uart.EnableRxInterrupts (UART6);  // Enable RX Interrupts for UART6
-  Uart.DisableTxInterrupts(UART6);  // Disable TX Interrupts for UART6
-
-
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable SPI interrupts             // Not functionnal yet
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //  Spi.EnableRxInterrupts(SPI4);   // Enable RX Interrupts for SPI4
@@ -479,6 +472,15 @@ void StartInterrupts(void)
   {
     LED_ERROR_ON;
   }
+
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Enable UART interrupts        
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//  Uart.EnableRxInterrupts (UART6);  // Enable RX Interrupts for UART6
+//  Uart.DisableTxInterrupts(UART6);  // Disable TX Interrupts for UART6
+//
+//  INTEnable(INT_SOURCE_UART_ERROR(UART6), INT_DISABLED);   // Disable Error interrupts
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

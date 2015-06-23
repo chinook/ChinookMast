@@ -48,9 +48,9 @@ extern volatile BOOL oCapture1
                     ,oCapture2
                     ,oCapture3
                     ,oCapture4
-                    ,oTimer1
-                    ,oTimer4
-                    ,oTimer5
+                    ,oTimerReg
+                    ,oTimerSendData
+                    ,oTimerChngMode
                     ;
 
 volatile BOOL  oManualMode            = 1
@@ -250,8 +250,8 @@ void StateInit(void)
 //  INIT_WDT;
   INIT_TIMER;
   INIT_INPUT_CAPTURE;
-  INIT_UART;
   INIT_CAN;
+//  INIT_UART;
 //  INIT_SKADI;
   INIT_SPI;
   INIT_PWM;
@@ -308,7 +308,7 @@ void StateCalib(void)
 //===============================================================
 void StateReg(void)
 {
-  oTimer1 = 0;
+  oTimerReg = 0;
 
   Regulator();
 
@@ -350,7 +350,7 @@ void StateClose(void)
 
   Spi.Close(SPI4);
 
-//  Can.Close(CAN2);
+//  Can.Close(CAN1);
 
   Uart.Close(UART6);
 
@@ -385,13 +385,13 @@ void StateIdle(void)
 //===============================================================
 void StateSendData(void)
 {
-  oTimer4 = 0;
+  oTimerSendData = 0;
   
-  BYTE txMastAngle[4];
-
-  memcpy(&txMastAngle[0], (void *) &mastCurrentPos, 4);   // mastCurrentPos is a float
-
-  Can.SendByteArray(CAN1, 0x55, &txMastAngle[0], 4);
+//  BYTE txMastAngle[4];
+//
+//  memcpy(&txMastAngle[0], (void *) &mastCurrentPos, 4);   // mastCurrentPos is a float
+//
+//  Can.SendByteArray(CAN1, 0x55, &txMastAngle[0], 4);
 //  
 //  WriteMastPos2Eeprom();
 //

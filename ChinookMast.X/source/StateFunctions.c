@@ -45,8 +45,8 @@ extern volatile BOOL oCapture1
                     ,oCapture2
                     ,oCapture3
                     ,oCapture4
-                    ,oTimer1
-                    ,oTimer5
+                    ,oTimerReg
+                    ,oTimerChngMode
                     ,oManualMode
                     ,oCountTimeToChngMode
                     ,oManualFlagChng
@@ -176,7 +176,7 @@ void AssessButtons (void)
           oCountTimeToChngMode = 1;           // Start procedure to change manual mode
           Timer.EnableInterrupt(TIMER_5);
           Timer.Reset(TIMER_5);
-          oTimer5 = 0;
+          oTimerChngMode = 0;
 
           oManualMastLeft  = 0;               // Stop moving
           oManualMastRight = 0;
@@ -199,7 +199,7 @@ void AssessButtons (void)
           oCountTimeToChngMode = 0;
           Timer.DisableInterrupt(TIMER_5);
 
-          if (oTimer5)              // If at least one second has passed
+          if (oTimerChngMode)              // If at least one second has passed
           {
             oManualMode ^= 1;       // Change mode
           }
@@ -224,7 +224,7 @@ void AssessButtons (void)
           oCountTimeToChngMode = 1;           // Start procedure to change manual mode
           Timer.EnableInterrupt(TIMER_5);
           Timer.Reset(TIMER_5);
-          oTimer5 = 0;
+          oTimerChngMode = 0;
 
           oManualMastLeft  = 0;               // Stop moving
           oManualMastRight = 0;
@@ -247,7 +247,7 @@ void AssessButtons (void)
           oCountTimeToChngMode = 0;
           Timer.DisableInterrupt(TIMER_5);
 
-          if (oTimer5)              // If at least one second has passed
+          if (oTimerChngMode)              // If at least one second has passed
           {
             oManualMode ^= 1;       // Change mode
           }
@@ -272,7 +272,7 @@ void AssessButtons (void)
           oCountTimeToChngMode = 1;                 // Start procedure to change manual mode
           Timer.EnableInterrupt(TIMER_5);
           Timer.Reset(TIMER_5);
-          oTimer5 = 0;
+          oTimerChngMode = 0;
 
           oManualMastLeft  = 0;                     // Stop moving
           oManualMastRight = 0;
@@ -295,7 +295,7 @@ void AssessButtons (void)
           oCountTimeToChngMode = 0;
           Timer.DisableInterrupt(TIMER_5);
 
-          if (oTimer5)              // If at least one second has passed
+          if (oTimerChngMode)              // If at least one second has passed
           {
             oManualMode ^= 1;       // Change mode
           }
@@ -320,7 +320,7 @@ void AssessButtons (void)
           oCountTimeToChngMode = 1;                 // Start procedure to change manual mode
           Timer.EnableInterrupt(TIMER_5);
           Timer.Reset(TIMER_5);
-          oTimer5 = 0;
+          oTimerChngMode = 0;
 
           oManualMastLeft  = 0;                     // Stop moving
           oManualMastRight = 0;
@@ -343,7 +343,7 @@ void AssessButtons (void)
           oCountTimeToChngMode = 0;
           Timer.DisableInterrupt(TIMER_5);
 
-          if (oTimer5)              // If at least one second has passed
+          if (oTimerChngMode)              // If at least one second has passed
           {
             oManualMode ^= 1;       // Change mode
           }

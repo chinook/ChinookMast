@@ -84,8 +84,8 @@ volatile  INT8  breakFlag   // Flag indicating if the emergency break has been p
 #define MANUAL_MODE           oManualMode
 #define MANUAL_FLAG_CHANGE    oManualFlagChng
 #define DISCONNECT_OK         0
-#define REG_TIMER_OK          oTimer1
-#define SEND_DATA_TIMER_OK    oTimer4
+#define REG_TIMER_OK          oTimerReg
+#define SEND_DATA_TIMER_OK    oTimerSendData
 
 #define PULSE_PER_DEGREE      30
 
