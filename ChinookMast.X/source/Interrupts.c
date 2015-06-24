@@ -40,6 +40,7 @@ volatile BOOL  oCapture1      = 0
               ;
 
 UINT8 iMastStop = 0;
+INT8  mastDir = 0;
 
 volatile UINT32 rxWindAngle = 0;
 
@@ -76,45 +77,43 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
 {
   if (oEnableMastStopProcedure)
   {
-    if (mastCurrentSpeed != 0)
+    if (iMastStop == 0)
     {
-      if (iMastStop < 11)
+      mastDir = SIGN(mastCurrentSpeed);
+    }
+    if (iMastStop < 11)
+    {
+      DRVB_SLEEP = 1;
+
+      if (mastDir == MAST_DIR_LEFT)
       {
-        DRVB_SLEEP = 1;
-
-        if (SIGN(mastCurrentSpeed) == MAST_DIR_LEFT)
-        {
-          Pwm.SetDutyCycle(PWM_2, 500 + (100 - iMastStop*10));
-          Pwm.SetDutyCycle(PWM_3, 500 - (100 - iMastStop*10));
-          Timer.DelayMs(20);
-        }
-        else if (SIGN(mastCurrentSpeed) == MAST_DIR_RIGHT)
-        {
-          Pwm.SetDutyCycle(PWM_2, 500 - (100 - iMastStop*10));
-          Pwm.SetDutyCycle(PWM_3, 500 + (100 - iMastStop*10));
-          Timer.DelayMs(20);
-        }
-        iMastStop++;
+        Pwm.SetDutyCycle(PWM_2, 500 + (100 - iMastStop*10));
+        Pwm.SetDutyCycle(PWM_3, 500 - (100 - iMastStop*10));
+        Timer.DelayMs(20);
       }
-      else
+      else if (mastDir == MAST_DIR_RIGHT)
       {
-        iMastStop = 0;
-
-        Pwm.SetDutyCycle(PWM_2, 500);
-        Pwm.SetDutyCycle(PWM_3, 500);
-
-        DRVB_SLEEP = 0;
-
-        oEnableMastStopProcedure = 0;
-
-        mastCurrentSpeed = 0;
-
-        WriteMastPos2Eeprom();
+        Pwm.SetDutyCycle(PWM_2, 500 - (100 - iMastStop*10));
+        Pwm.SetDutyCycle(PWM_3, 500 + (100 - iMastStop*10));
+        Timer.DelayMs(20);
       }
+      iMastStop++;
     }
     else
     {
+      iMastStop = 0;
+      mastDir   = 0;
+
+      Pwm.SetDutyCycle(PWM_2, 500);
+      Pwm.SetDutyCycle(PWM_3, 500);
+
+      DRVB_SLEEP = 0;
+
       oEnableMastStopProcedure = 0;
+
+      mastCurrentSpeed = 0;
+
+      WriteMastPos2Eeprom();
     }
   }
 
@@ -645,6 +644,7 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
   // Check if the source of the interrupt is RX_EVENT. This is redundant since
   // only this event is enabled in this example but this shows one scheme for
   // handling events
+  
 //  LED_CAN_TOGGLE;
 
   if ((CANGetModuleEvent(CAN1) & CAN_RX_EVENT) != 0)

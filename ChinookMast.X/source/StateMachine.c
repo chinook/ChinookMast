@@ -46,7 +46,7 @@ extern volatile BOOL oCapture1
                     ,oTimerChngMode
                     ;
 
-volatile BOOL  oManualMode            = 0
+volatile BOOL  oManualMode            = 1
               ,oCalibMode             = 0
               ,oCountTimeToChngMode   = 0
               ,oManualFlagChng        = 0
@@ -275,6 +275,11 @@ void StateInit(void)
 
   // Get last known position of the mast
   ReadMastPosFromEeprom();
+  if (ABS(mastAngle.currentValue) > 360)  // Error
+  {
+    mastAngle.previousValue = 0;
+    mastAngle.currentValue  = 0;
+  }
 
   // Init registers for the drive
   InitDriver();

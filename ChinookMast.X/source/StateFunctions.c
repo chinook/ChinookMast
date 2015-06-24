@@ -138,6 +138,7 @@ void MastManualRight (void)
 void MastManualStop (void)
 {
   oEnableMastStopProcedure = 1;
+  LED_STATUS_TOGGLE;
 
 //  UINT8 i;
 //  if (SIGN(mastCurrentSpeed) == MAST_DIR_LEFT)

@@ -51,7 +51,7 @@
 #define MOTOR_ENCODER_RATIO         49.0f
 #define MAST_MOTOR_RATIO            50.0f
 
-#define INP_CAP_EVENTS_FOR_AVERAGE  33
+#define INP_CAP_EVENTS_FOR_AVERAGE  15
 
 #define MOTOR_DEG_PER_PULSE         360.0f/980.0f
 
@@ -91,6 +91,23 @@ void AssessMastValues (void);
 
 #define ABS(x)  ( (x >= 0)?  x : -x )
 #define SIGN(x) ( (x >= 0)?  1 : -1 )
+
+typedef struct
+{
+  float windPrevious[100];
+  float windCurrent [100];
+  float posPrevious[100];
+  float posCurrent [100];
+  float speedPrevious[100];
+  float speedCurrent [100];
+  float error[100];
+  float inPiPrevious[100];
+  float inPiCurrent [100];
+  float outPiPrevious[100];
+  float outPiCurrent [100];
+  float cmd[100];
+  UINT8 length;
+} sCmdData_t;
 
 #endif	/* __COMMAND_FUNCTIONS__ */
 

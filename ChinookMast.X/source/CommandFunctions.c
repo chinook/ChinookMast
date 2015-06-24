@@ -28,9 +28,11 @@
 //==============================================================================
 extern volatile UINT32 rxWindAngle;
 
-const float  KP = 0.02
-            ,KI = 0.08
-            ,K  = 0.2
+sCmdData_t data = {0};
+
+const float  KP = 0.015
+            ,KI = 0.075
+            ,K  = 0.15
             ,T  = 0.2
             ,pwmMaxDutyCycle  = 0.98
             ,pwmMinDutyCycle  = 0.2
@@ -60,7 +62,9 @@ extern volatile BOOL oCapture1
                     ,oTimerReg
                     ;
 
-BOOL oAtLeastOneEventOccured = 0;
+BOOL  oAtLeastOneEventOccured = 0
+     ,oFirstTimeInMastStop    = 0
+     ;
 
 //==============================================================================
 // Mast regulation private functions prototypes
@@ -81,13 +85,16 @@ void SetPwm (float cmd)
 {
   if (cmd == 0)
   {
-    MastManualStop();
-//    DRVB_SLEEP = 0;
-//    Pwm.SetDutyCycle(PWM_2, 500);
-//    Pwm.SetDutyCycle(PWM_3, 500);
+    if (oFirstTimeInMastStop)
+    {
+      MastManualStop();
+      oFirstTimeInMastStop = 0;
+    }
   }
   else
   {
+    oFirstTimeInMastStop = 1;
+    
     UINT16 pwm = ABS(cmd) * 500;
 
     if (SIGN(cmd) == MAST_DIR_LEFT)
@@ -137,12 +144,10 @@ void Regulator (void)
   if (ABS(error) <= ERROR_THRESHOLD)  // Don't need to move the mast
   {
     cmd = 0;
-    mastCurrentSpeed = 0;
   }
   else if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )   // Mast too far
   {
     cmd = 0;
-    mastCurrentSpeed = 0;
   }
   else if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
   {
@@ -150,6 +155,8 @@ void Regulator (void)
   }
   else
   {
+    oFirstTimeInMastStop = 1;
+
     inPi.previousValue = inPi.currentValue;
     inPi.currentValue  = K * error - mastSpeed.currentValue;
 
@@ -168,6 +175,16 @@ void Regulator (void)
   }
 
   SetPwm(cmd);
+
+  data.cmd[data.length] = cmd;
+  data.error = error;
+  data.inPiCurrent = inPi.currentValue;
+  data.inPiPrevious = inPi.previousValue;
+  data.outPiCurrent = outPi.currentValue;
+  data.outPiPrevious = outPi.previousValue;
+  data.posCurrent = mastAngle.currentValue;
+  data.posPrevious = mastAngle.previousValue;
+  data.
 }
 
 
@@ -208,7 +225,7 @@ void AssessMastValues (void)
       }
     }
 
-    if (inpCapTimes.n >= INP_CAP_EVENTS_FOR_AVERAGE)
+    if (inpCapTimes.n >= INP_CAP_EVENTS_FOR_AVERAGE + 3)
     {
       UINT64 meanTime   = 0;
       INT16  meanDir    = 0;
