@@ -46,7 +46,7 @@ extern volatile BOOL oCapture1
                     ,oTimerChngMode
                     ;
 
-volatile BOOL  oManualMode            = 1
+volatile BOOL  oManualMode            = 0
               ,oCalibMode             = 0
               ,oCountTimeToChngMode   = 0
               ,oManualFlagChng        = 0
@@ -461,7 +461,7 @@ void StateSendData(void)
   UINT8 msg[100] = {0};
   UINT8 sizeOfMsg = 0;
 
-  sizeOfMsg = sprintf(msg, "\n\rCurrent speed\t\t= %f\n\rCurrent pos\t\t= %f\n\r", mastSpeed.currentValue, mastAngle.currentValue);
+  sizeOfMsg = sprintf(msg, "\n\rCurrent speed\t\t= %f\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r", mastSpeed.currentValue, mastAngle.currentValue, windAngle.currentValue);
 
   Uart.SendDataBuffer(UART6, msg, sizeOfMsg);
   

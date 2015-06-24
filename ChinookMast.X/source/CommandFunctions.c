@@ -226,8 +226,8 @@ void AssessMastValues (void)
 
       float mastTime = SIGN(meanDir) * (float) meanTime / ((2*inpCapTimes.n - 6));
 
-//      mastCurrentSpeed = MOTOR_ENCODER_RATIO / (mastTime * 360.0f * TIMER_SCALE_US);
-      mastCurrentSpeed = 980 / (mastTime * 360.0f * TIMER_SCALE_US);
+      mastCurrentSpeed = MOTOR_ENCODER_RATIO / (mastTime * 360.0f * TIMER_SCALE_US);
+//      mastCurrentSpeed = 980 / (mastTime * 360.0f * TIMER_SCALE_US);
 
 //      float mastTime = SIGN(meanDir) * (float) meanTime / ( (2*inpCapTimes.n - 6) * MOTOR_ENCODER_RATIO);
 //

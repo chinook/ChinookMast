@@ -46,6 +46,7 @@ extern volatile BOOL oCapture1
                     ,oCapture2
                     ,oCapture3
                     ,oCapture4
+                    ,oEnableMastStopProcedure
                     ,oTimerReg
                     ,oTimerChngMode
                     ,oManualMode
@@ -136,34 +137,36 @@ void MastManualRight (void)
 
 void MastManualStop (void)
 {
-  UINT8 i;
-  if (SIGN(mastCurrentSpeed) == MAST_DIR_LEFT)
-  {
-    for (i = 0; i < 11; i++)
-    {
-      Pwm.SetDutyCycle(PWM_2, 500 + (110 - i*10));
-      Pwm.SetDutyCycle(PWM_3, 500 - (110 - i*10));
-      Timer.DelayMs(20);
-    }
-  }
-  else if (SIGN(mastCurrentSpeed) == MAST_DIR_RIGHT)
-  {
-    for (i = 0; i < 11; i++)
-    {
-      Pwm.SetDutyCycle(PWM_2, 500 - (110 - i*10));
-      Pwm.SetDutyCycle(PWM_3, 500 + (110 - i*10));
-      Timer.DelayMs(20);
-    }
-  }
+  oEnableMastStopProcedure = 1;
 
-  Pwm.SetDutyCycle(PWM_2, 500);
-  Pwm.SetDutyCycle(PWM_3, 500);
-  
-  DRVB_SLEEP = 0;
-
-  mastCurrentSpeed = 0;
-
-  WriteMastPos2Eeprom();
+//  UINT8 i;
+//  if (SIGN(mastCurrentSpeed) == MAST_DIR_LEFT)
+//  {
+//    for (i = 0; i < 11; i++)
+//    {
+//      Pwm.SetDutyCycle(PWM_2, 500 + (110 - i*10));
+//      Pwm.SetDutyCycle(PWM_3, 500 - (110 - i*10));
+//      Timer.DelayMs(20);
+//    }
+//  }
+//  else if (SIGN(mastCurrentSpeed) == MAST_DIR_RIGHT)
+//  {
+//    for (i = 0; i < 11; i++)
+//    {
+//      Pwm.SetDutyCycle(PWM_2, 500 - (110 - i*10));
+//      Pwm.SetDutyCycle(PWM_3, 500 + (110 - i*10));
+//      Timer.DelayMs(20);
+//    }
+//  }
+//
+//  Pwm.SetDutyCycle(PWM_2, 500);
+//  Pwm.SetDutyCycle(PWM_3, 500);
+//
+//  DRVB_SLEEP = 0;
+//
+//  mastCurrentSpeed = 0;
+//
+//  WriteMastPos2Eeprom();
 }
 
 

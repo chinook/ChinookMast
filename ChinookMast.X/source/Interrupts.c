@@ -27,6 +27,7 @@
 
 #include "..\headers\Interrupts.h"
 #include "..\headers\StateFunctions.h"
+#include "..\headers\CommandFunctions.h"
 
 volatile BOOL  oCapture1      = 0
               ,oCapture2      = 0
@@ -35,7 +36,10 @@ volatile BOOL  oCapture1      = 0
               ,oTimerReg      = 0
               ,oTimerSendData = 0
               ,oTimerChngMode = 0
+              ,oEnableMastStopProcedure = 0
               ;
+
+UINT8 iMastStop = 0;
 
 volatile UINT32 rxWindAngle = 0;
 
@@ -43,6 +47,8 @@ extern volatile BOOL  oButtonLeft
                      ,oButtonRight
                      ,oCountTimeToChngMode
                      ;
+
+extern volatile float mastCurrentSpeed;
 
 extern volatile sButtonStates_t buttons;
 
@@ -68,6 +74,49 @@ void __ISR(_TIMER_1_VECTOR, T1_INTERRUPT_PRIORITY) Timer1InterruptHandler(void)
 //=============================================
 void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
 {
+  if (oEnableMastStopProcedure)
+  {
+    if (mastCurrentSpeed != 0)
+    {
+      if (iMastStop < 11)
+      {
+        DRVB_SLEEP = 1;
+
+        if (SIGN(mastCurrentSpeed) == MAST_DIR_LEFT)
+        {
+          Pwm.SetDutyCycle(PWM_2, 500 + (100 - iMastStop*10));
+          Pwm.SetDutyCycle(PWM_3, 500 - (100 - iMastStop*10));
+          Timer.DelayMs(20);
+        }
+        else if (SIGN(mastCurrentSpeed) == MAST_DIR_RIGHT)
+        {
+          Pwm.SetDutyCycle(PWM_2, 500 - (100 - iMastStop*10));
+          Pwm.SetDutyCycle(PWM_3, 500 + (100 - iMastStop*10));
+          Timer.DelayMs(20);
+        }
+        iMastStop++;
+      }
+      else
+      {
+        iMastStop = 0;
+
+        Pwm.SetDutyCycle(PWM_2, 500);
+        Pwm.SetDutyCycle(PWM_3, 500);
+
+        DRVB_SLEEP = 0;
+
+        oEnableMastStopProcedure = 0;
+
+        mastCurrentSpeed = 0;
+
+        WriteMastPos2Eeprom();
+      }
+    }
+    else
+    {
+      oEnableMastStopProcedure = 0;
+    }
+  }
 
   // Increment the number of overflows from this timer. Used primarily by Input Capture
   Timer.Var.nOverflows[1]++;

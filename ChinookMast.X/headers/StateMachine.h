@@ -67,8 +67,8 @@ volatile  INT8  breakFlag   // Flag indicating if the emergency break has been p
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 /*********** LIMITS **/
-#define MAST_MAX               500
-#define MAST_MIN              -500
+#define MAST_MAX               90
+#define MAST_MIN              -90
 
 /*********** BASIC CONDITION *****************/
 #define MAST_LEFT             (oManualMastLeft)
