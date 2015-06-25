@@ -51,9 +51,13 @@
 #define MOTOR_ENCODER_RATIO         49.0f
 #define MAST_MOTOR_RATIO            50.0f
 
-#define INP_CAP_EVENTS_FOR_AVERAGE  15
+#define INP_CAP_EVENTS_FOR_AVERAGE  20
 
 #define MOTOR_DEG_PER_PULSE         360.0f/980.0f
+
+#define N_DATA_TO_ACQ               100
+
+#define PRINT_DATA                  1
 
 
 typedef struct sCmdValue
@@ -94,19 +98,19 @@ void AssessMastValues (void);
 
 typedef struct
 {
-  float windPrevious[100];
-  float windCurrent [100];
-  float posPrevious[100];
-  float posCurrent [100];
-  float speedPrevious[100];
-  float speedCurrent [100];
-  float error[100];
-  float inPiPrevious[100];
-  float inPiCurrent [100];
-  float outPiPrevious[100];
-  float outPiCurrent [100];
-  float cmd[100];
-  UINT8 length;
+  float windPrevious  [N_DATA_TO_ACQ];
+  float windCurrent   [N_DATA_TO_ACQ];
+  float posPrevious   [N_DATA_TO_ACQ];
+  float posCurrent    [N_DATA_TO_ACQ];
+  float speedPrevious [N_DATA_TO_ACQ];
+  float speedCurrent  [N_DATA_TO_ACQ];
+  float error         [N_DATA_TO_ACQ];
+  float inPiPrevious  [N_DATA_TO_ACQ];
+  float inPiCurrent   [N_DATA_TO_ACQ];
+  float outPiPrevious [N_DATA_TO_ACQ];
+  float outPiCurrent  [N_DATA_TO_ACQ];
+  float cmd           [N_DATA_TO_ACQ];
+  UINT16 length;
 } sCmdData_t;
 
 #endif	/* __COMMAND_FUNCTIONS__ */

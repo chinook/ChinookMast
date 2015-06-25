@@ -30,12 +30,13 @@ extern volatile UINT32 rxWindAngle;
 
 sCmdData_t data = {0};
 
-const float  KP = 0.015
-            ,KI = 0.075
-            ,K  = 0.15
-            ,T  = 0.2
-            ,pwmMaxDutyCycle  = 0.98
-            ,pwmMinDutyCycle  = 0.2
+const float  KP = 0.015f
+//            ,KI = 0.075f
+            ,KI = 0.100f
+            ,K  = 1.5f
+            ,T  = 0.2f
+            ,pwmMaxDutyCycle  = 0.98f
+            ,pwmMinDutyCycle  = 0.2f
             ;
 
 volatile sCmdValue_t windAngle          = {.currentValue = 60, .previousValue = 60}
@@ -89,6 +90,27 @@ void SetPwm (float cmd)
     {
       MastManualStop();
       oFirstTimeInMastStop = 0;
+      inPi.currentValue = 0;
+      inPi.previousValue = 0;
+      outPi.currentValue = 0;
+      outPi.previousValue = 0;
+
+      if (PRINT_DATA)
+      {
+        UINT8 buffer[130];
+        UINT8 n;
+        n = sprintf(buffer, "\n\ri\tpSeed\tSpeed\tpPos\tPos\tpWind\tWind\tError\tpInPi\tinPi\tpOutPi\tOutPi\tcmd\n\r");
+        Uart.SendDataBuffer(UART6, buffer, n);
+        UINT8 i;
+        for (i = 0; i < data.length; i++)
+        {
+          n = sprintf(buffer, "%d\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\n\r", i, data.speedPrevious[i], data.speedCurrent[i], data.posPrevious[i]
+                  ,data.posCurrent[i],data.windPrevious[i], data.windCurrent[i], data.error[i], data.inPiPrevious[i], data.inPiCurrent[i], data.outPiPrevious[i]
+                  ,data.outPiCurrent[i], data.cmd[i]);
+          Uart.SendDataBuffer(UART6, buffer, n);
+        }
+        data.length = 0;
+      }
     }
   }
   else
@@ -174,17 +196,27 @@ void Regulator (void)
     }
   }
 
-  SetPwm(cmd);
+  if (PRINT_DATA && oFirstTimeInMastStop)
+  {
+    if (data.length < N_DATA_TO_ACQ)
+    {
+      data.cmd            [data.length] = cmd;
+      data.error          [data.length] = error;
+      data.inPiCurrent    [data.length] = inPi.currentValue;
+      data.inPiPrevious   [data.length] = inPi.previousValue;
+      data.outPiCurrent   [data.length] = outPi.currentValue;
+      data.outPiPrevious  [data.length] = outPi.previousValue;
+      data.posCurrent     [data.length] = mastAngle.currentValue;
+      data.posPrevious    [data.length] = mastAngle.previousValue;
+      data.speedCurrent   [data.length] = mastSpeed.currentValue;
+      data.speedPrevious  [data.length] = mastSpeed.previousValue;
+      data.windCurrent    [data.length] = windAngle.currentValue;
+      data.windPrevious   [data.length] = windAngle.previousValue;
+      data.length++;
+    }
+  }
 
-  data.cmd[data.length] = cmd;
-  data.error = error;
-  data.inPiCurrent = inPi.currentValue;
-  data.inPiPrevious = inPi.previousValue;
-  data.outPiCurrent = outPi.currentValue;
-  data.outPiPrevious = outPi.previousValue;
-  data.posCurrent = mastAngle.currentValue;
-  data.posPrevious = mastAngle.previousValue;
-  data.
+  SetPwm(cmd);
 }
 
 

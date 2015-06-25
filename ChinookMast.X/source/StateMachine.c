@@ -46,7 +46,7 @@ extern volatile BOOL oCapture1
                     ,oTimerChngMode
                     ;
 
-volatile BOOL  oManualMode            = 1
+volatile BOOL  oManualMode            = 0
               ,oCalibMode             = 0
               ,oCountTimeToChngMode   = 0
               ,oManualFlagChng        = 0
