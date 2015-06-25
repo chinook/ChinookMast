@@ -53,7 +53,8 @@
 
 #define INP_CAP_EVENTS_FOR_AVERAGE  20
 
-#define MOTOR_DEG_PER_PULSE         360.0f/980.0f
+//#define MOTOR_DEG_PER_PULSE         360.0f/980.0f
+#define MOTOR_DEG_PER_PULSE         360.0f/245.0f
 
 #define N_DATA_TO_ACQ               100
 

@@ -63,8 +63,7 @@ extern volatile BOOL oCapture1
                     ,oTimerReg
                     ;
 
-BOOL  oAtLeastOneEventOccured = 0
-     ,oFirstTimeInMastStop    = 0
+BOOL  oFirstTimeInMastStop    = 0
      ;
 
 //==============================================================================
@@ -230,59 +229,65 @@ void AssessMastValues (void)
   
   if (oCapture2 && oCapture4)
   {
-    oAtLeastOneEventOccured = 1;
     oCapture2 = 0;
     oCapture4 = 0;
+
+    UINT8 allo = 0;
+    BOOL caca = 1;
 
     rx2 = InputCapture.GetTimeBetweenCaptures(IC2, SCALE_US);
 
     rx4 = InputCapture.GetTimeBetweenCaptures(IC4, SCALE_US);
 
-    if (ABS(100 - rx2*100/rx4) < 20)
+    if ( !((rx2 > 2000000) || (rx4 > 2000000)) )  // It would mean 0.34 deg/s for the motor shaft, consider it zero
     {
-      inpCapTimes.inpCapTime2[inpCapTimes.n] = rx2;
-      inpCapTimes.inpCapTime4[inpCapTimes.n] = rx4;
-
-      firstIc = InputCapture.GetDirection(IC2, IC4, rx4, SCALE_US);
-
-      if (firstIc == IC2)
+      if (ABS(100 - rx2*100/rx4) < 20)
       {
-        inpCapTimes.dir[inpCapTimes.n] = MAST_DIR_LEFT;
-        inpCapTimes.n++;
+        inpCapTimes.inpCapTime2[inpCapTimes.n] = rx2;
+        inpCapTimes.inpCapTime4[inpCapTimes.n] = rx4;
+
+        firstIc = InputCapture.GetDirection(IC2, IC4, rx4, SCALE_US);
+
+        if (firstIc == IC2)
+        {
+          inpCapTimes.dir[inpCapTimes.n] = MAST_DIR_LEFT;
+          inpCapTimes.n++;
+        }
+        else if (firstIc == IC4)
+        {
+          inpCapTimes.dir[inpCapTimes.n] = MAST_DIR_RIGHT;
+          inpCapTimes.n++;
+        }
       }
-      else if (firstIc == IC4)
-      {
-        inpCapTimes.dir[inpCapTimes.n] = MAST_DIR_RIGHT;
-        inpCapTimes.n++;
-      }
+
+//      if (inpCapTimes.n >= INP_CAP_EVENTS_FOR_AVERAGE)
+//      {
+        UINT64 meanTime   = 0;
+        INT16  meanDir    = 0;
+        UINT8  i          = 0;
+
+//        for (i = 3; i < inpCapTimes.n; i++)  // Skip 3 first values
+//        {
+//          meanTime  += inpCapTimes.inpCapTime2[i] + inpCapTimes.inpCapTime4[i];
+//          meanDir   += inpCapTimes.dir[i];
+//        }
+
+        meanTime = (rx2 + rx4) / 2;
+        meanDir  = inpCapTimes.dir[0];
+
+//        float mastTime = SIGN(meanDir) * (float) meanTime / ((2*inpCapTimes.n - 6));
+        float mastTime = SIGN(meanDir) * (float) meanTime;
+        mastCurrentSpeed = MOTOR_DEG_PER_PULSE / (mastTime * TIMER_SCALE_US);
+
+  //      mastCurrentSpeed = MOTOR_ENCODER_RATIO / (mastTime * 360.0f * TIMER_SCALE_US);
+  //      mastCurrentSpeed = MOTOR_ENCODER_RATIO * MOTOR_DEG_PER_PULSE / (mastTime * TIMER_SCALE_US);
+
+        inpCapTimes.n = 0;
+//      }
     }
-
-    if (inpCapTimes.n >= INP_CAP_EVENTS_FOR_AVERAGE + 3)
+    else
     {
-      UINT64 meanTime   = 0;
-      INT16  meanDir    = 0;
-      UINT8  i          = 0;
-
-      for (i = 3; i < inpCapTimes.n; i++)  // Skip 3 first values
-      {
-        meanTime  += inpCapTimes.inpCapTime2[i] + inpCapTimes.inpCapTime4[i];
-        meanDir   += inpCapTimes.dir[i];
-      }
-
-//      float mastTime = SIGN(meanDir) * (float) meanTime / ((2*inpCapTimes.n - 6) * MOTOR_ENCODER_RATIO * MAST_MOTOR_RATIO);
-
-//      mastCurrentSpeed = MOTOR_DEG_PER_PULSE * MAST_MOTOR_RATIO / mastTime;
-
-      float mastTime = SIGN(meanDir) * (float) meanTime / ((2*inpCapTimes.n - 6));
-
-      mastCurrentSpeed = MOTOR_ENCODER_RATIO / (mastTime * 360.0f * TIMER_SCALE_US);
-//      mastCurrentSpeed = 980 / (mastTime * 360.0f * TIMER_SCALE_US);
-
-//      float mastTime = SIGN(meanDir) * (float) meanTime / ( (2*inpCapTimes.n - 6) * MOTOR_ENCODER_RATIO);
-//
-//      mastCurrentSpeed = MOTOR_DEG_PER_PULSE / mastTime * TIMER_SCALE_US;
-
-      inpCapTimes.n = 0;
+      mastCurrentSpeed = 0;
     }
   }
 }

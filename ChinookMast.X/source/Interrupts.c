@@ -109,6 +109,11 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
 
       DRVB_SLEEP = 0;
 
+      oCapture1 = 0;
+      oCapture2 = 0;
+      oCapture3 = 0;
+      oCapture4 = 0;
+
       oEnableMastStopProcedure = 0;
 
       mastCurrentSpeed = 0;
