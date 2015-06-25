@@ -37,6 +37,8 @@ volatile BOOL  oCapture1      = 0
               ,oTimerSendData = 0
               ,oTimerChngMode = 0
               ,oEnableMastStopProcedure = 0
+              ,oFirstCapture2 = 1
+              ,oFirstCapture4 = 1
               ;
 
 UINT8 iMastStop = 0;
@@ -109,16 +111,16 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
 
       DRVB_SLEEP = 0;
 
-      oCapture1 = 0;
-      oCapture2 = 0;
-      oCapture3 = 0;
-      oCapture4 = 0;
+//      oCapture1 = 0;
+//      oCapture2 = 0;
+//      oCapture3 = 0;
+//      oCapture4 = 0;
 
       oEnableMastStopProcedure = 0;
 
       mastCurrentSpeed = 0;
 
-      WriteMastPos2Eeprom();
+//      WriteMastPos2Eeprom();
     }
   }
 
@@ -317,7 +319,14 @@ void __ISR(_INPUT_CAPTURE_2_VECTOR, IC2_INT_PRIORITY) InputCapture2InterruptHand
   InputCapture.Var.previousCaptureCountValue[IC2] = InputCapture.Var.currentCaptureCountValue[IC2];
   InputCapture.Var.currentCaptureCountValue [IC2] = InputCapture.ReadCapture(IC2);
 
-  oCapture2 = 1;   // Flag that tells that a new Capture event occured
+  if (!oFirstCapture2)
+  {
+    oCapture2 = 1;   // Flag that tells that a new Capture event occured
+  }
+  else
+  {
+    oFirstCapture2 = 0;
+  }
 
   // Clear the interrupt flag
   INTClearFlag(INT_IC2);
@@ -359,10 +368,6 @@ void __ISR(_INPUT_CAPTURE_3_VECTOR, IC3_INT_PRIORITY) InputCapture3InterruptHand
 //================================================
 void __ISR(_INPUT_CAPTURE_4_VECTOR, IC4_INT_PRIORITY) InputCapture4InterruptHandler(void)
 {
-  /*
-   * DEVELOPPER CODE HERE
-   */
-
   // Get the timer used by this Input Capture
   TimerNum_t numTimer = InputCapture.Var.timerUsed[IC4];
 
@@ -377,7 +382,14 @@ void __ISR(_INPUT_CAPTURE_4_VECTOR, IC4_INT_PRIORITY) InputCapture4InterruptHand
   InputCapture.Var.previousCaptureCountValue[IC4] = InputCapture.Var.currentCaptureCountValue[IC4];
   InputCapture.Var.currentCaptureCountValue [IC4] = InputCapture.ReadCapture(IC4);
 
-  oCapture4 = 1;   // Flag that tells that a new Capture event occured
+  if (!oFirstCapture4)
+  {
+    oCapture4 = 1;   // Flag that tells that a new Capture event occured
+  }
+  else
+  {
+    oFirstCapture4 = 0;
+  }
 
   // Clear the interrupt flag
   INTClearFlag(INT_IC4);

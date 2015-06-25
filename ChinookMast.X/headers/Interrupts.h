@@ -104,15 +104,15 @@ typedef union
  * | 5        | 2           | I2C 4             |
  * | 5        | 3           |                   |
  * |----------+-------------+-------------------|
- * | 6        | 0           | Input Capture 1   |
- * | 6        | 1           | Input Capture 3   |
- * | 6        | 2           | Input Capture 2   |
- * | 6        | 3           | Input Capture 4   |
+ * | 6        | 0           |                   |
+ * | 6        | 1           | CAN 1             |
+ * | 6        | 2           |                   |
+ * | 6        | 3           | Timer 1           |
  * |----------+-------------+-------------------|
- * | 7        | 0           |                   |
- * | 7        | 1           | CAN 1             |
- * | 7        | 2           |                   |
- * | 7        | 3           | Timer 1           |
+ * | 7        | 0           | Input Capture 1   |
+ * | 7        | 1           | Input Capture 3   |
+ * | 7        | 2           | Input Capture 2   |
+ * | 7        | 3           | Input Capture 4   |
  * +----------+-------------+-------------------+
  * 
  */
@@ -120,8 +120,8 @@ typedef union
 //===============================================
 // Timer interrupts priorities and subpriorities
 //===============================================
-#define TIMER1_INTERRUPT_PRIORITY       7         // Used in ChinookLib function
-#define T1_INTERRUPT_PRIORITY           ipl7auto  // Used in ISR
+#define TIMER1_INTERRUPT_PRIORITY       6         // Used in ChinookLib function
+#define T1_INTERRUPT_PRIORITY           ipl6auto  // Used in ISR
 #define TIMER2_INTERRUPT_PRIORITY       4         // Used in ChinookLib function
 #define T2_INTERRUPT_PRIORITY           ipl4auto  // Used in ISR
 #define TIMER3_INTERRUPT_PRIORITY       3         // Used in ChinookLib function
@@ -162,14 +162,14 @@ typedef union
 //===============================================
 // Input Capture interrupts priorities and subpriorities
 //===============================================
-#define IC1_INTERRUPT_PRIORITY          6           // Used in ChinookLib function
-#define IC1_INT_PRIORITY                ipl6auto    // Used in ISR
-#define IC2_INTERRUPT_PRIORITY          6           // Used in ChinookLib function
-#define IC2_INT_PRIORITY                ipl6auto    // Used in ISR
-#define IC3_INTERRUPT_PRIORITY          6           // Used in ChinookLib function
-#define IC3_INT_PRIORITY                ipl6auto    // Used in ISR
-#define IC4_INTERRUPT_PRIORITY          6           // Used in ChinookLib function
-#define IC4_INT_PRIORITY                ipl6auto    // Used in ISR
+#define IC1_INTERRUPT_PRIORITY          7           // Used in ChinookLib function
+#define IC1_INT_PRIORITY                ipl7auto    // Used in ISR
+#define IC2_INTERRUPT_PRIORITY          7           // Used in ChinookLib function
+#define IC2_INT_PRIORITY                ipl7auto    // Used in ISR
+#define IC3_INTERRUPT_PRIORITY          7           // Used in ChinookLib function
+#define IC3_INT_PRIORITY                ipl7auto    // Used in ISR
+#define IC4_INTERRUPT_PRIORITY          7           // Used in ChinookLib function
+#define IC4_INT_PRIORITY                ipl7auto    // Used in ISR
 
 #define IC1_INTERRUPT_SUBPRIORITY       0
 #define IC2_INTERRUPT_SUBPRIORITY       2
@@ -181,8 +181,8 @@ typedef union
 //===============================================
 // CAN interrupts priorities and subpriorities
 //===============================================
-#define CAN1_INTERRUPT_PRIORITY         7           // Used in ChinookLib function
-#define CAN1_INT_PRIORITY               ipl7auto    // Used in ISR
+#define CAN1_INTERRUPT_PRIORITY         6           // Used in ChinookLib function
+#define CAN1_INT_PRIORITY               ipl6auto    // Used in ISR
 
 #define CAN1_INTERRUPT_SUBPRIORITY      1           
 //===============================================

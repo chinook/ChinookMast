@@ -247,7 +247,6 @@ void StateScheduler(void)
   /*
    * DEVELOPPER CODE HERE
    */
-
 }
 
 //===============================================================
@@ -281,6 +280,9 @@ void StateInit(void)
     mastAngle.currentValue  = 0;
   }
 
+  float allo = 36.0f;
+  memcpy((void *) &rxWindAngle, (void *) &allo, 4);
+
   // Init registers for the drive
   InitDriver();
 }
@@ -296,13 +298,16 @@ void StateManual(void)
 
   if (!oManualMastLeft && !oManualMastRight)
   {
-    MastManualStop();
+    if (MAST_MIN_OK && MAST_MAX_OK)   // Stop has not been done yet
+    {
+      MastManualStop();
+    }
   }
   else if (oManualMastLeft)
   {
     if (!MAST_MIN_OK)   // Mast too far
     {
-      MastManualStop();
+//      MastManualStop();   Do nothing
     }
     else
     {
@@ -313,7 +318,7 @@ void StateManual(void)
   {
     if (!MAST_MAX_OK)   // Mast too far
     {
-      MastManualStop();
+//      MastManualStop();   Do nothing
     }
     else
     {
@@ -337,8 +342,22 @@ void StateGetMastData(void)
   
   // Update wind direction
   windAngle.previousValue = windAngle.currentValue;
-//  memcpy((void *) &windAngle.currentValue, (void *) &rxWindAngle, 4);
-  windAngle.currentValue = 60;
+
+  float tempWind;
+  memcpy ((void *) &tempWind, (void *) &rxWindAngle, 4);
+  
+  if (tempWind > MAST_MAX)
+  {
+    windAngle.currentValue = MAST_MAX;
+  }
+  else if (tempWind < MAST_MIN)
+  {
+    windAngle.currentValue = MAST_MIN;
+  }
+  else if (tempWind != windAngle.currentValue)
+  {
+    windAngle.currentValue = tempWind;
+  }
 
   // Update mast speed
   mastSpeed.previousValue = mastSpeed.currentValue;
@@ -475,8 +494,8 @@ void StateSendData(void)
 //  memcpy(&txMastAngle[0], (void *) &mastCurrentPos, 4);   // mastCurrentPos is a float
 //
 //  Can.SendByteArray(CAN1, 0x55, &txMastAngle[0], 4);
-//  
-//  WriteMastPos2Eeprom();
+  
+  WriteMastPos2Eeprom();
 //
 //  sUartLineBuffer_t buffer =
 //  {
@@ -509,84 +528,10 @@ void StateAcq(void)
   {
     LED_DEBUG0_OFF;
   }
-  
-  if (buttons.buttons.bits.boardSw1 != SW1)
-  {
-    buttons.buttons.bits.boardSw1    = SW1;
-    buttons.chng.bits.boardSw1       =   1;
-  }
-
-  if (buttons.buttons.bits.boardSw2 != SW2)
-  {
-    buttons.buttons.bits.boardSw2    = SW2;
-    buttons.chng.bits.boardSw2       =   1;
-  }
-
-  if (buttons.buttons.bits.boardSw3 != SW3)
-  {
-    buttons.buttons.bits.boardSw3    = SW3;
-    buttons.chng.bits.boardSw3       =   1;
-  }
 
   AssessButtons();
 
   AssessMastValues();
-  
-//  INT64 rx2, rx4;
-//
-//  if (oCapture2 && oCapture4)
-//  {
-//    oCapture2 = 0;
-//    oCapture4 = 0;
-//
-//    rx2 = InputCapture.GetTimeBetweenCaptures(IC2, SCALE_US);
-//
-//    rx4 = InputCapture.GetTimeBetweenCaptures(IC4, SCALE_US);
-//
-//    if (ABS(100 - rx2*100/rx4) < 10)
-//    {
-//      oCapture2Acquired = 1;
-//      oCapture4Acquired = 1;
-//    }
-//    else
-//    {
-//      oCapture2Acquired = 0;
-//      oCapture4Acquired = 0;
-//    }
-//  }
-//
-//  INT8 firstIc;
-//
-//  if (oCapture2Acquired && oCapture4Acquired)
-//  {
-//    oCapture2Acquired = 0;
-//    oCapture4Acquired = 0;
-//
-//    firstIc = InputCapture.GetDirection(IC2, IC4, rx4, SCALE_US);
-//
-//    if (firstIc == IC2)
-//    {
-////      buffer.length = sprintf(buffer.buffer, "DROITE\r\n");
-////      Uart.PutTxFifoBuffer(UART6, &buffer);
-////      mastCurrentSpeed = (rx2 + rx4) / (2*49);
-//      mastCurrentSpeed = (rx2 + rx4) / 98;
-//    }
-//    else if (firstIc == IC4)
-//    {
-////      buffer.length = sprintf(buffer.buffer, "GAUCHE\r\n");
-////      Uart.PutTxFifoBuffer(UART6, &buffer);
-////      mastCurrentSpeed = - (rx2 + rx4) / (2*49);
-//      mastCurrentSpeed = - (rx2 + rx4) / 98;
-//    }
-////    else
-////    {
-////      buffer.length = sprintf(buffer.buffer, "ERREUR\r\n");
-////      Uart.PutTxFifoBuffer(UART6, &buffer);
-////    }
-//  }
-//
-//  oCapture2Acquired = 0;
-//  oCapture4Acquired = 0;
 
 //  Skadi.GetCmdMsg();
 }

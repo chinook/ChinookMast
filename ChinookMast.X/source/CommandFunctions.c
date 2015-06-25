@@ -30,16 +30,8 @@ extern volatile UINT32 rxWindAngle;
 
 sCmdData_t data = {0};
 
-const float  KP = 0.015f
-//            ,KI = 0.075f
-            ,KI = 0.100f
-            ,K  = 1.5f
-            ,T  = 0.2f
-            ,pwmMaxDutyCycle  = 0.98f
-            ,pwmMinDutyCycle  = 0.2f
-            ;
-
-volatile sCmdValue_t windAngle          = {.currentValue = 60, .previousValue = 60}
+//volatile sCmdValue_t windAngle          = {.currentValue = 60, .previousValue = 60}
+volatile sCmdValue_t windAngle          = {0}
                     ,mastAngle          = {0}
                     ,mastSpeed          = {0}
                     ,mastSpeedRealTime  = {0}   // Used as fast as possible
@@ -50,7 +42,7 @@ sCmdValue_t  inPi   = {0}
             ,outPi  = {0}
             ;
 
-sInpCapValues_t inpCapTimes = {0};
+//sInpCapValues_t inpCapTimes = {0};
 
 // Mast general value
 extern volatile float  mastCurrentSpeed      // Actual speed of Mast
@@ -137,12 +129,26 @@ void Regulator (void)
 {
   float  cmd
         ,error
+        ,tempWind
         ;
 
   // Update wind angle
   windAngle.previousValue = windAngle.currentValue;
-//  memcpy((void *) &windAngle.currentValue, (void *) &rxWindAngle, 4);
-  windAngle.currentValue = 60;
+
+  memcpy ((void *) &tempWind, (void *) &rxWindAngle, 4);
+
+  if (tempWind > MAST_MAX)
+  {
+    windAngle.currentValue = MAST_MAX;
+  }
+  else if (tempWind < MAST_MIN)
+  {
+    windAngle.currentValue = MAST_MIN;
+  }
+  else if (tempWind != windAngle.currentValue)
+  {
+    windAngle.currentValue = tempWind;
+  }
 
   // Update mast speed
   mastSpeed.previousValue = mastSpeed.currentValue;
@@ -185,17 +191,18 @@ void Regulator (void)
 
     cmd = inPi.currentValue * KP + outPi.currentValue * KI;
 
-    if (ABS(cmd) > pwmMaxDutyCycle)
+    if (ABS(cmd) > PWM_MAX_DUTY_CYCLE)
     {
-      cmd = SIGN(cmd) * pwmMaxDutyCycle;
+      cmd = SIGN(cmd) * PWM_MAX_DUTY_CYCLE;
     }
-    else if (ABS(cmd) < pwmMinDutyCycle)
+    else if (ABS(cmd) < PWM_MIN_DUTY_CYCLE)
     {
-      cmd = SIGN(cmd) * pwmMinDutyCycle;
+      cmd = SIGN(cmd) * PWM_MIN_DUTY_CYCLE;
     }
   }
 
-  if (PRINT_DATA && oFirstTimeInMastStop)
+//  if (PRINT_DATA && oFirstTimeInMastStop)
+  if (PRINT_DATA)
   {
     if (data.length < N_DATA_TO_ACQ)
     {
@@ -226,64 +233,53 @@ void AssessMastValues (void)
 {
   INT64 rx2, rx4;
   INT8 firstIc;
+  UINT64 meanTime   = 0;
+  INT8 dir    = 0;
   
   if (oCapture2 && oCapture4)
   {
     oCapture2 = 0;
     oCapture4 = 0;
 
-    UINT8 allo = 0;
-    BOOL caca = 1;
-
     rx2 = InputCapture.GetTimeBetweenCaptures(IC2, SCALE_US);
-
     rx4 = InputCapture.GetTimeBetweenCaptures(IC4, SCALE_US);
 
     if ( !((rx2 > 2000000) || (rx4 > 2000000)) )  // It would mean 0.34 deg/s for the motor shaft, consider it zero
     {
-      if (ABS(100 - rx2*100/rx4) < 20)
-      {
-        inpCapTimes.inpCapTime2[inpCapTimes.n] = rx2;
-        inpCapTimes.inpCapTime4[inpCapTimes.n] = rx4;
-
+//      if (ABS(100 - rx2*100/rx4) < 30)
+//      {
         firstIc = InputCapture.GetDirection(IC2, IC4, rx4, SCALE_US);
 
         if (firstIc == IC2)
         {
-          inpCapTimes.dir[inpCapTimes.n] = MAST_DIR_LEFT;
-          inpCapTimes.n++;
+          dir = MAST_DIR_LEFT;
         }
         else if (firstIc == IC4)
         {
-          inpCapTimes.dir[inpCapTimes.n] = MAST_DIR_RIGHT;
-          inpCapTimes.n++;
+          dir = MAST_DIR_RIGHT;
         }
-      }
-
-//      if (inpCapTimes.n >= INP_CAP_EVENTS_FOR_AVERAGE)
+//      }
+//      else
 //      {
-        UINT64 meanTime   = 0;
-        INT16  meanDir    = 0;
-        UINT8  i          = 0;
+////        LED_ERROR_ON;
+//      }
 
-//        for (i = 3; i < inpCapTimes.n; i++)  // Skip 3 first values
-//        {
-//          meanTime  += inpCapTimes.inpCapTime2[i] + inpCapTimes.inpCapTime4[i];
-//          meanDir   += inpCapTimes.dir[i];
-//        }
-
-        meanTime = (rx2 + rx4) / 2;
-        meanDir  = inpCapTimes.dir[0];
+      meanTime = (rx2 + rx4) / 2;
 
 //        float mastTime = SIGN(meanDir) * (float) meanTime / ((2*inpCapTimes.n - 6));
-        float mastTime = SIGN(meanDir) * (float) meanTime;
-        mastCurrentSpeed = MOTOR_DEG_PER_PULSE / (mastTime * TIMER_SCALE_US);
+      float mastTime = SIGN(dir) * (float) meanTime * TIMER_SCALE_US;
+      if (mastTime == 0)
+      {
+        mastCurrentSpeed = 0;
+      }
+      else
+      {
+        mastCurrentSpeed = MOTOR_DEG_PER_PULSE / (mastTime * MAST_MOTOR_RATIO);
+      }
+      
 
-  //      mastCurrentSpeed = MOTOR_ENCODER_RATIO / (mastTime * 360.0f * TIMER_SCALE_US);
-  //      mastCurrentSpeed = MOTOR_ENCODER_RATIO * MOTOR_DEG_PER_PULSE / (mastTime * TIMER_SCALE_US);
-
-        inpCapTimes.n = 0;
-//      }
+//      mastCurrentSpeed = MOTOR_ENCODER_RATIO / (mastTime * 360.0f * TIMER_SCALE_US);
+//      mastCurrentSpeed = MOTOR_ENCODER_RATIO * MOTOR_DEG_PER_PULSE / (mastTime * TIMER_SCALE_US);
     }
     else
     {

@@ -1,7 +1,9 @@
 TODO
 
+Trouve pas vitesse = 0 en auto
 Angles et vitesses précis
 Limites en mode auto
+Redondance EEPROM
 Envoyer orientation du mât
 Envoyer mode manual ou auto
 Tester algo avec mât

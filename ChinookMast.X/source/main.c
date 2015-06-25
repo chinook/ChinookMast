@@ -77,7 +77,7 @@ void main(void)
   DDPCONbits.JTAGEN = 0;
 //==============================================================================
 
-
+  
 //==============================================================================
 // Configure the device for maximum performance but do not change the PBDIV
 // Given the options, this function will change the flash wait states, RAM
@@ -118,13 +118,13 @@ void sendUART()
 {
   char  Text[100]={0};
   int i=0;
-  if(pStateMast==&StateInit) Uart.SendDataBuffer(UART6, "\n\rState Mast : Init\t\t", 21);
-  else if(pStateMast==&StateCalib) Uart.SendDataBuffer(UART6, "\n\rState Mast : Calib\t\t", 22);
-  else if(pStateMast == &StateAcq) Uart.SendDataBuffer(UART6, "\n\rState Mast : Acq\t\t", 20);
-  else if(pStateMast == &StateGetMastData) Uart.SendDataBuffer(UART6, "\n\rState Mast : Get Mast Data\t\t", 30);
-  else if(pStateMast == &StateManual) Uart.SendDataBuffer(UART6, "\n\rState Mast : Manual\t\t", 22);
-  else if(pStateMast == &StateReg) Uart.SendDataBuffer(UART6, "\n\rState Mast : Reg\t\t", 20);
-  else if(pStateMast == &StateSendData) Uart.SendDataBuffer(UART6, "\n\rState Mast : Send Data\t\t", 26);
+       if (pStateMast == &StateInit)        Uart.SendDataBuffer(UART6, "\n\rState Mast : Init\t\t"          , 21);
+  else if (pStateMast == &StateCalib)       Uart.SendDataBuffer(UART6, "\n\rState Mast : Calib\t\t"         , 22);
+  else if (pStateMast == &StateAcq)         Uart.SendDataBuffer(UART6, "\n\rState Mast : Acq\t\t"           , 20);
+  else if (pStateMast == &StateGetMastData) Uart.SendDataBuffer(UART6, "\n\rState Mast : Get Mast Data\t\t" , 30);
+  else if (pStateMast == &StateManual)      Uart.SendDataBuffer(UART6, "\n\rState Mast : Manual\t\t"        , 22);
+  else if (pStateMast == &StateReg)         Uart.SendDataBuffer(UART6, "\n\rState Mast : Reg\t\t"           , 20);
+  else if (pStateMast == &StateSendData)    Uart.SendDataBuffer(UART6, "\n\rState Mast : Send Data\t\t"     , 26);
 
 //  sprintf(Text, "Mast Now = %d\t\tMast Consigne = %d\n\r", mastCurrentPos, Mast_consigne);
   Uart.SendDataBuffer(UART6, Text, sizeof(Text));

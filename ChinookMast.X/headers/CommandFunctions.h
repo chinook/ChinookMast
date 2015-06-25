@@ -48,6 +48,24 @@
 
 #define ERROR_THRESHOLD              5.0f
 
+#define KP                           0.015f
+//#define KI                           0.075f
+#define KI                           0.100f
+#define K                            0.400f
+#define T                            0.050f
+#define PWM_MAX_DUTY_CYCLE           0.980f
+#define PWM_MIN_DUTY_CYCLE           0.200f
+
+
+//const float  KP = 0.015f
+////            ,KI = 0.075f
+//            ,KI = 0.100f
+//            ,K  = 0.5f
+//            ,T  = 0.05f
+//            ,pwmMaxDutyCycle  = 0.98f
+//            ,pwmMinDutyCycle  = 0.2f
+//            ;
+
 #define MOTOR_ENCODER_RATIO         49.0f
 #define MAST_MOTOR_RATIO            50.0f
 
@@ -69,13 +87,13 @@ typedef struct sCmdValue
 } sCmdValue_t;
 
 
-typedef struct sInpCapValues
-{
-  UINT32 inpCapTime2  [INP_CAP_EVENTS_FOR_AVERAGE + 10];
-  UINT32 inpCapTime4  [INP_CAP_EVENTS_FOR_AVERAGE + 10];
-  INT8   dir          [INP_CAP_EVENTS_FOR_AVERAGE + 10];
-  UINT16 n;
-} sInpCapValues_t;
+//typedef struct sInpCapValues
+//{
+//  UINT32 inpCapTime2  [INP_CAP_EVENTS_FOR_AVERAGE + 10];
+//  UINT32 inpCapTime4  [INP_CAP_EVENTS_FOR_AVERAGE + 10];
+//  INT8   dir          [INP_CAP_EVENTS_FOR_AVERAGE + 10];
+//  UINT16 n;
+//} sInpCapValues_t;
 
 //==============================================================================
 // Variable declarations

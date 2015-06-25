@@ -176,6 +176,25 @@ void MastManualStop (void)
 //==============================================================================
 void AssessButtons (void)
 {
+
+  if (buttons.buttons.bits.boardSw1 != SW1)
+  {
+    buttons.buttons.bits.boardSw1    = SW1;
+    buttons.chng.bits.boardSw1       =   1;
+  }
+
+  if (buttons.buttons.bits.boardSw2 != SW2)
+  {
+    buttons.buttons.bits.boardSw2    = SW2;
+    buttons.chng.bits.boardSw2       =   1;
+  }
+
+  if (buttons.buttons.bits.boardSw3 != SW3)
+  {
+    buttons.buttons.bits.boardSw3    = SW3;
+    buttons.chng.bits.boardSw3       =   1;
+  }
+  
   if (buttons.chng.byte)
   {
 

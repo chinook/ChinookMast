@@ -58,11 +58,11 @@ void InitTimer(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //	Open timers
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  timerCounterValue = Timer.Open(TIMER_1, 200, SCALE_MS);   // Timer used for regulating the mast. Period = 200 ms
+  timerCounterValue = Timer.Open(TIMER_1, 50, SCALE_MS);   // Timer used for regulating the mast. Period = 100 ms
   timerCounterValue = Timer.Open(TIMER_2, 11, SCALE_MS);    // Timer used for input capture AND stopping the mast. Period = 11 ms
   timerCounterValue = Timer.Open(TIMER_3, 500, SCALE_US);   // Timer used for PWM. Period = 500 ms (f = 2kHz)
 //  timerCounterValue = Timer.Open(TIMER_4,  15, SCALE_MS);   // Timer used for sending data to other devices. Period = 15 ms (f ~ 66.67 Hz)
-  timerCounterValue = Timer.Open(TIMER_4, 200, SCALE_MS);   // Timer used for sending data to other devices. Period = 15 ms (f ~ 66.67 Hz)
+  timerCounterValue = Timer.Open(TIMER_4, 1000, SCALE_MS);   // Timer used for sending data to other devices. Period = 15 ms (f ~ 66.67 Hz)
   timerCounterValue = Timer.Open(TIMER_5, 600, SCALE_MS);   // Timer used for changing mode of operation. Period = 600 ms
   
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -406,6 +406,9 @@ void InitInputCapture(void)
 
   InputCapture.ConfigInterrupt(IC2, IC2_INTERRUPT_PRIORITY, IC2_INTERRUPT_SUBPRIORITY);
   InputCapture.ConfigInterrupt(IC4, IC4_INTERRUPT_PRIORITY, IC4_INTERRUPT_SUBPRIORITY);
+  
+  INTClearFlag(INT_IC2);
+  INTClearFlag(INT_IC4);
 
 }
 
