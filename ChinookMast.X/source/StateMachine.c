@@ -481,13 +481,11 @@ void StateIdle(void)
 void StateSendData(void)
 {
   oTimerSendData = 0;
+  sUartLineBuffer_t buffer;
 
-  UINT8 msg[100] = {0};
-  UINT8 sizeOfMsg = 0;
+  buffer.length = sprintf(buffer.buffer, "\n\rCurrent speed\t\t= %f\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r", mastSpeed.currentValue, mastAngle.currentValue, windAngle.currentValue);
 
-//  sizeOfMsg = sprintf(msg, "\n\rCurrent speed\t\t= %f\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r", mastSpeed.currentValue, mastAngle.currentValue, windAngle.currentValue);
-//
-//  Uart.SendDataBuffer(UART6, msg, sizeOfMsg);
+  Uart.PutTxFifoBuffer(UART6, &buffer);
   
 //  BYTE txMastAngle[4];
 //
@@ -533,5 +531,5 @@ void StateAcq(void)
 
   AssessMastValues();
 
-//  Skadi.GetCmdMsg();
+  Skadi.GetCmdMsg();
 }

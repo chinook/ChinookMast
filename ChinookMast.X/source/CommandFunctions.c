@@ -242,8 +242,21 @@ void AssessMastValues (void)
   {
     oCapture2 = 0;
     oCapture4 = 0;
+//
+//    UINT32 coreTickRate = CORE_TICK_RATE * TIMER_SCALE_US * 100;
+//    OpenCoreTimer(coreTickRate);
+////    WriteCoreTimer(0);
+//
+//    UINT32 coreTickRate = Timer.Tic(100, SCALE_US);
 
     rx2 = InputCapture.GetTimeBetweenCaptures(IC2, SCALE_US);
+
+//    UINT32 tok = Timer.Toc(100, coreTickRate);
+////    UINT32 tok = ReadCoreTimer();
+//    sUartLineBuffer_t buffer;
+//    buffer.length = sprintf(buffer.buffer, "T = %i", tok);
+//    Uart.PutTxFifoBuffer(UART6, &buffer);
+    
     rx4 = InputCapture.GetTimeBetweenCaptures(IC4, SCALE_US);
 
     if ( !((rx2 > 2000000) || (rx4 > 2000000)) )  // It would mean 0.34 deg/s for the motor shaft, consider it zero

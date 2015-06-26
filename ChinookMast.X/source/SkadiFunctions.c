@@ -54,12 +54,12 @@ void LedDebug(sSkadi_t *skadi, sSkadiArgs_t args)
 #ifdef __32MX795F512L__
     Port.A.ToggleBits(BIT_3);
 #elif defined __32MX795F512H__
-    Port.B.ToggleBits(BIT_12);
+    LED_DEBUG3_TOGGLE;
 #endif
   }
   else
   {
-    Uart.SendDataBuffer(UART1, errorMsg, sizeof(errorMsg));
+    Uart.SendDataBuffer(UART6, errorMsg, sizeof(errorMsg));
   }
 }
 
@@ -81,12 +81,12 @@ void LedCan(sSkadi_t *skadi, sSkadiArgs_t args)
 #ifdef __32MX795F512L__
     Port.C.ToggleBits(BIT_1);
 #elif defined __32MX795F512H__
-    Port.B.ToggleBits(BIT_13);
+    LED_CAN_TOGGLE;
 #endif
   }
   else
   {
-    Uart.SendDataBuffer(UART1, errorMsg, sizeof(errorMsg));
+    Uart.SendDataBuffer(UART6, errorMsg, sizeof(errorMsg));
   }
 }
 
