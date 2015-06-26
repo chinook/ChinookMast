@@ -485,9 +485,9 @@ void StateSendData(void)
   UINT8 msg[100] = {0};
   UINT8 sizeOfMsg = 0;
 
-  sizeOfMsg = sprintf(msg, "\n\rCurrent speed\t\t= %f\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r", mastSpeed.currentValue, mastAngle.currentValue, windAngle.currentValue);
-
-  Uart.SendDataBuffer(UART6, msg, sizeOfMsg);
+//  sizeOfMsg = sprintf(msg, "\n\rCurrent speed\t\t= %f\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r", mastSpeed.currentValue, mastAngle.currentValue, windAngle.currentValue);
+//
+//  Uart.SendDataBuffer(UART6, msg, sizeOfMsg);
   
 //  BYTE txMastAngle[4];
 //

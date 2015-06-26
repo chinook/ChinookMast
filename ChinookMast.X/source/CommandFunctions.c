@@ -28,6 +28,8 @@
 //==============================================================================
 extern volatile UINT32 rxWindAngle;
 
+UINT16 nTurns = 0;
+
 sCmdData_t data = {0};
 
 //volatile sCmdValue_t windAngle          = {.currentValue = 60, .previousValue = 60}
@@ -201,8 +203,8 @@ void Regulator (void)
     }
   }
 
-//  if (PRINT_DATA && oFirstTimeInMastStop)
-  if (PRINT_DATA)
+  if (PRINT_DATA && oFirstTimeInMastStop)
+//  if (PRINT_DATA)
   {
     if (data.length < N_DATA_TO_ACQ)
     {

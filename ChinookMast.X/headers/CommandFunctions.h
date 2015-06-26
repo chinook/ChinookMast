@@ -46,7 +46,8 @@
 #define MAST_DIR_LEFT               -1
 #define MAST_DIR_RIGHT               1
 
-#define ERROR_THRESHOLD              5.0f
+//#define ERROR_THRESHOLD              5.0f
+#define ERROR_THRESHOLD              1.0f
 
 #define KP                           0.015f
 //#define KI                           0.075f

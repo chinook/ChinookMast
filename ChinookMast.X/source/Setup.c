@@ -481,8 +481,8 @@ void StartInterrupts(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable UART interrupts        
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//  Uart.EnableRxInterrupts (UART6);  // Enable RX Interrupts for UART6
-//  Uart.DisableTxInterrupts(UART6);  // Disable TX Interrupts for UART6
+  Uart.EnableRxInterrupts (UART6);  // Enable RX Interrupts for UART6
+  Uart.DisableTxInterrupts(UART6);  // Disable TX Interrupts for UART6
 //
 //  INTEnable(INT_SOURCE_UART_ERROR(UART6), INT_DISABLED);   // Disable Error interrupts
 
