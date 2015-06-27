@@ -33,10 +33,26 @@
 /**************************************************************
  * Function name  : LedDebug
  * Purpose        : Toggle LED_DEBUG.
- * Arguments      : None.
+ * Arguments      : 1.
  * Returns        : None.
  *************************************************************/
 void LedDebug();
+
+/**************************************************************
+ * Function name  : LedStatus
+ * Purpose        : Toggle LED_STATUS.
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void LedStatus();
+
+/**************************************************************
+ * Function name  : LedError
+ * Purpose        : Toggle LED_ERROR.
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void LedError();
 
 /**************************************************************
  * Function name  : LedCan

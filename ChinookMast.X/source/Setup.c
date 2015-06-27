@@ -43,10 +43,13 @@
 sSkadiCommand_t skadiCommandTable[] =
 {
    {"LedDebug"    , LedDebug    , 1 , "\tUsage : flash Led DEBUGx"}   // 1 argument
-  ,{"LedCan"      , LedCan      , 1 , "\tUsage : flash Led CAN"   }   // 1 argument
+  ,{"LedCan"      , LedCan      , 0 , "\tUsage : flash Led CAN"   }   // 0 argument
+  ,{"LedStatus"   , LedStatus   , 0 , "\tUsage : flash Led STATUS"}   // 0 argument
+  ,{"LedError"    , LedError    , 0 , "\tUsage : flash Led ERROR" }   // 0 argument
+  ,{"LedCan"      , LedCan      , 0 , "\tUsage : flash Led CAN"   }   // 0 argument
   ,{"ReInitSystem", ReInitSystem, 0 , "\tUsage : Redo StateInit()"}   // 0 argument
-  ,{"SetWind"     , SetWind     , 1 , "\tUsage : Set wind angle"  }   // 1 argument
-  ,{"SetPos"      , SetPos      , 1 , "\tUsage : Set mast angle"  }   // 1 argument
+  ,{"SetWind"     , SetWind     , 1 , "\tUsage : Set wind angle. Min = -179, Max = 179"  }   // 1 argument
+  ,{"SetPos"      , SetPos      , 1 , "\tUsage : Set mast angle. Min = -179, Max = 179"  }   // 1 argument
   ,{"SetMode"     , SetMode     , 1 , "\tUsage : Set mast mode of operation. 1 = Manual, 0 = Auto"  }   // 1 argument
 };
 

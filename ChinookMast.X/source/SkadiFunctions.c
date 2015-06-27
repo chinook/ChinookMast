@@ -129,6 +129,10 @@ void SetPos(sSkadi_t *skadi, sSkadiArgs_t args)
     mastAngle.currentValue  = mast;
     mastAngle.previousValue = mast;
     mastCurrentSpeed = 0;
+    if (mast == 0)
+    {
+      SEND_CALIB_DONE;
+    }
   }
   else
   {
@@ -163,26 +167,38 @@ void SetWind(sSkadi_t *skadi, sSkadiArgs_t args)
 
 
 /**************************************************************
+ * Function name  : LedError
+ * Purpose        : Toggle LedError
+ * Arguments      : Received from Skadi functions
+ * Returns        : None.
+ *************************************************************/
+void LedError(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  LED_ERROR_TOGGLE;
+}
+
+
+/**************************************************************
+ * Function name  : LedStatus
+ * Purpose        : Toggle LedStatus
+ * Arguments      : Received from Skadi functions
+ * Returns        : None.
+ *************************************************************/
+void LedStatus(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  LED_STATUS_TOGGLE;
+}
+
+
+/**************************************************************
  * Function name  : LedCan
- * Purpose        : Toggle LedCan depending on the arguments
+ * Purpose        : Toggle LedCan
  * Arguments      : Received from Skadi functions
  * Returns        : None.
  *************************************************************/
 void LedCan(sSkadi_t *skadi, sSkadiArgs_t args)
 {
-  sUartLineBuffer_t buffer;
-
-  int led = atoi(args.elements[0]);   // Convert argument to int
-
-  if (led == 2)
-  {
-    LED_CAN_TOGGLE;
-  }
-  else
-  {
-    buffer.length = sprintf(buffer.buffer, "Cette led n'existe pas!\r\n");
-    Uart.PutTxFifoBuffer(UART6, &buffer);
-  }
+  LED_CAN_TOGGLE;
 }
 
 
@@ -195,4 +211,5 @@ void LedCan(sSkadi_t *skadi, sSkadiArgs_t args)
 void ReInitSystem(sSkadi_t *skadi, sSkadiArgs_t args)
 {
   StateInit();
+  pStateMast = &StateInit;
 }
