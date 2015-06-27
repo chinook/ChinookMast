@@ -304,7 +304,6 @@ void __ISR(_INPUT_CAPTURE_1_VECTOR, IC1_INT_PRIORITY) InputCapture1InterruptHand
 //================================================
 void __ISR(_INPUT_CAPTURE_2_VECTOR, IC2_INT_PRIORITY) InputCapture2InterruptHandler(void)
 {
-
   // Get the timer used by this Input Capture
   TimerNum_t numTimer = InputCapture.Var.timerUsed[IC2];
 
@@ -687,6 +686,12 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
       {
         buttons.buttons.bits.steerWheelSw1  = switches.bits.sw1;
         buttons.chng.bits.steerWheelSw1     = 1;
+      }
+
+      if (buttons.buttons.bits.steerWheelSw3  != switches.bits.sw3 )
+      {
+        buttons.buttons.bits.steerWheelSw3  = switches.bits.sw3;
+        buttons.chng.bits.steerWheelSw3     = 1;
       }
 
       if (buttons.buttons.bits.steerWheelSw10 != switches.bits.sw10)

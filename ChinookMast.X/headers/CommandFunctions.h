@@ -75,9 +75,9 @@
 //#define MOTOR_DEG_PER_PULSE         360.0f/980.0f
 #define MOTOR_DEG_PER_PULSE         360.0f/245.0f
 
-#define N_DATA_TO_ACQ               100
+#define N_DATA_TO_ACQ               200
 
-#define PRINT_DATA                  1
+#define PRINT_DATA                  0
 
 
 typedef struct sCmdValue

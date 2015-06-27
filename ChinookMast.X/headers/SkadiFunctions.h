@@ -54,6 +54,14 @@ void LedCan();
  *************************************************************/
 void ReInitSystem();
 
+/**************************************************************
+ * Function name  : SetWind
+ * Purpose        : Set the wind angle
+ * Arguments      : Received from Skadi functions
+ * Returns        : None.
+ *************************************************************/
+void SetWind();
+
 
 //==============================================================================
 // Macro definitions

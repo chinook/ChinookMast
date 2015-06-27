@@ -90,18 +90,33 @@ void SetPwm (float cmd)
 
       if (PRINT_DATA)
       {
-        UINT8 buffer[130];
-        UINT8 n;
-        n = sprintf(buffer, "\n\ri\tpSeed\tSpeed\tpPos\tPos\tpWind\tWind\tError\tpInPi\tinPi\tpOutPi\tOutPi\tcmd\n\r");
-        Uart.SendDataBuffer(UART6, buffer, n);
         UINT8 i;
+        INT32 err = 0;
+        sUartLineBuffer_t buffer;
+        buffer.length = sprintf(buffer.buffer, "\n\ri\tpSeed\tSpeed\tpPos\tPos\tpWind\tWind\tError\tpInPi\tinPi\tpOutPi\tOutPi\tcmd\n\r");
+        Uart.PutTxFifoBuffer(UART6, &buffer);
         for (i = 0; i < data.length; i++)
         {
-          n = sprintf(buffer, "%d\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\n\r", i, data.speedPrevious[i], data.speedCurrent[i], data.posPrevious[i]
+          if (err < 0)
+          {
+            i--;
+          }
+          buffer.length = sprintf(buffer.buffer, "%d\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\n\r", i, data.speedPrevious[i], data.speedCurrent[i], data.posPrevious[i]
                   ,data.posCurrent[i],data.windPrevious[i], data.windCurrent[i], data.error[i], data.inPiPrevious[i], data.inPiCurrent[i], data.outPiPrevious[i]
                   ,data.outPiCurrent[i], data.cmd[i]);
-          Uart.SendDataBuffer(UART6, buffer, n);
+          err = Uart.PutTxFifoBuffer(UART6, &buffer);
         }
+//        UINT8 buffer[130];
+//        UINT8 n;
+//        n = sprintf(buffer, "\n\ri\tpSeed\tSpeed\tpPos\tPos\tpWind\tWind\tError\tpInPi\tinPi\tpOutPi\tOutPi\tcmd\n\r");
+//        Uart.SendDataBuffer(UART6, buffer, n);
+//        for (i = 0; i < data.length; i++)
+//        {
+//          n = sprintf(buffer, "%d\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\n\r", i, data.speedPrevious[i], data.speedCurrent[i], data.posPrevious[i]
+//                  ,data.posCurrent[i],data.windPrevious[i], data.windCurrent[i], data.error[i], data.inPiPrevious[i], data.inPiCurrent[i], data.outPiPrevious[i]
+//                  ,data.outPiCurrent[i], data.cmd[i]);
+//          Uart.SendDataBuffer(UART6, buffer, n);
+//        }
         data.length = 0;
       }
     }
@@ -178,7 +193,7 @@ void Regulator (void)
   {
     cmd = 0;
   }
-  else if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
+  else if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) && (mastSpeed.currentValue != 0) )  // Mast too far
   {
     cmd = 0;
   }
@@ -242,21 +257,8 @@ void AssessMastValues (void)
   {
     oCapture2 = 0;
     oCapture4 = 0;
-//
-//    UINT32 coreTickRate = CORE_TICK_RATE * TIMER_SCALE_US * 100;
-//    OpenCoreTimer(coreTickRate);
-////    WriteCoreTimer(0);
-//
-//    UINT32 coreTickRate = Timer.Tic(100, SCALE_US);
 
     rx2 = InputCapture.GetTimeBetweenCaptures(IC2, SCALE_US);
-
-//    UINT32 tok = Timer.Toc(100, coreTickRate);
-////    UINT32 tok = ReadCoreTimer();
-//    sUartLineBuffer_t buffer;
-//    buffer.length = sprintf(buffer.buffer, "T = %i", tok);
-//    Uart.PutTxFifoBuffer(UART6, &buffer);
-    
     rx4 = InputCapture.GetTimeBetweenCaptures(IC4, SCALE_US);
 
     if ( !((rx2 > 2000000) || (rx4 > 2000000)) )  // It would mean 0.34 deg/s for the motor shaft, consider it zero

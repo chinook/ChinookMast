@@ -27,7 +27,7 @@
 //==============================================================================
 // Variable declarations
 //==============================================================================
-const UINT16 EEPROM_POS_REGISTER = 0x0100;
+const UINT16 EEPROM_POS_REGISTER = 0x0200;
 
 volatile sButtonStates_t buttons =
 {
@@ -72,8 +72,6 @@ void WriteMastPos2Eeprom (void)
   dataBuffer[0] = I2c.Var.eepromAddress.byte;
   dataBuffer[1] = EEPROM_POS_REGISTER >> 8;
   dataBuffer[2] = EEPROM_POS_REGISTER;
-//  dataBuffer[1] = 0x01;
-//  dataBuffer[2] = 0x00;
 
   memcpy(&dataBuffer[3], (void *) &mastAngle.currentValue, 4);
 
@@ -92,8 +90,6 @@ void ReadMastPosFromEeprom (void)
   slaveAddPlusRegBuf[0] = I2c.Var.eepromAddress.byte;
   slaveAddPlusRegBuf[1] = EEPROM_POS_REGISTER >> 8;
   slaveAddPlusRegBuf[2] = EEPROM_POS_REGISTER;
-//  slaveAddPlusRegBuf[1] = 0x01;
-//  slaveAddPlusRegBuf[2] = 0x00;
 
   while(I2c.Var.oI2cWriteIsRunning[I2C4]);  // Wait for any I2C4 write sequence to end
   while(I2c.Var.oI2cReadIsRunning[I2C4]);  // Wait for any I2C4 read sequence to end
@@ -180,28 +176,36 @@ void MastManualStop (void)
 //==============================================================================
 void AssessButtons (void)
 {
-
+  // <editor-fold defaultstate="collapsed" desc="Check changes on board">
+  // <editor-fold defaultstate="collapsed" desc="Change on SW1 on board">
   if (buttons.buttons.bits.boardSw1 != SW1)
   {
     buttons.buttons.bits.boardSw1    = SW1;
     buttons.chng.bits.boardSw1       =   1;
   }
+  // </editor-fold>
 
+  // <editor-fold defaultstate="collapsed" desc="Change on SW2 on board">
   if (buttons.buttons.bits.boardSw2 != SW2)
   {
     buttons.buttons.bits.boardSw2    = SW2;
     buttons.chng.bits.boardSw2       =   1;
   }
+  // </editor-fold>
 
+  // <editor-fold defaultstate="collapsed" desc="Change on SW3 on board">
   if (buttons.buttons.bits.boardSw3 != SW3)
   {
     buttons.buttons.bits.boardSw3    = SW3;
     buttons.chng.bits.boardSw3       =   1;
   }
-  
+  // </editor-fold>
+  // </editor-fold>
+
+  // <editor-fold defaultstate="collapsed" desc="Assess changes">
   if (buttons.chng.byte)
   {
-
+    // <editor-fold defaultstate="collapsed" desc="SW1 on board">
     if (buttons.chng.bits.boardSw1)
     {
       buttons.chng.bits.boardSw1 = 0;
@@ -212,10 +216,13 @@ void AssessButtons (void)
         mastAngle.previousValue = 0;
         
         WriteMastPos2Eeprom (); // Write zero to EEPROM
+
+        SEND_CALIB_DONE;  // Confirm that the calib is done
       }
     }
+// </editor-fold>
 
-
+    // <editor-fold defaultstate="collapsed" desc="SW2 on board">
     if (buttons.chng.bits.boardSw2)
     {
       buttons.chng.bits.boardSw2 = 0;
@@ -253,6 +260,7 @@ void AssessButtons (void)
           if (oTimerChngMode)              // If at least one second has passed
           {
             oManualMode ^= 1;       // Change mode
+            SEND_MODE_TO_STEERING_WHEEL;  // Send change of mode to the steering wheel
           }
         }
         else if (oManualMode)
@@ -262,8 +270,9 @@ void AssessButtons (void)
         }
       }
     }
+// </editor-fold>
 
-
+    // <editor-fold defaultstate="collapsed" desc="SW3 on board">
     if (buttons.chng.bits.boardSw3)
     {
       buttons.chng.bits.boardSw3 = 0;
@@ -301,6 +310,7 @@ void AssessButtons (void)
           if (oTimerChngMode)              // If at least one second has passed
           {
             oManualMode ^= 1;       // Change mode
+            SEND_MODE_TO_STEERING_WHEEL;  // Send change of mode to the steering wheel
           }
         }
         else if (oManualMode)
@@ -310,8 +320,9 @@ void AssessButtons (void)
         }
       }
     }
+// </editor-fold>
 
-
+    // <editor-fold defaultstate="collapsed" desc="SW1 on steering wheel">
     if (buttons.chng.bits.steerWheelSw1)
     {
       buttons.chng.bits.steerWheelSw1 = 0;
@@ -349,6 +360,7 @@ void AssessButtons (void)
           if (oTimerChngMode)              // If at least one second has passed
           {
             oManualMode ^= 1;       // Change mode
+            SEND_MODE_TO_STEERING_WHEEL;  // Send change of mode to the steering wheel
           }
         }
         else if (oManualMode)
@@ -358,8 +370,26 @@ void AssessButtons (void)
         }
       }
     }
+// </editor-fold>
 
+    // <editor-fold defaultstate="collapsed" desc="SW3 on steering wheel">
+    if (buttons.chng.bits.steerWheelSw3)
+    {
+      buttons.chng.bits.steerWheelSw3 = 0;
 
+      if (buttons.buttons.bits.steerWheelSw3)     // If SW1 is pressed
+      {
+        mastAngle.currentValue = 0;
+        mastAngle.previousValue = 0;
+
+        WriteMastPos2Eeprom (); // Write zero to EEPROM
+
+        SEND_CALIB_DONE;  // Confirm that the calib is done
+      }
+    }
+// </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="SW10 on steering wheel">
     if (buttons.chng.bits.steerWheelSw10)
     {
       buttons.chng.bits.steerWheelSw10 = 0;
@@ -397,6 +427,7 @@ void AssessButtons (void)
           if (oTimerChngMode)              // If at least one second has passed
           {
             oManualMode ^= 1;       // Change mode
+            SEND_MODE_TO_STEERING_WHEEL;  // Send change of mode to the steering wheel
           }
         }
         else if (oManualMode)
@@ -406,5 +437,7 @@ void AssessButtons (void)
         }
       }
     }
+// </editor-fold>
   }
+  // </editor-fold>
 }

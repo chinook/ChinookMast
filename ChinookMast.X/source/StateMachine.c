@@ -262,7 +262,7 @@ void StateInit(void)
   INIT_TIMER;
   INIT_INPUT_CAPTURE;
   INIT_UART;
-//  INIT_SKADI;
+  INIT_SKADI;
   INIT_SPI;
   INIT_PWM;
   INIT_I2C;
@@ -271,6 +271,9 @@ void StateInit(void)
 
   // Send ID to backplane by CAN protocol
   SEND_ID_TO_BACKPLANE;
+  
+  // Send the mode of operation to the steering wheel
+  SEND_MODE_TO_STEERING_WHEEL;
 
   // Get last known position of the mast
   ReadMastPosFromEeprom();
@@ -280,8 +283,8 @@ void StateInit(void)
     mastAngle.currentValue  = 0;
   }
 
-  float allo = 36.0f;
-  memcpy((void *) &rxWindAngle, (void *) &allo, 4);
+//  float allo = 36.0f;
+//  memcpy((void *) &rxWindAngle, (void *) &allo, 4);
 
   // Init registers for the drive
   InitDriver();
@@ -396,6 +399,12 @@ void StateGetMastData(void)
 void StateCalib(void)
 {
   oCalibMode = 0;
+  mastAngle.currentValue = 0;
+  mastAngle.previousValue = 0;
+
+  WriteMastPos2Eeprom (); // Write zero to EEPROM
+
+  SEND_CALIB_DONE;  // Confirm that the calib is done
 }
 
 
@@ -487,21 +496,10 @@ void StateSendData(void)
 
   Uart.PutTxFifoBuffer(UART6, &buffer);
   
-//  BYTE txMastAngle[4];
-//
-//  memcpy(&txMastAngle[0], (void *) &mastCurrentPos, 4);   // mastCurrentPos is a float
-//
-//  Can.SendByteArray(CAN1, 0x55, &txMastAngle[0], 4);
+//  Can.SendFloat(CAN1, MAST_DIRECTION_SID, mastAngle.currentValue);
+  SEND_MAST_DIRECTION;
   
   WriteMastPos2Eeprom();
-//
-//  sUartLineBuffer_t buffer =
-//  {
-//    .buffer = {0}
-//   ,.length =  0
-//  };
-//
-//  buffer.length = sprintf(buffer.buffer, "PWM = %\r\n");
 }
 
 
@@ -511,13 +509,6 @@ void StateSendData(void)
 //===============================================================
 void StateAcq(void)
 {
-
-  sUartLineBuffer_t buffer =
-  {
-    .buffer = {0}
-   ,.length =  0
-  };
-
   if (oManualMode)
   {
     LED_DEBUG0_ON;
@@ -531,5 +522,6 @@ void StateAcq(void)
 
   AssessMastValues();
 
-  Skadi.GetCmdMsg();
+//  Skadi.GetCmdMsg();
+  Skadi.GetCmdMsgFifo();
 }

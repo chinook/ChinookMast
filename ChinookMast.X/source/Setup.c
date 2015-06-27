@@ -45,6 +45,7 @@ sSkadiCommand_t skadiCommandTable[] =
    {"LedDebug"    , LedDebug    , 1, "Usage : flash Led DEBUG"}   // 1 argument
   ,{"LedCan"      , LedCan      , 1, "Usage : flash Led CAN"}     // 1 argument
   ,{"ReInitSystem", ReInitSystem, 0, "Redo StateInit()"}          // 0 argument
+  ,{"SetWind"     , SetWind     , 1, "Set wind angle"}            // 1 argument
 };
 
 //===========================
@@ -81,7 +82,7 @@ void InitTimer(void)
 //===========================
 void InitSkadi(void)
 {
-  Skadi.Init(skadiCommandTable, sizeof(skadiCommandTable)/sizeof(sSkadiCommand_t), UART6, FALSE);
+  Skadi.Init(skadiCommandTable, sizeof(skadiCommandTable)/sizeof(sSkadiCommand_t), UART6, TRUE);
 }
 
 //===========================
@@ -295,8 +296,7 @@ void InitCan(void)
   Can.SetChannel(CAN1, CAN_CHANNEL1, 8, RX);
   Can.SetChannelMask(CAN1, CAN_CHANNEL1, CAN_FILTER0, 0x42, CAN_FILTER_MASK0, 0x7FF);
 
-
-//  // Data from telemetry
+  // Data from telemetry
   Can.SetChannel(CAN1, CAN_CHANNEL2, 8, RX);
   Can.SetChannelMask(CAN1, CAN_CHANNEL2, CAN_FILTER1, 0x20, CAN_FILTER_MASK0, 0x7FF);
 

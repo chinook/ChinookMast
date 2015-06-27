@@ -1,11 +1,17 @@
 TODO
 
-Trouve pas vitesse = 0 en auto
-Angles et vitesses précis
-Redondance EEPROM
-Envoyer orientation du mât
-Envoyer mode manual ou auto
+Calib				// Done
+Bouton calib sur le volant	// Done
+Envoyer orientation du mât	// Done
+Envoyer mode manual ou auto	// Done
+Trouve pas vitesse = 0 en auto	// À cause du UART
+Commande skadi pour vitesse	// Done
+Angles et vitesses précis (essayer direct dans les interrupts)
 Tester algo avec mât
+Revoir le stop (lors du changement de mode)
+Redondance EEPROM
 
 
 Interrupts SPI
+
+SetWind 

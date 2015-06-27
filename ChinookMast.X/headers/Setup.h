@@ -114,8 +114,20 @@ void StartInterrupts  (void);
 #define LED_CAN_TOGGLE      Port.B.ToggleBits(BIT_13)
 #define LED_STATUS_TOGGLE   Port.F.ToggleBits(BIT_3)
 
-#define LED_ALL_OFF()   { LED_DEBUG0_OFF; LED_DEBUG1_OFF; LED_DEBUG2_OFF; LED_DEBUG3_OFF; LED_DEBUG4_OFF; LED_ERROR_OFF; LED_CAN_OFF; LED_STATUS_OFF; }
-#define LED_ALL_ON()   { LED_DEBUG0_ON; LED_DEBUG1_ON; LED_DEBUG2_ON; LED_DEBUG3_ON; LED_DEBUG4_ON; LED_ERROR_ON; LED_CAN_ON; LED_STATUS_ON; }
+#define LED_ALL_OFF()     { LED_DEBUG0_OFF    ; LED_DEBUG1_OFF    ; \
+                            LED_DEBUG2_OFF    ; LED_DEBUG3_OFF    ; \
+                            LED_DEBUG4_OFF    ; LED_ERROR_OFF     ; \
+                            LED_CAN_OFF       ; LED_STATUS_OFF    ; }
+
+#define LED_ALL_ON()      { LED_DEBUG0_ON     ; LED_DEBUG1_ON     ; \
+                            LED_DEBUG2_ON     ; LED_DEBUG3_ON     ; \
+                            LED_DEBUG4_ON     ; LED_ERROR_ON      ; \
+                            LED_CAN_ON        ; LED_STATUS_ON     ; }
+
+#define LED_ALL_TOGGLE()  { LED_DEBUG0_TOGGLE ; LED_DEBUG1_TOGGLE ; \
+                            LED_DEBUG2_TOGGLE ; LED_DEBUG3_TOGGLE ; \
+                            LED_DEBUG4_TOGGLE ; LED_ERROR_TOGGLE  ; \
+                            LED_CAN_TOGGLE    ; LED_STATUS_TOGGLE ; }
 
 //==============================================================================
 // Define INPUT SWITCH
@@ -173,15 +185,6 @@ void StartInterrupts  (void);
 //==============================================================================
 #define DRVA_IO_CON1      PORTDbits.RD8
 #define DRVA_IO_CON2      PORTDbits.RD10
-
-
-//==============================================================================
-// Define ADRESS EEPROM
-//==============================================================================
-#define ADD_Mast_NOW          0X0100
-#define ADD_Mast_CONGIGNE     0X0101
-#define ADD_PITCH_NOW         0X0200
-#define ADD_PITCH_CONGIGNE    0X0201
 
 
 enum drvRegAdress {
@@ -280,13 +283,26 @@ BYTE Can1MessageFifoArea [ CAN_NB_CHANNELS     // Space used by CAN
                          * CAN_TX_RX_MESSAGE_SIZE_BYTES
                          ];
 
+#define MAST_BOARD_SID        0x30
+#define MAST_DISCONNECT_SID   0x31
+#define MAST_DIRECTION_SID    0x32
+#define MAST_MODE_SID         0x33
+#define MAST_CALIB_DONE_SID   0x34
+
 // Message 0 : Identification
-#define SEND_ID_TO_BACKPLANE          Can.SendByte(CAN1, 0x30, 0x00)
+#define SEND_ID_TO_BACKPLANE          Can.SendByte(CAN1, MAST_BOARD_SID, 0x00)
 
 // Message 1 : Disconnect
-#define SEND_DISCONNECT_TO_BACKPLANE  Can.SendByte(CAN1, 0x31, 0x00)
+#define SEND_DISCONNECT_TO_BACKPLANE  Can.SendByte(CAN1, MAST_DISCONNECT_SID, 0x00)
 
-#define MAST_DIRECTION_SID    0x55
+// Message 2 : Mast orientation
+#define SEND_MAST_DIRECTION           Can.SendFloat(CAN1, MAST_DIRECTION_SID, mastAngle.currentValue)
+
+// Message 3 : Mast mode of operation
+#define SEND_MODE_TO_STEERING_WHEEL   Can.SendByte(CAN1, MAST_MODE_SID, (BYTE) oManualMode)
+
+// Message 4 : Mast calib done
+#define SEND_CALIB_DONE               Can.SendByte(CAN1, MAST_CALIB_DONE_SID, 1)
 
 
 #endif	/* __SETUP_H__ */
