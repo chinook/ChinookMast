@@ -263,28 +263,22 @@ void AssessMastValues (void)
 
     if ( !((rx2 > 2000000) || (rx4 > 2000000)) )  // It would mean 0.34 deg/s for the motor shaft, consider it zero
     {
-//      if (ABS(100 - rx2*100/rx4) < 30)
-//      {
-        firstIc = InputCapture.GetDirection(IC2, IC4, rx4, SCALE_US);
+      firstIc = InputCapture.GetDirection(IC2, IC4, rx4, SCALE_US);
 
-        if (firstIc == IC2)
-        {
-          dir = MAST_DIR_LEFT;
-        }
-        else if (firstIc == IC4)
-        {
-          dir = MAST_DIR_RIGHT;
-        }
-//      }
-//      else
-//      {
-////        LED_ERROR_ON;
-//      }
+      if (firstIc == IC2)
+      {
+        dir = MAST_DIR_LEFT;
+      }
+      else if (firstIc == IC4)
+      {
+        dir = MAST_DIR_RIGHT;
+      }
 
-      meanTime = (rx2 + rx4) / 2;
+//      meanTime = (rx2 + rx4) / 2;
+      meanTime = (rx2 + rx4) >> 1;   // Divide by 2
 
-//        float mastTime = SIGN(meanDir) * (float) meanTime / ((2*inpCapTimes.n - 6));
       float mastTime = SIGN(dir) * (float) meanTime * TIMER_SCALE_US;
+
       if (mastTime == 0)
       {
         mastCurrentSpeed = 0;
@@ -293,10 +287,6 @@ void AssessMastValues (void)
       {
         mastCurrentSpeed = MOTOR_DEG_PER_PULSE / (mastTime * MAST_MOTOR_RATIO);
       }
-      
-
-//      mastCurrentSpeed = MOTOR_ENCODER_RATIO / (mastTime * 360.0f * TIMER_SCALE_US);
-//      mastCurrentSpeed = MOTOR_ENCODER_RATIO * MOTOR_DEG_PER_PULSE / (mastTime * TIMER_SCALE_US);
     }
     else
     {

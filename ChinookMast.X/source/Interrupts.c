@@ -48,6 +48,7 @@ volatile UINT32 rxWindAngle = 0;
 
 extern volatile BOOL  oButtonLeft
                      ,oButtonRight
+                     ,oManualMode
                      ,oCountTimeToChngMode
                      ;
 

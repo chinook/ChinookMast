@@ -283,9 +283,6 @@ void StateInit(void)
     mastAngle.currentValue  = 0;
   }
 
-//  float allo = 36.0f;
-//  memcpy((void *) &rxWindAngle, (void *) &allo, 4);
-
   // Init registers for the drive
   InitDriver();
 }
