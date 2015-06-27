@@ -187,10 +187,9 @@ void __ISR(_UART_6_VECTOR, U6_INTERRUPT_PRIORITY) Uart6InterruptHandler(void)
         ,data   // used in UartFifoWrite/Read functions
         ;
 
-  LED_DEBUG1_TOGGLE;
-
   if ( INTGetFlag ( INT_SOURCE_UART_ERROR(UART6)) )
   {
+    LED_ERROR_ON;
     INTClearFlag(INT_SOURCE_UART_ERROR(UART6));
   }
   

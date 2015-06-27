@@ -21,6 +21,7 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #include "..\headers\CommandFunctions.h"
+#include "..\headers\StateFunctions.h"
 
 
 //==============================================================================
@@ -95,6 +96,8 @@ void SetPwm (float cmd)
       outPi.currentValue = 0;
       outPi.previousValue = 0;
 
+      WriteDrive(DRVB, STATUS_Mastw);
+
       if (PRINT_DATA)
       {
         UINT8 i;
@@ -113,17 +116,6 @@ void SetPwm (float cmd)
                   ,data.outPiCurrent[i], data.cmd[i]);
           err = Uart.PutTxFifoBuffer(UART6, &buffer);
         }
-//        UINT8 buffer[130];
-//        UINT8 n;
-//        n = sprintf(buffer, "\n\ri\tpSeed\tSpeed\tpPos\tPos\tpWind\tWind\tError\tpInPi\tinPi\tpOutPi\tOutPi\tcmd\n\r");
-//        Uart.SendDataBuffer(UART6, buffer, n);
-//        for (i = 0; i < data.length; i++)
-//        {
-//          n = sprintf(buffer, "%d\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\n\r", i, data.speedPrevious[i], data.speedCurrent[i], data.posPrevious[i]
-//                  ,data.posCurrent[i],data.windPrevious[i], data.windCurrent[i], data.error[i], data.inPiPrevious[i], data.inPiCurrent[i], data.outPiPrevious[i]
-//                  ,data.outPiCurrent[i], data.cmd[i]);
-//          Uart.SendDataBuffer(UART6, buffer, n);
-//        }
         data.length = 0;
       }
     }
@@ -265,7 +257,7 @@ void AssessMastValues (void)
     oCapture2 = 0;
     oCapture4 = 0;
 
-    nTurns++;
+//    nTurns++;
 
     rx2 = InputCapture.GetTimeBetweenCaptures(IC2, SCALE_US);
     rx4 = InputCapture.GetTimeBetweenCaptures(IC4, SCALE_US);

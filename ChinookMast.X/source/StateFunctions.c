@@ -27,7 +27,13 @@
 //==============================================================================
 // Variable declarations
 //==============================================================================
-const UINT16 EEPROM_POS_REGISTER = 0x0200;
+//const UINT16 EEPROM_POS_REGISTER = 0x0200;
+
+I2cEepromInternalRegister_t eepromFirstRegister =
+{
+  .index.pageIndex = 0b00010000
+ ,.index.byteIndex = 0b000000
+};
 
 volatile sButtonStates_t buttons =
 {
@@ -70,8 +76,10 @@ void WriteMastPos2Eeprom (void)
 {
   UINT8 dataBuffer[7];
   dataBuffer[0] = I2c.Var.eepromAddress.byte;
-  dataBuffer[1] = EEPROM_POS_REGISTER >> 8;
-  dataBuffer[2] = EEPROM_POS_REGISTER;
+  dataBuffer[1] = eepromFirstRegister.address.highByte;
+  dataBuffer[2] = eepromFirstRegister.address.lowByte;
+//  dataBuffer[1] = EEPROM_POS_REGISTER >> 8;
+//  dataBuffer[2] = EEPROM_POS_REGISTER;
 
   memcpy(&dataBuffer[3], (void *) &mastAngle.currentValue, 4);
 
@@ -88,8 +96,10 @@ void ReadMastPosFromEeprom (void)
   UINT8 slaveAddPlusRegBuf[3];
 
   slaveAddPlusRegBuf[0] = I2c.Var.eepromAddress.byte;
-  slaveAddPlusRegBuf[1] = EEPROM_POS_REGISTER >> 8;
-  slaveAddPlusRegBuf[2] = EEPROM_POS_REGISTER;
+  slaveAddPlusRegBuf[1] = eepromFirstRegister.address.highByte;
+  slaveAddPlusRegBuf[2] = eepromFirstRegister.address.lowByte;
+//  slaveAddPlusRegBuf[1] = EEPROM_POS_REGISTER >> 8;
+//  slaveAddPlusRegBuf[2] = EEPROM_POS_REGISTER;
 
   while(I2c.Var.oI2cWriteIsRunning[I2C4]);  // Wait for any I2C4 write sequence to end
   while(I2c.Var.oI2cReadIsRunning[I2C4]);  // Wait for any I2C4 read sequence to end
@@ -140,34 +150,7 @@ void MastManualStop (void)
   oEnableMastStopProcedure = 1;
   LED_STATUS_TOGGLE;
 
-//  UINT8 i;
-//  if (SIGN(mastCurrentSpeed) == MAST_DIR_LEFT)
-//  {
-//    for (i = 0; i < 11; i++)
-//    {
-//      Pwm.SetDutyCycle(PWM_2, 500 + (110 - i*10));
-//      Pwm.SetDutyCycle(PWM_3, 500 - (110 - i*10));
-//      Timer.DelayMs(20);
-//    }
-//  }
-//  else if (SIGN(mastCurrentSpeed) == MAST_DIR_RIGHT)
-//  {
-//    for (i = 0; i < 11; i++)
-//    {
-//      Pwm.SetDutyCycle(PWM_2, 500 - (110 - i*10));
-//      Pwm.SetDutyCycle(PWM_3, 500 + (110 - i*10));
-//      Timer.DelayMs(20);
-//    }
-//  }
-//
-//  Pwm.SetDutyCycle(PWM_2, 500);
-//  Pwm.SetDutyCycle(PWM_3, 500);
-//
-//  DRVB_SLEEP = 0;
-//
-//  mastCurrentSpeed = 0;
-//
-//  WriteMastPos2Eeprom();
+  WriteDrive(DRVB, STATUS_Mastw);
 }
 
 
@@ -220,7 +203,7 @@ void AssessButtons (void)
         SEND_CALIB_DONE;  // Confirm that the calib is done
       }
     }
-// </editor-fold>
+    // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="SW2 on board">
     if (buttons.chng.bits.boardSw2)
@@ -265,12 +248,15 @@ void AssessButtons (void)
         }
         else if (oManualMode)
         {
-          oManualMastLeft = 0;
-          oManualFlagChng = 1;
+          if (oManualMastLeft)
+          {
+            oManualMastLeft = 0;
+            oManualFlagChng = 1;
+          }
         }
       }
     }
-// </editor-fold>
+    // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="SW3 on board">
     if (buttons.chng.bits.boardSw3)
@@ -315,12 +301,15 @@ void AssessButtons (void)
         }
         else if (oManualMode)
         {
-          oManualMastRight = 0;
-          oManualFlagChng = 1;
+          if (oManualMastRight)
+          {
+            oManualMastRight = 0;
+            oManualFlagChng = 1;
+          }
         }
       }
     }
-// </editor-fold>
+    // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="SW1 on steering wheel">
     if (buttons.chng.bits.steerWheelSw1)
@@ -365,12 +354,15 @@ void AssessButtons (void)
         }
         else if (oManualMode)
         {
-          oManualMastLeft = 0;
-          oManualFlagChng = 1;
+          if (oManualMastLeft)
+          {
+            oManualMastLeft = 0;
+            oManualFlagChng = 1;
+          }
         }
       }
     }
-// </editor-fold>
+    // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="SW3 on steering wheel">
     if (buttons.chng.bits.steerWheelSw3)
@@ -387,7 +379,7 @@ void AssessButtons (void)
         SEND_CALIB_DONE;  // Confirm that the calib is done
       }
     }
-// </editor-fold>
+    // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="SW10 on steering wheel">
     if (buttons.chng.bits.steerWheelSw10)
@@ -432,12 +424,15 @@ void AssessButtons (void)
         }
         else if (oManualMode)
         {
-          oManualMastRight = 0;
-          oManualFlagChng = 1;
+          if (oManualMastRight)
+          {
+            oManualMastRight = 0;
+            oManualFlagChng = 1;
+          }
         }
       }
     }
-// </editor-fold>
+    // </editor-fold>
   }
   // </editor-fold>
 }

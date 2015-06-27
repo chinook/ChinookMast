@@ -58,6 +58,9 @@ void AssessButtons (void);
 // Macro definitions
 //==============================================================================
 
+// Defined at one when debugging via UART, else 0
+#define SEND_DATA_TO_UART     0
+
 // Typedef for mapping the steering wheel switches and the buttons on the board
 typedef union
 {

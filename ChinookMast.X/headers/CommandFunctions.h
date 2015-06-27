@@ -56,7 +56,7 @@
 #define K                            0.400f
 #define T                            0.100f
 #define PWM_MAX_DUTY_CYCLE           0.980f
-#define PWM_MIN_DUTY_CYCLE           0.020f
+#define PWM_MIN_DUTY_CYCLE           0.030f
 
 
 //const float  KP = 0.015f

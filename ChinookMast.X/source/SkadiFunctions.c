@@ -22,6 +22,7 @@
 
 #include "..\headers\SkadiFunctions.h"
 #include "..\headers\CommandFunctions.h"
+#include "..\headers\StateFunctions.h"
 
 
 //==============================================================================
@@ -32,9 +33,14 @@
 //==============================================================================
 // Variable definitions
 //==============================================================================
-extern volatile sCmdValue_t mastAngle;
+extern volatile sCmdValue_t  mastAngle
+                            ,windAngle
+                            ;
+
 extern volatile float mastCurrentSpeed;
+
 extern volatile UINT32 rxWindAngle;
+
 extern volatile BOOL oManualMode;
 
 //==============================================================================
@@ -75,7 +81,7 @@ void LedDebug(sSkadi_t *skadi, sSkadiArgs_t args)
   }
   else
   {
-    buffer.length = sprintf(buffer.buffer, "Cette led n'existe pas!\r\n");
+    buffer.length = sprintf(buffer.buffer, "Cette led n'existe pas!\r\n\n");
     Uart.PutTxFifoBuffer(UART6, &buffer);
   }
 }
@@ -96,19 +102,139 @@ void SetMode(sSkadi_t *skadi, sSkadiArgs_t args)
 
   if (mode == 0)    // Auto mode
   {
-    oManualMode = 0;
-    SEND_MODE_TO_STEERING_WHEEL;
+    if (oManualMode)
+    {
+      oManualMode = 0;
+      SEND_MODE_TO_STEERING_WHEEL;
+      buffer.length = sprintf(buffer.buffer, "Mast is in Automatic Mode (oManualMode == 0)\r\n\n");
+    }
+    else
+    {
+      buffer.length = sprintf(buffer.buffer, "Mast is already in Automatic Mode!! (oManualMode == 0)\r\n\n");
+    }
   }
   else if (mode == 1)    // Manual mode
   {
-    oManualMode = 1;
-    SEND_MODE_TO_STEERING_WHEEL;
+    if (!oManualMode)
+    {
+      oManualMode = 1;
+      SEND_MODE_TO_STEERING_WHEEL;
+      buffer.length = sprintf(buffer.buffer, "Mast is in Manual Mode (oManualMode == 1)\r\n\n");
+    }
+    else
+    {
+      buffer.length = sprintf(buffer.buffer, "Mast is already in Manual Mode!! (oManualMode == 1)\r\n\n");
+    }
   }
   else
   {
-    buffer.length = sprintf(buffer.buffer, "Mauvais argument!\r\n");
-    Uart.PutTxFifoBuffer(UART6, &buffer);
+    buffer.length = sprintf(buffer.buffer, "Mauvais argument!\r\n\n");
   }
+  
+  Uart.PutTxFifoBuffer(UART6, &buffer);
+}
+
+
+/**************************************************************
+ * Function name  : GetMode
+ * Purpose        : Send the current mast mode of operation
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void GetMode(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  sUartLineBuffer_t buffer;
+  
+  if (oManualMode)
+  {
+    buffer.length = sprintf(buffer.buffer, "Mast is in Manual Mode (oManualMode == 1)\r\n\n");
+  }
+  else
+  {
+    buffer.length = sprintf(buffer.buffer, "Mast is in Automatic Mode (oManualMode == 0)\r\n\n");
+  }
+
+  Uart.PutTxFifoBuffer(UART6, &buffer);
+}
+
+
+/**************************************************************
+ * Function name  : Clear
+ * Purpose        : Clear the terminal window
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void Clear(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  sUartLineBuffer_t buffer;
+  buffer.buffer[0] = '\n';
+  buffer.buffer[1] = '\r';
+  UINT8 i;
+
+  for (i = 2; i < 50; i++)
+  {
+    buffer.buffer[i] = '\n';
+  }
+  buffer.length = i;
+  
+  Uart.PutTxFifoBuffer(UART6, &buffer);
+}
+
+
+/**************************************************************
+ * Function name  : WriteStatus
+ * Purpose        : Write STATUS msg to the drive
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void WriteStatus(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  WriteDrive(DRVB, STATUS_Mastw);
+  sUartLineBuffer_t buffer;
+  buffer.length = sprintf(buffer.buffer, "STATUS msg written to drive\r\n\n");
+  Uart.PutTxFifoBuffer(UART6, &buffer);
+}
+
+
+/**************************************************************
+ * Function name  : GetSpeed
+ * Purpose        : Send the current mast speed [deg/s]
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void GetSpeed(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  sUartLineBuffer_t buffer;
+  buffer.length = sprintf(buffer.buffer, "MastSpeed = %f\r\n\n", mastCurrentSpeed);
+  Uart.PutTxFifoBuffer(UART6, &buffer);
+}
+
+
+/**************************************************************
+ * Function name  : GetWind
+ * Purpose        : Send the wind angle
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void GetWind(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  sUartLineBuffer_t buffer;
+  buffer.length = sprintf(buffer.buffer, "WindAngle = %f\r\n\n", windAngle.currentValue);
+  Uart.PutTxFifoBuffer(UART6, &buffer);
+}
+
+
+/**************************************************************
+ * Function name  : GetPos
+ * Purpose        : Send the mast angle
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void GetPos(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  sUartLineBuffer_t buffer;
+  buffer.length = sprintf(buffer.buffer, "MastAngle = %f\r\n\n", mastAngle.currentValue);
+  Uart.PutTxFifoBuffer(UART6, &buffer);
 }
 
 
@@ -133,10 +259,12 @@ void SetPos(sSkadi_t *skadi, sSkadiArgs_t args)
     {
       SEND_CALIB_DONE;
     }
+    buffer.length = sprintf(buffer.buffer, "MastAngle = %f\r\n\n", mastAngle.currentValue);
+    Uart.PutTxFifoBuffer(UART6, &buffer);
   }
   else
   {
-    buffer.length = sprintf(buffer.buffer, "Mauvais argument!\r\n");
+    buffer.length = sprintf(buffer.buffer, "Mauvais argument!\r\n\n");
     Uart.PutTxFifoBuffer(UART6, &buffer);
   }
 }
@@ -157,10 +285,12 @@ void SetWind(sSkadi_t *skadi, sSkadiArgs_t args)
   if ((wind >= -179) && (wind <= 179))
   {
     memcpy((void *) &rxWindAngle, (void *) &wind, 4);
+    buffer.length = sprintf(buffer.buffer, "WindAngle = %f\r\n\n", wind);
+    Uart.PutTxFifoBuffer(UART6, &buffer);
   }
   else
   {
-    buffer.length = sprintf(buffer.buffer, "Mauvais argument!\r\n");
+    buffer.length = sprintf(buffer.buffer, "Mauvais argument!\r\n\n");
     Uart.PutTxFifoBuffer(UART6, &buffer);
   }
 }

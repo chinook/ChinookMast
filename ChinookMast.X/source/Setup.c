@@ -42,15 +42,15 @@
  **********************************/
 sSkadiCommand_t skadiCommandTable[] =
 {
-   {"LedDebug"    , LedDebug    , 1 , "\tUsage : flash Led DEBUGx"}   // 1 argument
-  ,{"LedCan"      , LedCan      , 0 , "\tUsage : flash Led CAN"   }   // 0 argument
-  ,{"LedStatus"   , LedStatus   , 0 , "\tUsage : flash Led STATUS"}   // 0 argument
-  ,{"LedError"    , LedError    , 0 , "\tUsage : flash Led ERROR" }   // 0 argument
-  ,{"LedCan"      , LedCan      , 0 , "\tUsage : flash Led CAN"   }   // 0 argument
-  ,{"ReInitSystem", ReInitSystem, 0 , "\tUsage : Redo StateInit()"}   // 0 argument
-  ,{"SetWind"     , SetWind     , 1 , "\tUsage : Set wind angle. Min = -179, Max = 179"  }   // 1 argument
-  ,{"SetPos"      , SetPos      , 1 , "\tUsage : Set mast angle. Min = -179, Max = 179"  }   // 1 argument
-  ,{"SetMode"     , SetMode     , 1 , "\tUsage : Set mast mode of operation. 1 = Manual, 0 = Auto"  }   // 1 argument
+   {"SetWind"     , SetWind     , 1 , "\t| Set wind angle.\t\t\t\t| 1 argument : Min = -179, Max = 179"         }   // 1 argument
+  ,{"SetPos"      , SetPos      , 1 , "\t| Set mast angle.\t\t\t\t| 1 argument : Min = -179, Max = 179"         }   // 1 argument
+  ,{"SetMode"     , SetMode     , 1 , "\t| Set mast mode of operation.\t\t\t| 1 argument : 1 = Manual, 0 = Auto"}   // 1 argument
+  ,{"GetWind"     , GetWind     , 0 , "\t| Read the wind current angle [deg].\t\t| No arguments needed"         }   // 0 argument
+  ,{"GetPos"      , GetPos      , 0 , "\t| Read the mast current position [deg].\t\t| No arguments needed"      }   // 0 argument
+  ,{"GetMode"     , GetMode     , 0 , "\t| Get the mast current mode of operation.\t| No arguments needed"      }   // 0 argument
+  ,{"GetSpeed"    , GetSpeed    , 0 , "\t| Read the mast current speed [deg/s].\t\t| No arguments needed"       }   // 0 argument
+  ,{"WriteStatus" , WriteStatus , 0 , "\t| Write STATUS msg to drive.\t\t\t| No arguments needed"               }   // 0 argument
+  ,{"Clear"       , Clear       , 0 , "\t| Clear terminal window.\t\t\t| No arguments needed"                   }   // 0 argument
 };
 
 //===========================

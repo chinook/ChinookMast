@@ -487,14 +487,23 @@ void StateIdle(void)
 void StateSendData(void)
 {
   oTimerSendData = 0;
-  sUartLineBuffer_t buffer;
-
-  buffer.length = sprintf(buffer.buffer, "\n\rCurrent speed\t\t= %f\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r", mastSpeed.currentValue, mastAngle.currentValue, windAngle.currentValue);
-
-  Uart.PutTxFifoBuffer(UART6, &buffer);
   
-//  Can.SendFloat(CAN1, MAST_DIRECTION_SID, mastAngle.currentValue);
+  if (SEND_DATA_TO_UART)
+  {
+    sUartLineBuffer_t buffer;
+    buffer.length = sprintf ( buffer.buffer
+                            , "\n\rCurrent speed\t\t= %f\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
+                            , mastSpeed.currentValue
+                            , mastAngle.currentValue
+                            , windAngle.currentValue
+                            );
+    Uart.PutTxFifoBuffer(UART6, &buffer);
+  }
+  
   SEND_MAST_DIRECTION;
+//  UINT32 tick = Timer.Tic(100, SCALE_MS);
+  WriteDrive(DRVB, STATUS_Mastw);
+//  INT32 time = Timer.Toc(100, tick);
   
   WriteMastPos2Eeprom();
 }

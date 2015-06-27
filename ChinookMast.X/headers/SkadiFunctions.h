@@ -95,6 +95,54 @@ void SetMode();
  *************************************************************/
 void SetPos();
 
+/**************************************************************
+ * Function name  : GetPos
+ * Purpose        : Send the mast angle
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void GetPos();
+
+/**************************************************************
+ * Function name  : GetWind
+ * Purpose        : Send the wind angle
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void GetWind();
+
+/**************************************************************
+ * Function name  : GetSpeed
+ * Purpose        : Send the mast current speed [deg/s]
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void GetSpeed();
+
+/**************************************************************
+ * Function name  : GetMode
+ * Purpose        : Send the current mast mode of operation
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void GetMode();
+
+/**************************************************************
+ * Function name  : Clear
+ * Purpose        : Clear the terminal window
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void Clear();
+
+/**************************************************************
+ * Function name  : WriteStatus
+ * Purpose        : Write STATUS msg to the drive
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void WriteStatus();
+
 
 //==============================================================================
 // Macro definitions
