@@ -47,15 +47,16 @@
 #define MAST_DIR_RIGHT               1
 
 //#define ERROR_THRESHOLD              5.0f
-#define ERROR_THRESHOLD              1.0f
+#define ERROR_THRESHOLD              0.1f
 
 #define KP                           0.015f
 //#define KI                           0.075f
 #define KI                           0.100f
+//#define K                            1.500f
 #define K                            0.400f
-#define T                            0.050f
+#define T                            0.100f
 #define PWM_MAX_DUTY_CYCLE           0.980f
-#define PWM_MIN_DUTY_CYCLE           0.200f
+#define PWM_MIN_DUTY_CYCLE           0.020f
 
 
 //const float  KP = 0.015f
@@ -74,6 +75,8 @@
 
 //#define MOTOR_DEG_PER_PULSE         360.0f/980.0f
 #define MOTOR_DEG_PER_PULSE         360.0f/245.0f
+//#define MOTOR_DEG_PER_PULSE         360.0f/250.0f
+//#define MOTOR_DEG_PER_PULSE         360.0f/252.0f
 
 #define N_DATA_TO_ACQ               200
 

@@ -42,10 +42,12 @@
  **********************************/
 sSkadiCommand_t skadiCommandTable[] =
 {
-   {"LedDebug"    , LedDebug    , 1, "Usage : flash Led DEBUG"}   // 1 argument
-  ,{"LedCan"      , LedCan      , 1, "Usage : flash Led CAN"}     // 1 argument
-  ,{"ReInitSystem", ReInitSystem, 0, "Redo StateInit()"}          // 0 argument
-  ,{"SetWind"     , SetWind     , 1, "Set wind angle"}            // 1 argument
+   {"LedDebug"    , LedDebug    , 1 , "\tUsage : flash Led DEBUGx"}   // 1 argument
+  ,{"LedCan"      , LedCan      , 1 , "\tUsage : flash Led CAN"   }   // 1 argument
+  ,{"ReInitSystem", ReInitSystem, 0 , "\tUsage : Redo StateInit()"}   // 0 argument
+  ,{"SetWind"     , SetWind     , 1 , "\tUsage : Set wind angle"  }   // 1 argument
+  ,{"SetPos"      , SetPos      , 1 , "\tUsage : Set mast angle"  }   // 1 argument
+  ,{"SetMode"     , SetMode     , 1 , "\tUsage : Set mast mode of operation. 1 = Manual, 0 = Auto"  }   // 1 argument
 };
 
 //===========================
@@ -59,7 +61,7 @@ void InitTimer(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //	Open timers
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  timerCounterValue = Timer.Open(TIMER_1, 50, SCALE_MS);   // Timer used for regulating the mast. Period = 100 ms
+  timerCounterValue = Timer.Open(TIMER_1, 100, SCALE_MS);   // Timer used for regulating the mast. Period = 100 ms
   timerCounterValue = Timer.Open(TIMER_2, 11, SCALE_MS);    // Timer used for input capture AND stopping the mast. Period = 11 ms
   timerCounterValue = Timer.Open(TIMER_3, 500, SCALE_US);   // Timer used for PWM. Period = 500 ms (f = 2kHz)
 //  timerCounterValue = Timer.Open(TIMER_4,  15, SCALE_MS);   // Timer used for sending data to other devices. Period = 15 ms (f ~ 66.67 Hz)

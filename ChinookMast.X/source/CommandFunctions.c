@@ -75,13 +75,20 @@ void TustinZ (sCmdValue_t *input, sCmdValue_t *output)
   output->currentValue  = output->previousValue + T/2 * (input->currentValue + input->previousValue);
 }
 
+
 void SetPwm (float cmd)
 {
   if (cmd == 0)
   {
     if (oFirstTimeInMastStop)
     {
-      MastManualStop();
+//      MastManualStop();
+
+      DRVB_SLEEP = 0;
+      Pwm.SetDutyCycle(PWM_2, 500);
+      Pwm.SetDutyCycle(PWM_3, 500);
+      mastCurrentSpeed = 0;
+
       oFirstTimeInMastStop = 0;
       inPi.currentValue = 0;
       inPi.previousValue = 0;
@@ -141,6 +148,7 @@ void SetPwm (float cmd)
     }
   }
 }
+
 
 void Regulator (void)
 {
@@ -219,7 +227,6 @@ void Regulator (void)
   }
 
   if (PRINT_DATA && oFirstTimeInMastStop)
-//  if (PRINT_DATA)
   {
     if (data.length < N_DATA_TO_ACQ)
     {
@@ -257,6 +264,8 @@ void AssessMastValues (void)
   {
     oCapture2 = 0;
     oCapture4 = 0;
+
+    nTurns++;
 
     rx2 = InputCapture.GetTimeBetweenCaptures(IC2, SCALE_US);
     rx4 = InputCapture.GetTimeBetweenCaptures(IC4, SCALE_US);

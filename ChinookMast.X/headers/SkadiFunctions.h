@@ -62,6 +62,23 @@ void ReInitSystem();
  *************************************************************/
 void SetWind();
 
+/**************************************************************
+ * Function name  : SetMode
+ * Purpose        : Set the mast mode of operation
+ * Arguments      : 1 : Manual mode
+ *                  0 : Auto mode
+ * Returns        : None.
+ *************************************************************/
+void SetMode();
+
+/**************************************************************
+ * Function name  : SetPos
+ * Purpose        : Set the mast angle
+ * Arguments      : Received from Skadi functions
+ * Returns        : None.
+ *************************************************************/
+void SetPos();
+
 
 //==============================================================================
 // Macro definitions

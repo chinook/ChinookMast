@@ -32,8 +32,10 @@
 //==============================================================================
 // Variable definitions
 //==============================================================================
-extern volatile sCmdValue_t windAngle;
+extern volatile sCmdValue_t mastAngle;
+extern volatile float mastCurrentSpeed;
 extern volatile UINT32 rxWindAngle;
+extern volatile BOOL oManualMode;
 
 //==============================================================================
 // Functions
@@ -48,8 +50,6 @@ extern volatile UINT32 rxWindAngle;
 void LedDebug(sSkadi_t *skadi, sSkadiArgs_t args)
 {
   sUartLineBuffer_t buffer;
-  buffer.length = sprintf(buffer.buffer, "Cette led n'existe pas!\r\n");
-//  UINT8 errorMsg[] = {"Cette led n'existe pas!\r\n"};
 
   int led = atoi(args.elements[0]);   // Convert argument to int
 
@@ -75,7 +75,64 @@ void LedDebug(sSkadi_t *skadi, sSkadiArgs_t args)
   }
   else
   {
-//    Uart.SendDataBuffer(UART6, errorMsg, sizeof(errorMsg));
+    buffer.length = sprintf(buffer.buffer, "Cette led n'existe pas!\r\n");
+    Uart.PutTxFifoBuffer(UART6, &buffer);
+  }
+}
+
+
+/**************************************************************
+ * Function name  : SetMode
+ * Purpose        : Set the mast mode of operation
+ * Arguments      : 1 : Manual mode
+ *                  0 : Auto mode
+ * Returns        : None.
+ *************************************************************/
+void SetMode(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  sUartLineBuffer_t buffer;
+
+  UINT8 mode = atoi(args.elements[0]);   // Convert argument to int
+
+  if (mode == 0)    // Auto mode
+  {
+    oManualMode = 0;
+    SEND_MODE_TO_STEERING_WHEEL;
+  }
+  else if (mode == 1)    // Manual mode
+  {
+    oManualMode = 1;
+    SEND_MODE_TO_STEERING_WHEEL;
+  }
+  else
+  {
+    buffer.length = sprintf(buffer.buffer, "Mauvais argument!\r\n");
+    Uart.PutTxFifoBuffer(UART6, &buffer);
+  }
+}
+
+
+/**************************************************************
+ * Function name  : SetPos
+ * Purpose        : Set the mast angle
+ * Arguments      : Received from Skadi functions
+ * Returns        : None.
+ *************************************************************/
+void SetPos(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  sUartLineBuffer_t buffer;
+
+  float mast = atoi(args.elements[0]);   // Convert argument to int
+
+  if ((mast >= -179) && (mast <= 179))
+  {
+    mastAngle.currentValue  = mast;
+    mastAngle.previousValue = mast;
+    mastCurrentSpeed = 0;
+  }
+  else
+  {
+    buffer.length = sprintf(buffer.buffer, "Mauvais argument!\r\n");
     Uart.PutTxFifoBuffer(UART6, &buffer);
   }
 }
@@ -90,7 +147,6 @@ void LedDebug(sSkadi_t *skadi, sSkadiArgs_t args)
 void SetWind(sSkadi_t *skadi, sSkadiArgs_t args)
 {
   sUartLineBuffer_t buffer;
-  buffer.length = sprintf(buffer.buffer, "Mauvais argument!\r\n");
 
   float wind = atoi(args.elements[0]);   // Convert argument to int
 
@@ -100,7 +156,7 @@ void SetWind(sSkadi_t *skadi, sSkadiArgs_t args)
   }
   else
   {
-//    Uart.SendDataBuffer(UART6, errorMsg, sizeof(errorMsg));
+    buffer.length = sprintf(buffer.buffer, "Mauvais argument!\r\n");
     Uart.PutTxFifoBuffer(UART6, &buffer);
   }
 }
@@ -114,9 +170,7 @@ void SetWind(sSkadi_t *skadi, sSkadiArgs_t args)
  *************************************************************/
 void LedCan(sSkadi_t *skadi, sSkadiArgs_t args)
 {
-//  UINT8 errorMsg[] = {"Cette led n'existe pas!\r\n"};
   sUartLineBuffer_t buffer;
-  buffer.length = sprintf(buffer.buffer, "Cette led n'existe pas!\r\n");
 
   int led = atoi(args.elements[0]);   // Convert argument to int
 
@@ -126,7 +180,7 @@ void LedCan(sSkadi_t *skadi, sSkadiArgs_t args)
   }
   else
   {
-//    Uart.SendDataBuffer(UART6, errorMsg, sizeof(errorMsg));
+    buffer.length = sprintf(buffer.buffer, "Cette led n'existe pas!\r\n");
     Uart.PutTxFifoBuffer(UART6, &buffer);
   }
 }
