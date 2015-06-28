@@ -39,6 +39,15 @@
 void LedDebug();
 
 /**************************************************************
+ * Function name  : SetPrint
+ * Purpose        : Tells the software to print or not the
+ *                  regulation data.
+ * Arguments      : Received from Skadi functions
+ * Returns        : None.
+ *************************************************************/
+void SetPrint();
+
+/**************************************************************
  * Function name  : LedStatus
  * Purpose        : Toggle LED_STATUS.
  * Arguments      : None.

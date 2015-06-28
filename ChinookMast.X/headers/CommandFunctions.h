@@ -81,7 +81,7 @@
 
 #define N_DATA_TO_ACQ               300
 
-#define PRINT_DATA                  1
+//#define PRINT_DATA                  1
 
 
 typedef struct sCmdValue

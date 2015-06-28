@@ -45,7 +45,9 @@ extern volatile float  mastCurrentSpeed
 
 extern volatile UINT32 rxWindAngle;
 
-extern volatile BOOL oManualMode;
+extern volatile BOOL   oManualMode
+                      ,oPrintData
+                      ;
 
 //==============================================================================
 // Functions
@@ -313,26 +315,27 @@ void SetParam(sSkadi_t *skadi, sSkadiArgs_t args)
   if (!strcmp(kStr, args.elements[0]))
   {
     K = value;
-    buffer.length = sprintf(buffer.buffer, "K = %.4f\r\n\n", K);
-    Uart.PutTxFifoBuffer(UART6, &buffer);
+//    buffer.length = sprintf(buffer.buffer, "K = %.4f\r\n\n", K);
+    buffer.length = sprintf(buffer.buffer, "\nK\t= %.4f\r\nKI\t= %.4f\r\nKP\t= %.4f\r\n\n", K, KI, KP);
   }
   else if (!strcmp(kiStr, args.elements[0]))
   {
     KI = value;
-    buffer.length = sprintf(buffer.buffer, "KI = %.4f\r\n\n", KI);
-    Uart.PutTxFifoBuffer(UART6, &buffer);
+//    buffer.length = sprintf(buffer.buffer, "KI = %.4f\r\n\n", KI);
+    buffer.length = sprintf(buffer.buffer, "\nK\t= %.4f\r\nKI\t= %.4f\r\nKP\t= %.4f\r\n\n", K, KI, KP);
   }
   else if (!strcmp(kpStr, args.elements[0]))
   {
     KP = value;
-    buffer.length = sprintf(buffer.buffer, "KP = %.4f\r\n\n", KP);
-    Uart.PutTxFifoBuffer(UART6, &buffer);
+//    buffer.length = sprintf(buffer.buffer, "KP = %.4f\r\n\n", KP);
+    buffer.length = sprintf(buffer.buffer, "\nK\t= %.4f\r\nKI\t= %.4f\r\nKP\t= %.4f\r\n\n", K, KI, KP);
   }
   else
   {
     buffer.length = sprintf(buffer.buffer, "Mauvais argument!\r\n\n");
-    Uart.PutTxFifoBuffer(UART6, &buffer);
   }
+
+  Uart.PutTxFifoBuffer(UART6, &buffer);
 }
 
 
@@ -386,6 +389,51 @@ void LedError(sSkadi_t *skadi, sSkadiArgs_t args)
 void LedStatus(sSkadi_t *skadi, sSkadiArgs_t args)
 {
   LED_STATUS_TOGGLE;
+}
+
+
+/**************************************************************
+ * Function name  : SetPrint
+ * Purpose        : Tells the software to print or not the
+ *                  regulation data.
+ * Arguments      : Received from Skadi functions
+ * Returns        : None.
+ *************************************************************/
+void SetPrint(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  UINT8 oPrint = atoi(args.elements[0]);   // Convert argument to int
+  sUartLineBuffer_t buffer;
+
+  if (oPrint == 1)
+  {
+    if (oPrintData)
+    {
+      buffer.length = sprintf(buffer.buffer, "Already in printing mode!!\r\n\n");
+    }
+    else
+    {
+      oPrintData = 1;
+      buffer.length = sprintf(buffer.buffer, "Program will print data, now.\r\n\n");
+    }
+  }
+  else if (oPrint == 0)
+  {
+    if (!oPrintData)
+    {
+      buffer.length = sprintf(buffer.buffer, "Already not printing data!!\r\n\n");
+    }
+    else
+    {
+      oPrintData = 0;
+      buffer.length = sprintf(buffer.buffer, "Program won't print data, now.\r\n\n");
+    }
+  }
+  else
+  {
+    buffer.length = sprintf(buffer.buffer, "Mauvais argument!\r\n\n");
+  }
+
+  Uart.PutTxFifoBuffer(UART6, &buffer);
 }
 
 

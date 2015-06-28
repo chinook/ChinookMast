@@ -9,11 +9,10 @@ Commande skadi pour vitesse	// Done
 Angles et vitesses précis (essayer direct dans les interrupts)
 				// C'était précis, c'est juste l'erreur qui ne l'était pas
 Revoir limites en mode auto. De la misère passer de 72 à -72
+				// Parce qu'il est sous-amorti
 Tester algo avec mât
-Revoir le stop (lors du changement de mode)
+Revoir le stop (lors du changement de mode)	// Done
 Redondance EEPROM
 
 
 Interrupts SPI
-
-SetWind 36

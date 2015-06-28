@@ -55,7 +55,10 @@ extern volatile BOOL oCapture1
                     ,oTimerReg
                     ;
 
+volatile BOOL oPrintData = 0;
+
 BOOL  oFirstTimeInMastStop    = 0
+     ,oEmergencyStop          = 0
      ;
 
 // Regulator parameters
@@ -84,7 +87,17 @@ void SetPwm (float cmd)
 {
   if (cmd == 0)
   {
-    if (oFirstTimeInMastStop)
+    if (oEmergencyStop)
+    {
+      MastManualStop();
+      oEmergencyStop = 0;
+      inPi.currentValue = 0;
+      inPi.previousValue = 0;
+      outPi.currentValue = 0;
+      outPi.previousValue = 0;
+      LED_CAN_TOGGLE;
+    }
+    else if (oFirstTimeInMastStop)
     {
 //      MastManualStop();
 
@@ -103,9 +116,9 @@ void SetPwm (float cmd)
       
       WriteMastPos2Eeprom();
 
-      if (PRINT_DATA)
+      if (oPrintData)
       {
-        UINT8 i;
+        UINT16 i;
         INT32 err = 0;
         sUartLineBuffer_t buffer;
         buffer.length = sprintf(buffer.buffer, "\n\ri\tpSeed\tSpeed\tpPos\tPos\tpWind\tWind\tError\tpInPi\tinPi\tpOutPi\tOutPi\tcmd\n\r");
@@ -173,7 +186,7 @@ void Regulator (void)
   {
     windAngle.currentValue = MAST_MIN;
   }
-  else if (tempWind != windAngle.currentValue)
+  else // if (tempWind != windAngle.currentValue)
   {
     windAngle.currentValue = tempWind;
   }
@@ -202,14 +215,17 @@ void Regulator (void)
   }
   else if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )   // Mast too far
   {
+    oEmergencyStop = 1;
     cmd = 0;
   }
   else if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) && (mastSpeed.currentValue != 0) )  // Mast too far
   {
+    oEmergencyStop = 1;
     cmd = 0;
   }
   else
   {
+    oEmergencyStop = 0;
     oFirstTimeInMastStop = 1;
 
     inPi.previousValue = inPi.currentValue;
@@ -229,7 +245,7 @@ void Regulator (void)
     }
   }
 
-  if (PRINT_DATA && oFirstTimeInMastStop)
+  if (oPrintData && oFirstTimeInMastStop)
   {
     if (data.length < N_DATA_TO_ACQ)
     {
