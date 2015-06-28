@@ -27,19 +27,6 @@
 #include "StateMachine.h"
 
 
-/*
- *  ____________     ___  error  ___     ___      _______ inPi  ____ outPi   ___     ________   __________      _______
- * | wind angle |-> /+  \ ----->| K |-> /+  \ -> | 1 / s |---->| ki |-----> /+  \ ->| Motor |->| Encodeur |--->| 1 / s |__
- * |____________|   \_-_/       |___|   \_-_/    |_______| |   |____|       \_+_/   |_______|  |__________| |  |_______|  |
- *                    ^                   ^                |    _____         ^                             |             |
- *                    |                   |                |   | kp |         |                             |             |
- *                    |                   |                 -->|____|---------            mastCurrentSpeed  |             |
- *                    |                   |_________________________________________________________________|             |
- *                    |___________________________________________________________________________________________________|
- *                                                                                        mastCurrentPos
- */
-
-
 //==============================================================================
 // Macro definitions
 //==============================================================================
@@ -59,25 +46,12 @@
 #define PWM_MAX_DUTY_CYCLE           0.980f
 #define PWM_MIN_DUTY_CYCLE           0.030f
 
-
-//const float  KP = 0.015f
-////            ,KI = 0.075f
-//            ,KI = 0.100f
-//            ,K  = 0.5f
-//            ,T  = 0.05f
-//            ,pwmMaxDutyCycle  = 0.98f
-//            ,pwmMinDutyCycle  = 0.2f
-//            ;
-
 #define MOTOR_ENCODER_RATIO         49.0f
 #define MAST_MOTOR_RATIO            50.0f
 
 #define INP_CAP_EVENTS_FOR_AVERAGE  20
 
-//#define MOTOR_DEG_PER_PULSE         360.0f/980.0f
 #define MOTOR_DEG_PER_PULSE         360.0f/245.0f
-//#define MOTOR_DEG_PER_PULSE         360.0f/250.0f
-//#define MOTOR_DEG_PER_PULSE         360.0f/252.0f
 
 #define N_DATA_TO_ACQ               300
 
@@ -90,15 +64,6 @@ typedef struct sCmdValue
         ,currentValue
         ;
 } sCmdValue_t;
-
-
-//typedef struct sInpCapValues
-//{
-//  UINT32 inpCapTime2  [INP_CAP_EVENTS_FOR_AVERAGE + 10];
-//  UINT32 inpCapTime4  [INP_CAP_EVENTS_FOR_AVERAGE + 10];
-//  INT8   dir          [INP_CAP_EVENTS_FOR_AVERAGE + 10];
-//  UINT16 n;
-//} sInpCapValues_t;
 
 //==============================================================================
 // Variable declarations

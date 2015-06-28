@@ -497,13 +497,13 @@ void StateSendData(void)
                             , mastAngle.currentValue
                             , windAngle.currentValue
                             );
+    
     Uart.PutTxFifoBuffer(UART6, &buffer);
   }
   
-  SEND_MAST_DIRECTION;
-//  UINT32 tick = Timer.Tic(100, SCALE_MS);
-  WriteDrive(DRVB, STATUS_Mastw);
-//  INT32 time = Timer.Toc(100, tick);
+  SEND_MAST_DIRECTION;  // Via CAN bus
+
+  WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors
   
 //  WriteMastPos2Eeprom();
 }
@@ -528,6 +528,5 @@ void StateAcq(void)
 
   AssessMastValues();
 
-//  Skadi.GetCmdMsg();
   Skadi.GetCmdMsgFifo();
 }
