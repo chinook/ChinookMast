@@ -505,7 +505,7 @@ void StateSendData(void)
   WriteDrive(DRVB, STATUS_Mastw);
 //  INT32 time = Timer.Toc(100, tick);
   
-  WriteMastPos2Eeprom();
+//  WriteMastPos2Eeprom();
 }
 
 

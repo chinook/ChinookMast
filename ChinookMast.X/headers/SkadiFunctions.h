@@ -128,12 +128,12 @@ void GetSpeed();
 void GetMode();
 
 /**************************************************************
- * Function name  : Clear
+ * Function name  : ClearScreen
  * Purpose        : Clear the terminal window
  * Arguments      : None.
  * Returns        : None.
  *************************************************************/
-void Clear();
+void ClearScreen();
 
 /**************************************************************
  * Function name  : WriteStatus
@@ -142,6 +142,22 @@ void Clear();
  * Returns        : None.
  *************************************************************/
 void WriteStatus();
+
+/**************************************************************
+ * Function name  : SetParam
+ * Purpose        : Adjust one of the regulator parameters (K, KI or KP)
+ * Arguments      : Received from Skadi functions
+ * Returns        : None.
+ *************************************************************/
+void SetParam();
+
+/**************************************************************
+ * Function name  : GetParam
+ * Purpose        : Send the current mast parameters K, KI, KP
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void GetParam();
 
 
 //==============================================================================

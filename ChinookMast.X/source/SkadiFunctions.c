@@ -37,7 +37,11 @@ extern volatile sCmdValue_t  mastAngle
                             ,windAngle
                             ;
 
-extern volatile float mastCurrentSpeed;
+extern volatile float  mastCurrentSpeed
+                      ,KP
+                      ,KI
+                      ,K
+                      ;
 
 extern volatile UINT32 rxWindAngle;
 
@@ -136,6 +140,22 @@ void SetMode(sSkadi_t *skadi, sSkadiArgs_t args)
 
 
 /**************************************************************
+ * Function name  : GetParam
+ * Purpose        : Send the current mast parameters K, KI, KP
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void GetParam(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  sUartLineBuffer_t buffer;
+
+  buffer.length = sprintf(buffer.buffer, "\nK\t= %.4f\r\nKI\t= %.4f\r\nKP\t= %.4f\r\n\n", K, KI, KP);
+
+  Uart.PutTxFifoBuffer(UART6, &buffer);
+}
+
+
+/**************************************************************
  * Function name  : GetMode
  * Purpose        : Send the current mast mode of operation
  * Arguments      : None.
@@ -159,12 +179,12 @@ void GetMode(sSkadi_t *skadi, sSkadiArgs_t args)
 
 
 /**************************************************************
- * Function name  : Clear
+ * Function name  : ClearScreen
  * Purpose        : Clear the terminal window
  * Arguments      : None.
  * Returns        : None.
  *************************************************************/
-void Clear(sSkadi_t *skadi, sSkadiArgs_t args)
+void ClearScreen(sSkadi_t *skadi, sSkadiArgs_t args)
 {
   sUartLineBuffer_t buffer;
   buffer.buffer[0] = '\n';
@@ -248,10 +268,13 @@ void SetPos(sSkadi_t *skadi, sSkadiArgs_t args)
 {
   sUartLineBuffer_t buffer;
 
-  float mast = atoi(args.elements[0]);   // Convert argument to int
+//  float mast = atoi(args.elements[0]);   // Convert argument to int
+  float mast = atof(args.elements[0]);   // Convert argument to float
 
+//  if ((mast >= -1790) && (mast <= 1790))
   if ((mast >= -179) && (mast <= 179))
   {
+//    mast /= 10.0f;
     mastAngle.currentValue  = mast;
     mastAngle.previousValue = mast;
     mastCurrentSpeed = 0;
@@ -260,6 +283,49 @@ void SetPos(sSkadi_t *skadi, sSkadiArgs_t args)
       SEND_CALIB_DONE;
     }
     buffer.length = sprintf(buffer.buffer, "MastAngle = %f\r\n\n", mastAngle.currentValue);
+    Uart.PutTxFifoBuffer(UART6, &buffer);
+  }
+  else
+  {
+    buffer.length = sprintf(buffer.buffer, "Mauvais argument!\r\n\n");
+    Uart.PutTxFifoBuffer(UART6, &buffer);
+  }
+}
+
+
+/**************************************************************
+ * Function name  : SetParam
+ * Purpose        : Adjust one of the regulator parameters
+ * Arguments      : Received from Skadi functions
+ * Returns        : None.
+ *************************************************************/
+void SetParam(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  sUartLineBuffer_t buffer;
+
+  float value = atof(args.elements[1]);   // Convert argument to float
+
+  UINT8 kStr[]  = "K\0"
+       ,kiStr[] = "KI\0"
+       ,kpStr[] = "KP\0"
+       ;
+
+  if (!strcmp(kStr, args.elements[0]))
+  {
+    K = value;
+    buffer.length = sprintf(buffer.buffer, "K = %.4f\r\n\n", K);
+    Uart.PutTxFifoBuffer(UART6, &buffer);
+  }
+  else if (!strcmp(kiStr, args.elements[0]))
+  {
+    KI = value;
+    buffer.length = sprintf(buffer.buffer, "KI = %.4f\r\n\n", KI);
+    Uart.PutTxFifoBuffer(UART6, &buffer);
+  }
+  else if (!strcmp(kpStr, args.elements[0]))
+  {
+    KP = value;
+    buffer.length = sprintf(buffer.buffer, "KP = %.4f\r\n\n", KP);
     Uart.PutTxFifoBuffer(UART6, &buffer);
   }
   else
@@ -280,10 +346,13 @@ void SetWind(sSkadi_t *skadi, sSkadiArgs_t args)
 {
   sUartLineBuffer_t buffer;
 
-  float wind = atoi(args.elements[0]);   // Convert argument to int
+  float wind = atof(args.elements[0]);   // Convert argument to float
+//  float wind = atoi(args.elements[0]);   // Convert argument to int
 
   if ((wind >= -179) && (wind <= 179))
+//  if ((wind >= -1790) && (wind <= 1790))
   {
+//    wind /= 10.0f;
     memcpy((void *) &rxWindAngle, (void *) &wind, 4);
     buffer.length = sprintf(buffer.buffer, "WindAngle = %f\r\n\n", wind);
     Uart.PutTxFifoBuffer(UART6, &buffer);

@@ -33,7 +33,6 @@ UINT16 nTurns = 0;
 
 sCmdData_t data = {0};
 
-//volatile sCmdValue_t windAngle          = {.currentValue = 60, .previousValue = 60}
 volatile sCmdValue_t windAngle          = {0}
                     ,mastAngle          = {0}
                     ,mastSpeed          = {0}
@@ -44,8 +43,6 @@ volatile sCmdValue_t windAngle          = {0}
 sCmdValue_t  inPi   = {0}
             ,outPi  = {0}
             ;
-
-//sInpCapValues_t inpCapTimes = {0};
 
 // Mast general value
 extern volatile float  mastCurrentSpeed      // Actual speed of Mast
@@ -60,6 +57,12 @@ extern volatile BOOL oCapture1
 
 BOOL  oFirstTimeInMastStop    = 0
      ;
+
+// Regulator parameters
+volatile float KP = 0.015f
+              ,KI = 0.050f
+              ,K  = 0.400f
+              ;
 
 //==============================================================================
 // Mast regulation private functions prototypes
@@ -97,6 +100,8 @@ void SetPwm (float cmd)
       outPi.previousValue = 0;
 
       WriteDrive(DRVB, STATUS_Mastw);
+      
+      WriteMastPos2Eeprom();
 
       if (PRINT_DATA)
       {
@@ -107,15 +112,21 @@ void SetPwm (float cmd)
         Uart.PutTxFifoBuffer(UART6, &buffer);
         for (i = 0; i < data.length; i++)
         {
-          if (err < 0)
-          {
-            i--;
-          }
           buffer.length = sprintf(buffer.buffer, "%d\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\t%.2f\n\r", i, data.speedPrevious[i], data.speedCurrent[i], data.posPrevious[i]
                   ,data.posCurrent[i],data.windPrevious[i], data.windCurrent[i], data.error[i], data.inPiPrevious[i], data.inPiCurrent[i], data.outPiPrevious[i]
                   ,data.outPiCurrent[i], data.cmd[i]);
-          err = Uart.PutTxFifoBuffer(UART6, &buffer);
+          do
+          {
+            err = Uart.PutTxFifoBuffer(UART6, &buffer);
+          } while (err < 0);
         }
+        buffer.buffer[0] = '\n';
+        buffer.length = 1;
+        do
+        {
+          err = Uart.PutTxFifoBuffer(UART6, &buffer);
+        } while (err < 0);
+        
         data.length = 0;
       }
     }

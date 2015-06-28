@@ -42,15 +42,17 @@
  **********************************/
 sSkadiCommand_t skadiCommandTable[] =
 {
-   {"SetWind"     , SetWind     , 1 , "\t| Set wind angle.\t\t\t\t| 1 argument : Min = -179, Max = 179"         }   // 1 argument
-  ,{"SetPos"      , SetPos      , 1 , "\t| Set mast angle.\t\t\t\t| 1 argument : Min = -179, Max = 179"         }   // 1 argument
-  ,{"SetMode"     , SetMode     , 1 , "\t| Set mast mode of operation.\t\t\t| 1 argument : 1 = Manual, 0 = Auto"}   // 1 argument
-  ,{"GetWind"     , GetWind     , 0 , "\t| Read the wind current angle [deg].\t\t| No arguments needed"         }   // 0 argument
-  ,{"GetPos"      , GetPos      , 0 , "\t| Read the mast current position [deg].\t\t| No arguments needed"      }   // 0 argument
-  ,{"GetMode"     , GetMode     , 0 , "\t| Get the mast current mode of operation.\t| No arguments needed"      }   // 0 argument
-  ,{"GetSpeed"    , GetSpeed    , 0 , "\t| Read the mast current speed [deg/s].\t\t| No arguments needed"       }   // 0 argument
-  ,{"WriteStatus" , WriteStatus , 0 , "\t| Write STATUS msg to drive.\t\t\t| No arguments needed"               }   // 0 argument
-  ,{"Clear"       , Clear       , 0 , "\t| Clear terminal window.\t\t\t| No arguments needed"                   }   // 0 argument
+   {"setwind"     , SetWind     , 1 , "\t| Set wind angle.\t\t\t\t| 1 arg : Min = -179.0, Max = 179.0"        }   // 1 argument
+  ,{"setpos"      , SetPos      , 1 , "\t| Set mast angle.\t\t\t\t| 1 arg : Min = -179.0, Max = 179.0"        }   // 1 argument
+  ,{"setmode"     , SetMode     , 1 , "\t| Set mast mode of operation.\t\t\t| 1 arg : 1 = Manual, 0 = Auto"   }   // 1 argument
+  ,{"setparam"    , SetParam    , 2 , "\t| Set one of the parameters K, Ki or KP.\t| 2 args : var and val\n"  }   // 1 argument
+  ,{"getwind"     , GetWind     , 0 , "\t| Read the wind current angle [deg].\t\t| No arg needed"             }   // 0 argument
+  ,{"getpos"      , GetPos      , 0 , "\t| Read the mast current position [deg].\t\t| 0 arg"                  }   // 0 argument
+  ,{"getmode"     , GetMode     , 0 , "\t| Get the mast current mode of operation.\t| 0 arg"                  }   // 0 argument
+  ,{"getspeed"    , GetSpeed    , 0 , "\t| Read the mast current speed [deg/s].\t\t| 0 arg"                   }   // 0 argument
+  ,{"getparam"    , GetParam    , 0 , "\t| Send the current mast parameters K, KI, KP.\t| 0 arg\n"            }   // 1 argument
+  ,{"writestatus" , WriteStatus , 0 , "\t| Write STATUS msg to drive.\t\t\t| 0 arg"                           }   // 0 argument
+  ,{"clc"         , ClearScreen , 0 , "\t\t| Clear terminal window.\t\t\t| 0 arg"                             }   // 0 argument
 };
 
 //===========================
