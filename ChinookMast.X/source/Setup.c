@@ -455,8 +455,6 @@ void StartInterrupts(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable InputCapture interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//  InputCapture.EnableInterrupt(IC1);
-//  InputCapture.EnableInterrupt(IC3);
   InputCapture.EnableInterrupt(IC2);
   InputCapture.EnableInterrupt(IC4);
 

@@ -93,40 +93,28 @@ void main(void)
 //============================
 
 //  StateInit();
-
-  pBuffStateMast  = pStateMast;
-  
+  INT32 allo = 0;
 	while(1)  //infinite loop
 	{
 
+//    WriteDrive(DRVB, 0x0003);
+//    allo = ReadDrive(DRVB, 0x8000);
+//    if (allo == 0x8003)
+//    {
+//      LED_CAN_ON;
+//    }
+//    else
+//    {
+//      LED_ERROR_ON;
+//    }
+//
+//    while(1);
+    
     //======================================
     // Mast State machine with Drive A
     //======================================
     (*pStateMast)();          // jump to next state
     StateScheduler();   // Decides which state will be next
 
-//    if (pStateMast != pBuffStateMast)
-//    {
-//      pBuffStateMast = pStateMast;
-//      sendUART();
-//    }
-
 	}  // end while
 }   //END MAIN CODE
-
-void sendUART()
-{
-  char  Text[100]={0};
-  int i=0;
-       if (pStateMast == &StateInit)        Uart.SendDataBuffer(UART6, "\n\rState Mast : Init\t\t"          , 21);
-  else if (pStateMast == &StateCalib)       Uart.SendDataBuffer(UART6, "\n\rState Mast : Calib\t\t"         , 22);
-  else if (pStateMast == &StateAcq)         Uart.SendDataBuffer(UART6, "\n\rState Mast : Acq\t\t"           , 20);
-  else if (pStateMast == &StateGetMastData) Uart.SendDataBuffer(UART6, "\n\rState Mast : Get Mast Data\t\t" , 30);
-  else if (pStateMast == &StateManual)      Uart.SendDataBuffer(UART6, "\n\rState Mast : Manual\t\t"        , 22);
-  else if (pStateMast == &StateReg)         Uart.SendDataBuffer(UART6, "\n\rState Mast : Reg\t\t"           , 20);
-  else if (pStateMast == &StateSendData)    Uart.SendDataBuffer(UART6, "\n\rState Mast : Send Data\t\t"     , 26);
-
-//  sprintf(Text, "Mast Now = %d\t\tMast Consigne = %d\n\r", mastCurrentPos, Mast_consigne);
-  Uart.SendDataBuffer(UART6, Text, sizeof(Text));
-  for(i=0; i<100; i++) Text[i]=0;
-}

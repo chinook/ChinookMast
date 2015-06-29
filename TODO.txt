@@ -10,6 +10,7 @@ Angles et vitesses précis (essayer direct dans les interrupts)
 				// C'était précis, c'est juste l'erreur qui ne l'était pas
 Revoir limites en mode auto. De la misère passer de 72 à -72
 				// Parce qu'il est sous-amorti
+Bug si on change de mode lorsque la régulation n'est pas finie
 Tester algo avec mât
 Revoir le stop (lors du changement de mode)	// Done
 Redondance EEPROM

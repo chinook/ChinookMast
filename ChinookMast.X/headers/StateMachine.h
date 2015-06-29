@@ -47,10 +47,6 @@ void StateScheduler   (void);     // State Scheduler. Decides which state is nex
 // Variable declarations
 //==============================================================================
 void (*pStateMast)(void);       // State pointer, used to navigate between states
-void (*pBuffStateMast)(void);       // State pointer, used to navigate between states
-volatile  INT8  breakFlag   // Flag indicating if the emergency break has been pressed
-               ,errorFlag   // Flag indicating an error
-               ;
 
 //==============================================================================
 // Macro definitions
