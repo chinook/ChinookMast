@@ -34,7 +34,8 @@
 #define MAST_DIR_RIGHT               1
 
 //#define ERROR_THRESHOLD              5.0f
-#define ERROR_THRESHOLD              0.1f
+//#define ERROR_THRESHOLD              0.5f
+//#define ERROR_THRESHOLD              0.2f
 
 //#define KP                           0.015f
 //#define KI                           0.050f
@@ -43,8 +44,8 @@
 ////#define K                            1.500f
 //#define K                            0.400f
 #define T                            0.100f
-#define PWM_MAX_DUTY_CYCLE           0.980f
-#define PWM_MIN_DUTY_CYCLE           0.030f
+//#define PWM_MAX_DUTY_CYCLE           0.980f
+//#define PWM_MIN_DUTY_CYCLE           0.080f
 
 #define MOTOR_ENCODER_RATIO         49.0f
 #define MAST_MOTOR_RATIO            50.0f

@@ -123,8 +123,8 @@ void MastManualLeft (void)
 {
   DRVB_SLEEP = 1;
 
-  Pwm.SetDutyCycle(PWM_2, 750);
-  Pwm.SetDutyCycle(PWM_3, 250);
+  Pwm.SetDutyCycle(PWM_2, 850);
+  Pwm.SetDutyCycle(PWM_3, 150);
 //  Pwm.SetDutyCycle(PWM_2, 600);
 //  Pwm.SetDutyCycle(PWM_3, 400);
 
@@ -136,8 +136,8 @@ void MastManualRight (void)
 {
   DRVB_SLEEP = 1;
 
-  Pwm.SetDutyCycle(PWM_2, 250);
-  Pwm.SetDutyCycle(PWM_3, 750);
+  Pwm.SetDutyCycle(PWM_2, 150);
+  Pwm.SetDutyCycle(PWM_3, 850);
 //  Pwm.SetDutyCycle(PWM_2, 400);
 //  Pwm.SetDutyCycle(PWM_3, 600);
 

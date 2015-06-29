@@ -41,6 +41,9 @@ extern volatile float  mastCurrentSpeed
                       ,KP
                       ,KI
                       ,K
+                      ,PWM_MAX_DUTY_CYCLE
+                      ,PWM_MIN_DUTY_CYCLE
+                      ,ERROR_THRESHOLD
                       ;
 
 extern volatile UINT32 rxWindAngle;
@@ -151,7 +154,7 @@ void GetParam(sSkadi_t *skadi, sSkadiArgs_t args)
 {
   sUartLineBuffer_t buffer;
 
-  buffer.length = sprintf(buffer.buffer, "\nK\t= %.4f\r\nKI\t= %.4f\r\nKP\t= %.4f\r\n\n", K, KI, KP);
+  buffer.length = sprintf(buffer.buffer, "\nK\t= %.4f\r\nKI\t= %.4f\r\nKP\t= %.4f\r\nPWM MAX\t= %.4f\r\nPWM MIN\t= %.4f\r\nERROR\t= %.4f\r\n\n", K, KI, KP, PWM_MAX_DUTY_CYCLE, PWM_MIN_DUTY_CYCLE, ERROR_THRESHOLD);
 
   Uart.PutTxFifoBuffer(UART6, &buffer);
 }
@@ -310,25 +313,44 @@ void SetParam(sSkadi_t *skadi, sSkadiArgs_t args)
   UINT8 kStr[]  = "K\0"
        ,kiStr[] = "KI\0"
        ,kpStr[] = "KP\0"
+       ,pmaxStr[] = "PMAX\0"
+       ,pminStr[] = "PMIN\0"
+       ,errStr[] = "ERR\0"
        ;
 
-  if (!strcmp(kStr, args.elements[0]))
+  if (value < 0)
+  {
+    buffer.length = sprintf(buffer.buffer, "Mauvais argument!\r\n\n");
+  }
+  else if (!strcmp(kStr, args.elements[0]))
   {
     K = value;
-//    buffer.length = sprintf(buffer.buffer, "K = %.4f\r\n\n", K);
-    buffer.length = sprintf(buffer.buffer, "\nK\t= %.4f\r\nKI\t= %.4f\r\nKP\t= %.4f\r\n\n", K, KI, KP);
+    buffer.length = sprintf(buffer.buffer, "\nK\t= %.4f\r\nKI\t= %.4f\r\nKP\t= %.4f\r\nPWM MAX\t= %.4f\r\nPWM MIN\t= %.4f\r\nERROR\t= %.4f\r\n\n", K, KI, KP, PWM_MAX_DUTY_CYCLE, PWM_MIN_DUTY_CYCLE, ERROR_THRESHOLD);
   }
   else if (!strcmp(kiStr, args.elements[0]))
   {
     KI = value;
-//    buffer.length = sprintf(buffer.buffer, "KI = %.4f\r\n\n", KI);
-    buffer.length = sprintf(buffer.buffer, "\nK\t= %.4f\r\nKI\t= %.4f\r\nKP\t= %.4f\r\n\n", K, KI, KP);
+    buffer.length = sprintf(buffer.buffer, "\nK\t= %.4f\r\nKI\t= %.4f\r\nKP\t= %.4f\r\nPWM MAX\t= %.4f\r\nPWM MIN\t= %.4f\r\nERROR\t= %.4f\r\n\n", K, KI, KP, PWM_MAX_DUTY_CYCLE, PWM_MIN_DUTY_CYCLE, ERROR_THRESHOLD);
   }
   else if (!strcmp(kpStr, args.elements[0]))
   {
     KP = value;
-//    buffer.length = sprintf(buffer.buffer, "KP = %.4f\r\n\n", KP);
-    buffer.length = sprintf(buffer.buffer, "\nK\t= %.4f\r\nKI\t= %.4f\r\nKP\t= %.4f\r\n\n", K, KI, KP);
+    buffer.length = sprintf(buffer.buffer, "\nK\t= %.4f\r\nKI\t= %.4f\r\nKP\t= %.4f\r\nPWM MAX\t= %.4f\r\nPWM MIN\t= %.4f\r\nERROR\t= %.4f\r\n\n", K, KI, KP, PWM_MAX_DUTY_CYCLE, PWM_MIN_DUTY_CYCLE, ERROR_THRESHOLD);
+  }
+  else if (!strcmp(pmaxStr, args.elements[0]))
+  {
+    PWM_MAX_DUTY_CYCLE = value;
+    buffer.length = sprintf(buffer.buffer, "\nK\t= %.4f\r\nKI\t= %.4f\r\nKP\t= %.4f\r\nPWM MAX\t= %.4f\r\nPWM MIN\t= %.4f\r\nERROR\t= %.4f\r\n\n", K, KI, KP, PWM_MAX_DUTY_CYCLE, PWM_MIN_DUTY_CYCLE, ERROR_THRESHOLD);
+  }
+  else if (!strcmp(pminStr, args.elements[0]))
+  {
+    PWM_MIN_DUTY_CYCLE = value;
+    buffer.length = sprintf(buffer.buffer, "\nK\t= %.4f\r\nKI\t= %.4f\r\nKP\t= %.4f\r\nPWM MAX\t= %.4f\r\nPWM MIN\t= %.4f\r\nERROR\t= %.4f\r\n\n", K, KI, KP, PWM_MAX_DUTY_CYCLE, PWM_MIN_DUTY_CYCLE, ERROR_THRESHOLD);
+  }
+  else if (!strcmp(errStr, args.elements[0]))
+  {
+    ERROR_THRESHOLD = value;
+    buffer.length = sprintf(buffer.buffer, "\nK\t= %.4f\r\nKI\t= %.4f\r\nKP\t= %.4f\r\nPWM MAX\t= %.4f\r\nPWM MIN\t= %.4f\r\nERROR\t= %.4f\r\n\n", K, KI, KP, PWM_MAX_DUTY_CYCLE, PWM_MIN_DUTY_CYCLE, ERROR_THRESHOLD);
   }
   else
   {

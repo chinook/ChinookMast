@@ -63,9 +63,16 @@ BOOL  oFirstTimeInMastStop    = 0
 
 // Regulator parameters
 volatile float KP = 0.015f
-              ,KI = 0.050f
-              ,K  = 0.400f
+              ,KI = 0.030f
+              ,K  = 0.300f
+              ,PWM_MAX_DUTY_CYCLE = 0.980f
+              ,PWM_MIN_DUTY_CYCLE = 0.040f
+              ,ERROR_THRESHOLD    = 1.000f
               ;
+
+//#define ERROR_THRESHOLD              0.2f
+//#define PWM_MAX_DUTY_CYCLE           0.980f
+//#define PWM_MIN_DUTY_CYCLE           0.080f
 
 //==============================================================================
 // Mast regulation private functions prototypes
