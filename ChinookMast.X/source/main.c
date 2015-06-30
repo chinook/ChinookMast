@@ -90,7 +90,7 @@ void main(void)
     //======================================
     // Mast State machine with Drive A
     //======================================
-    (*pStateMast)();          // jump to next state
+    (*pStateMast)();    // jump to next state
     StateScheduler();   // Decides which state will be next
 
 	}  // end while
