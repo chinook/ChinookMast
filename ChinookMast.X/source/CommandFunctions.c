@@ -27,39 +27,37 @@
 //==============================================================================
 // Mast regulation variables
 //==============================================================================
+
+// Received from CAN
+//=====================================
 extern volatile UINT32 rxWindAngle;
+//=====================================
 
-UINT16 nTurns = 0;
 
-sCmdData_t data = {0};
+// Used when acquiring data from regulator
+//=====================================
+sCmdData_t    data        = {0};
+volatile BOOL oPrintData  =  0;
+//=====================================
+
+
+// Mast general values
+//=====================================
+extern volatile float  mastCurrentSpeed      // Actual speed of Mast
+                      ;
 
 volatile sCmdValue_t windAngle          = {0}
                     ,mastAngle          = {0}
                     ,mastSpeed          = {0}
-                    ,mastSpeedRealTime  = {0}   // Used as fast as possible
-                    ,mastPosRealTime    = {0}   // Used as fast as possible
                     ;
+//=====================================
 
+
+// PI values
+//=====================================
 sCmdValue_t  inPi   = {0}
             ,outPi  = {0}
             ;
-
-// Mast general value
-extern volatile float  mastCurrentSpeed      // Actual speed of Mast
-                      ;
-
-extern volatile BOOL oCapture1
-                    ,oCapture2
-                    ,oCapture3
-                    ,oCapture4
-                    ,oTimerReg
-                    ;
-
-volatile BOOL oPrintData = 0;
-
-BOOL  oFirstTimeInMastStop    = 0
-     ,oEmergencyStop          = 0
-     ;
 
 // Regulator parameters
 volatile float KP = 0.015f
@@ -69,20 +67,35 @@ volatile float KP = 0.015f
               ,PWM_MIN_DUTY_CYCLE = 0.040f
               ,ERROR_THRESHOLD    = 1.000f
               ;
+//=====================================
 
-//#define ERROR_THRESHOLD              0.2f
-//#define PWM_MAX_DUTY_CYCLE           0.980f
-//#define PWM_MIN_DUTY_CYCLE           0.080f
 
-//==============================================================================
-// Mast regulation private functions prototypes
-//==============================================================================
+// Flags
+//=====================================
+extern volatile BOOL oCapture1
+                    ,oCapture2
+                    ,oCapture3
+                    ,oCapture4
+                    ,oTimerReg
+                    ;
+
+BOOL  oFirstTimeInMastStop    = 0
+     ,oEmergencyStop          = 0
+     ;
+//=====================================
 
 
 //==============================================================================
 // Mast regulation functions
 //==============================================================================
 
+// Discrete integrator using Tustin's method
+//
+//   1     T     z + 1
+//  --- = --- * -------
+//   s     2     z - 1
+//
+//  y(n) = y(n-1) + T/2 * ( x(n-1) + x(n) )
 void TustinZ (sCmdValue_t *input, sCmdValue_t *output)
 {
   output->previousValue = output->currentValue;
@@ -90,6 +103,7 @@ void TustinZ (sCmdValue_t *input, sCmdValue_t *output)
 }
 
 
+// Adjust the PWM of the motor
 void SetPwm (float cmd)
 {
   if (cmd == 0)
@@ -106,7 +120,6 @@ void SetPwm (float cmd)
     }
     else if (oFirstTimeInMastStop)
     {
-//      MastManualStop();
 
       DRVB_SLEEP = 0;
       Pwm.SetDutyCycle(PWM_2, 500);
@@ -301,8 +314,6 @@ void AssessMastValues (void)
   {
     oCapture2 = 0;
     oCapture4 = 0;
-
-//    nTurns++;
 
     rx2 = InputCapture.GetTimeBetweenCaptures(IC2, SCALE_US);
     rx4 = InputCapture.GetTimeBetweenCaptures(IC4, SCALE_US);

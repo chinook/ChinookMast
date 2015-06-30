@@ -49,33 +49,27 @@ void WriteDrive(INT32 DRV, INT32 msg)
   int i=0;
   if(DRV == DRVA)
   {
-    for(i=0;i<10000;i++);
     while(SpiChnIsBusy(SPI4+1));
     DRVA_SC = 1;
     Spi.SendCharacter(SPI4, msg);
-    for(i=0;i<10000;i++);
-//    while(SpiChnIsBusy(SPI4+1));
+    while(SpiChnIsBusy(SPI4+1));
     DRVA_SC = 0;
   }
   else if(DRV == DRVB)
   {
-//    for(i=0;i<10000;i++);
     while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 1;
     Spi.SendCharacter(SPI4, msg);
-//    for(i=0;i<10000;i++);
     while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 0;
   }
   else if(DRV == DRVAB)
   {
-    for(i=0;i<10000;i++);
-//    while(SpiChnIsBusy(SPI4+1));
+    while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 1;
     DRVA_SC = 1;
     Spi.SendCharacter(SPI4, msg);
-    for(i=0;i<10000;i++);
-//    while(SpiChnIsBusy(SPI4+1));
+    while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 0;
     DRVA_SC = 0;
   }
@@ -92,13 +86,12 @@ INT32 ReadDrive(INT32 DRV, INT32 msg)
 {
   int i=0;
   INT32 data;
-  if(DRV == DRVA){
-//    for(i=0;i<10000;i++);
+  if(DRV == DRVA)
+  {
     while(SpiChnIsBusy(SPI4+1));
     DRVA_SC = 1;
 //    Spi.SendCharacter(SPI4, msg | (1 << 15));
     Spi.SendCharacter(SPI4, msg);
-//    for(i=0;i<10000;i++);
     while(SpiChnIsBusy(SPI4+1));
     data = Spi.GetCharacter(SPI4);
     while(SpiChnIsBusy(SPI4+1));
@@ -107,28 +100,22 @@ INT32 ReadDrive(INT32 DRV, INT32 msg)
     
   }
   else if(DRV == DRVB){
-//    for(i=0;i<10000;i++);
     while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 1;
 //    Spi.SendCharacter(SPI4, msg | (1 << 15));
     Spi.SendCharacter(SPI4, msg);
-//    for(i=0;i<10000;i++);
     while(SpiChnIsBusy(SPI4+1));
     data = Spi.GetCharacter(SPI4);
     while(SpiChnIsBusy(SPI4+1));
     data = Spi.GetCharacter(SPI4);
-//    while(SpiChnIsBusy(SPI4+1));
-//    data = Spi.GetCharacter(SPI4);
     DRVB_SC = 0;
   }
   else if(DRV == DRVAB){
-//    for(i=0;i<10000;i++);
     while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 1;
     DRVA_SC = 1;
 //    Spi.SendCharacter(SPI4, msg | (1 << 15));
     Spi.SendCharacter(SPI4, msg);
-//    for(i=0;i<10000;i++);
     while(SpiChnIsBusy(SPI4+1));
     data = Spi.GetCharacter(SPI4);
     DRVB_SC = 0;

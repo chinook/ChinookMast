@@ -43,18 +43,18 @@
 sSkadiCommand_t skadiCommandTable[] =
 {
 //  User call       Function    args                     Description
-   {"setwind"     , SetWind     , 1 , "\t| Set wind angle [deg].\t\t\t\t| 1 arg : Min = -179.0, Max = 179.0"  }   // 1 argument
-  ,{"setpos"      , SetPos      , 1 , "\t| Set mast angle [deg].\t\t\t\t| 1 arg : Min = -179.0, Max = 179.0"  }   // 1 argument
-  ,{"setmode"     , SetMode     , 1 , "\t| Set mast mode of operation.\t\t\t| 1 arg : 1 = Manual, 0 = Auto"   }   // 1 argument
-  ,{"setparam"    , SetParam    , 2 , "\t| Set K, KI, KP, PWM MAX, PWM MIN and ERROR.\t| 2 args : var and val\n"  }   // 2 argument
-  ,{"getwind"     , GetWind     , 0 , "\t| Read the wind current angle [deg].\t\t| No arg needed"             }   // 0 argument
-  ,{"getpos"      , GetPos      , 0 , "\t| Read the mast current position [deg].\t\t| 0 arg"                  }   // 0 argument
-  ,{"getmode"     , GetMode     , 0 , "\t| Get the mast current mode of operation.\t| 0 arg"                  }   // 0 argument
-  ,{"getspeed"    , GetSpeed    , 0 , "\t| Read the mast current speed [deg/s].\t\t| 0 arg"                   }   // 0 argument
-  ,{"getparam"    , GetParam    , 0 , "\t| Print K, KI, KP, PWM MAX, PWM MIN and ERROR.\t| 0 arg\n"            }   // 1 argument
-  ,{"writestatus" , WriteStatus , 0 , "\t| Write STATUS msg to drive.\t\t\t| 0 arg"                           }   // 0 argument
-  ,{"setprint"    , SetPrint    , 1 , "\t| Print or not data from regulation.\t\t| 1 arg : 1 = Print, 0 = Don't print" }   // 1 argument
-  ,{"clc"         , ClearScreen , 0 , "\t\t| Clear terminal window.\t\t\t| 0 arg"                             }   // 0 argument
+   {"setwind"     , SetWind     , 1 , "\t| Set wind angle [deg].\t\t\t\t| 1 arg : Min = -179.0, Max = 179.0"            }
+  ,{"setpos"      , SetPos      , 1 , "\t| Set mast angle [deg].\t\t\t\t| 1 arg : Min = -179.0, Max = 179.0"            }
+  ,{"setmode"     , SetMode     , 1 , "\t| Set mast mode of operation.\t\t\t| 1 arg : 1 = Manual, 0 = Auto"             }
+  ,{"setparam"    , SetParam    , 2 , "\t| Set K, KI, KP, PWM MAX, PWM MIN and ERROR.\t| 2 args : var and val\n"        }
+  ,{"getwind"     , GetWind     , 0 , "\t| Read the wind current angle [deg].\t\t| No arg needed"                       }
+  ,{"getpos"      , GetPos      , 0 , "\t| Read the mast current position [deg].\t\t| 0 arg"                            }
+  ,{"getmode"     , GetMode     , 0 , "\t| Get the mast current mode of operation.\t| 0 arg"                            }
+  ,{"getspeed"    , GetSpeed    , 0 , "\t| Read the mast current speed [deg/s].\t\t| 0 arg"                             }
+  ,{"getparam"    , GetParam    , 0 , "\t| Print K, KI, KP, PWM MAX, PWM MIN and ERROR.\t| 0 arg\n"                     }
+  ,{"writestatus" , WriteStatus , 0 , "\t| Write STATUS msg to drive.\t\t\t| 0 arg"                                     }
+  ,{"setprint"    , SetPrint    , 1 , "\t| Print or not data from regulation.\t\t| 1 arg : 1 = Print, 0 = Don't print"  }
+  ,{"clc"         , ClearScreen , 0 , "\t\t| Clear terminal window.\t\t\t| 0 arg"                                       }
 };
 
 //===========================
@@ -72,7 +72,7 @@ void InitTimer(void)
   timerCounterValue = Timer.Open(TIMER_2, 11, SCALE_MS);    // Timer used for input capture AND stopping the mast. Period = 11 ms
   timerCounterValue = Timer.Open(TIMER_3, 500, SCALE_US);   // Timer used for PWM. Period = 500 ms (f = 2kHz)
 //  timerCounterValue = Timer.Open(TIMER_4,  15, SCALE_MS);   // Timer used for sending data to other devices. Period = 15 ms (f ~ 66.67 Hz)
-  timerCounterValue = Timer.Open(TIMER_4, 1000, SCALE_MS);   // Timer used for sending data to other devices. Period = 15 ms (f ~ 66.67 Hz)
+  timerCounterValue = Timer.Open(TIMER_4, 1000, SCALE_MS);   // Timer used for sending data to other devices. Period = 1 sec (f = 1 Hz)
   timerCounterValue = Timer.Open(TIMER_5, 600, SCALE_MS);   // Timer used for changing mode of operation. Period = 600 ms
   
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -334,60 +334,6 @@ void InitI2c(void)
 void InitWdt(void)
 {
   Wdt.Enable();
-}
-
-
-//===========================
-//	INIT ADC
-//===========================
-void InitAdc(void)
-{
-  // Mode of operation. Uncomment the one you need.
-  //================================================
-  UINT32 samplingClk = ADC_CLK_TMR;     // Timer3 used for sampling
-//  UINT32 samplingClk = ADC_CLK_AUTO;    // Internal counter used for sampling
-//  UINT32 samplingClk = ADC_CLK_INT0;    // Active transition on INT0 used for sampling
-//  UINT32 samplingClk = ADC_CLK_MANUAL;  // Manual sampling.
-  //================================================
-
-  // Hardware config. These are exemples.
-  //================================================
-//  UINT32 configHardware = ADC_VREF_AVDD_AVSS      // Vref+ is AVdd and Vref- is AVss
-//                        | ADC_SAMPLES_PER_INT_16; // 16 samples/interrupt
-  UINT32 configHardware = ADC_VREF_EXT_AVSS       // Vref+ is External and Vref- is AVss
-                        | ADC_SAMPLES_PER_INT_1; // 1 sample/interrupt => used in manual mode
-  //================================================
-
-  // Port config. These are exemples.
-  //================================================
-//  UINT32 configPort = ENABLE_ALL_ANA; // Enable AN0-AN15 in analog mode
-//  UINT32 configScan = 0; // Scan all ANs
-//  UINT32 configScan = SKIP_SCAN_ALL; // Skip all scans
-
-  UINT32 configPort = ENABLE_AN2_ANA; // Enable AN0, AN4 and AN13 in analog mode
-//
-  UINT32 configScan = SKIP_SCAN_AN0
-                    | SKIP_SCAN_AN1
-                    | SKIP_SCAN_AN3
-                    | SKIP_SCAN_AN4
-                    | SKIP_SCAN_AN5
-                    | SKIP_SCAN_AN6
-                    | SKIP_SCAN_AN7
-                    | SKIP_SCAN_AN8
-                    | SKIP_SCAN_AN9
-                    | SKIP_SCAN_AN10
-                    | SKIP_SCAN_AN11
-                    | SKIP_SCAN_AN12
-                    | SKIP_SCAN_AN13
-                    | SKIP_SCAN_AN14
-                    | SKIP_SCAN_AN15; // Don't scan the channels that are not enabled by configPort
-  //================================================
-
-  // Open ADC with parameters above
-  Adc.Open(samplingClk, configHardware, configPort, configScan);
-
-//  Adc.ConfigInterrupt(ADC_INTERRUPT_PRIORITY, ADC_INTERRUPT_SUBPRIORITY);
-
 }
 
 

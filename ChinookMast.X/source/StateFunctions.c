@@ -78,8 +78,6 @@ void WriteMastPos2Eeprom (void)
   dataBuffer[0] = I2c.Var.eepromAddress.byte;
   dataBuffer[1] = eepromFirstRegister.address.highByte;
   dataBuffer[2] = eepromFirstRegister.address.lowByte;
-//  dataBuffer[1] = EEPROM_POS_REGISTER >> 8;
-//  dataBuffer[2] = EEPROM_POS_REGISTER;
 
   memcpy(&dataBuffer[3], (void *) &mastAngle.currentValue, 4);
 
@@ -98,8 +96,6 @@ void ReadMastPosFromEeprom (void)
   slaveAddPlusRegBuf[0] = I2c.Var.eepromAddress.byte;
   slaveAddPlusRegBuf[1] = eepromFirstRegister.address.highByte;
   slaveAddPlusRegBuf[2] = eepromFirstRegister.address.lowByte;
-//  slaveAddPlusRegBuf[1] = EEPROM_POS_REGISTER >> 8;
-//  slaveAddPlusRegBuf[2] = EEPROM_POS_REGISTER;
 
   while(I2c.Var.oI2cWriteIsRunning[I2C4]);  // Wait for any I2C4 write sequence to end
   while(I2c.Var.oI2cReadIsRunning[I2C4]);  // Wait for any I2C4 read sequence to end

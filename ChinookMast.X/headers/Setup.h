@@ -53,7 +53,6 @@ void InitUart         (void);
 void InitI2c          (void);
 void InitSkadi        (void);
 void InitWdt          (void);
-void InitAdc          (void);
 void InitInputCapture (void);
 void StartInterrupts  (void);
 
@@ -70,7 +69,6 @@ void StartInterrupts  (void);
 #define INIT_I2C            InitI2c()
 #define INIT_SKADI          InitSkadi()
 #define INIT_WDT            InitWdt()
-#define INIT_ADC            InitAdc()
 #define INIT_INPUT_CAPTURE  InitInputCapture()
 #define START_INTERRUPTS    StartInterrupts()
 
