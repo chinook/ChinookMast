@@ -59,11 +59,11 @@ void WriteDrive(INT32 DRV, INT32 msg)
   }
   else if(DRV == DRVB)
   {
-    for(i=0;i<10000;i++);
+//    for(i=0;i<10000;i++);
     while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 1;
     Spi.SendCharacter(SPI4, msg);
-    for(i=0;i<10000;i++);
+//    for(i=0;i<10000;i++);
     while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 0;
   }
@@ -112,7 +112,7 @@ INT32 ReadDrive(INT32 DRV, INT32 msg)
     DRVB_SC = 1;
 //    Spi.SendCharacter(SPI4, msg | (1 << 15));
     Spi.SendCharacter(SPI4, msg);
-    for(i=0;i<10000;i++);
+//    for(i=0;i<10000;i++);
     while(SpiChnIsBusy(SPI4+1));
     data = Spi.GetCharacter(SPI4);
     while(SpiChnIsBusy(SPI4+1));

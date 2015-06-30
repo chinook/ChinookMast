@@ -93,7 +93,7 @@ void main(void)
 //============================
 
 //  StateInit();
-  INT32 allo = 0;
+//  INT32 allo = 0;
 	while(1)  //infinite loop
 	{
 

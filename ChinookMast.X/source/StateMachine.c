@@ -271,7 +271,7 @@ void StateInit(void)
 
   // Send ID to backplane by CAN protocol
   SEND_ID_TO_BACKPLANE;
-  
+
   // Send the mode of operation to the steering wheel
   SEND_MODE_TO_STEERING_WHEEL;
 
@@ -505,7 +505,7 @@ void StateSendData(void)
 
   WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors
   
-//  WriteMastPos2Eeprom();
+  WriteMastPos2Eeprom();
 }
 
 

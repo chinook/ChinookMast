@@ -447,12 +447,6 @@ void StartInterrupts(void)
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-// Enable ADC interrupts
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-//  Adc.EnableInterrupts();   // Works only when not in manual mode
-
-
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable InputCapture interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   InputCapture.EnableInterrupt(IC2);
@@ -490,7 +484,7 @@ void StartInterrupts(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   Uart.EnableRxInterrupts (UART6);  // Enable RX Interrupts for UART6
   Uart.DisableTxInterrupts(UART6);  // Disable TX Interrupts for UART6
-//
+
 //  INTEnable(INT_SOURCE_UART_ERROR(UART6), INT_DISABLED);   // Disable Error interrupts
 
 
