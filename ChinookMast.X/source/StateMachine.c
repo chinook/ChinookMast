@@ -260,28 +260,28 @@ void StateInit(void)
   INIT_PORTS;
 //  INIT_WDT;
   INIT_TIMER;
-  INIT_INPUT_CAPTURE;
-  INIT_UART;
-  INIT_SKADI;
+//  INIT_INPUT_CAPTURE;
+//  INIT_UART;
+//  INIT_SKADI;
   INIT_SPI;
-  INIT_PWM;
-  INIT_I2C;
-  INIT_CAN;
+//  INIT_PWM;
+//  INIT_I2C;
+//  INIT_CAN;
   START_INTERRUPTS;
 
-  // Send ID to backplane by CAN protocol
-  SEND_ID_TO_BACKPLANE;
-
-  // Send the mode of operation to the steering wheel
-  SEND_MODE_TO_STEERING_WHEEL;
-
-  // Get last known position of the mast
-  ReadMastPosFromEeprom();
-  if (ABS(mastAngle.currentValue) > 360)  // Error
-  {
-    mastAngle.previousValue = 0;
-    mastAngle.currentValue  = 0;
-  }
+//  // Send ID to backplane by CAN protocol
+//  SEND_ID_TO_BACKPLANE;
+//
+//  // Send the mode of operation to the steering wheel
+//  SEND_MODE_TO_STEERING_WHEEL;
+//
+//  // Get last known position of the mast
+//  ReadMastPosFromEeprom();
+//  if (ABS(mastAngle.currentValue) > 360)  // Error
+//  {
+//    mastAngle.previousValue = 0;
+//    mastAngle.currentValue  = 0;
+//  }
 
   // Init registers for the drive
   InitDriver();

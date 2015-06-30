@@ -206,17 +206,17 @@ void InitDriver(void)
   DRVB_SLEEP = 0;
   Timer.DelayMs(1);
 
-//  WriteDrive(DRVA, CONTROL_Mastw);
-//  WriteDrive(DRVA, TORQUE_Mastw);
-  WriteDrive(DRVB, CONTROL_Mastw);
-  WriteDrive(DRVB, TORQUE_Mastw);
-//  WriteDrive(DRVA, OFF_Mastw);
-//  WriteDrive(DRVA, 0x2180);
-  WriteDrive(DRVB, 0x2180);
-//  WriteDrive(DRVA, BLANK_Mastw);
-//  WriteDrive(DRVA, DECAY_Mastw);
-//  WriteDrive(DRVA, STALL_Mastw);
-//  WriteDrive(DRVA, DRIVE_Mastw);
-//  WriteDrive(DRVA, STATUS_Mastw);
-  WriteDrive(DRVB, STATUS_Mastw);
+////  WriteDrive(DRVA, CONTROL_Mastw);
+////  WriteDrive(DRVA, TORQUE_Mastw);
+//  WriteDrive(DRVB, CONTROL_Mastw);
+//  WriteDrive(DRVB, TORQUE_Mastw);
+////  WriteDrive(DRVA, OFF_Mastw);
+////  WriteDrive(DRVA, 0x2180);
+//  WriteDrive(DRVB, 0x2180);
+////  WriteDrive(DRVA, BLANK_Mastw);
+////  WriteDrive(DRVA, DECAY_Mastw);
+////  WriteDrive(DRVA, STALL_Mastw);
+////  WriteDrive(DRVA, DRIVE_Mastw);
+////  WriteDrive(DRVA, STATUS_Mastw);
+//  WriteDrive(DRVB, STATUS_Mastw);
 }

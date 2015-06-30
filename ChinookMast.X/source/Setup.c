@@ -449,41 +449,41 @@ void StartInterrupts(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable InputCapture interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  InputCapture.EnableInterrupt(IC2);
-  InputCapture.EnableInterrupt(IC4);
+//  InputCapture.EnableInterrupt(IC2);
+//  InputCapture.EnableInterrupt(IC4);
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable CAN interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  Can.EnableInterrupt(CAN1);
+//  Can.EnableInterrupt(CAN1);
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable I2C interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  err = I2c.EnableInterrupt (I2C4, I2C_MASTER_INTERRUPT);
-  if (err < 0)
-  {
-    LED_ERROR_ON;
-  }
-  err = I2c.DisableInterrupt(I2C4, I2C_SLAVE_INTERRUPT);
-  if (err < 0)
-  {
-    LED_ERROR_ON;
-  }
-  err = I2c.DisableInterrupt(I2C4, I2C_BUS_COLLISION_INTERRUPT);
-  if (err < 0)
-  {
-    LED_ERROR_ON;
-  }
+//  err = I2c.EnableInterrupt (I2C4, I2C_MASTER_INTERRUPT);
+//  if (err < 0)
+//  {
+//    LED_ERROR_ON;
+//  }
+//  err = I2c.DisableInterrupt(I2C4, I2C_SLAVE_INTERRUPT);
+//  if (err < 0)
+//  {
+//    LED_ERROR_ON;
+//  }
+//  err = I2c.DisableInterrupt(I2C4, I2C_BUS_COLLISION_INTERRUPT);
+//  if (err < 0)
+//  {
+//    LED_ERROR_ON;
+//  }
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable UART interrupts        
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  Uart.EnableRxInterrupts (UART6);  // Enable RX Interrupts for UART6
-  Uart.DisableTxInterrupts(UART6);  // Disable TX Interrupts for UART6
+//  Uart.EnableRxInterrupts (UART6);  // Enable RX Interrupts for UART6
+//  Uart.DisableTxInterrupts(UART6);  // Disable TX Interrupts for UART6
 
 //  INTEnable(INT_SOURCE_UART_ERROR(UART6), INT_DISABLED);   // Disable Error interrupts
 
