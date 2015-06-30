@@ -47,7 +47,6 @@ extern volatile BOOL oCapture1
                     ;
 
 volatile BOOL  oManualMode            = 1
-              ,oCalibMode             = 0
               ,oCountTimeToChngMode   = 0
               ,oManualFlagChng        = 0
               ,oManualMastRight       = 0
@@ -159,30 +158,11 @@ void StateScheduler(void)
   }
 
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  // Current state = StateCalib
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  else if (pStateMast == &StateCalib)
-  {
-    if (CALIB_2_ACQ)
-    {
-      pStateMast = &StateAcq;
-    }
-    else
-    {
-      pStateMast = &StateCalib;    // Stay in current state
-    }
-  }
-
-  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   // Current state = StateInit
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   else if (pStateMast == &StateInit)
   {
-    if (INIT_2_CALIB)
-    {
-      pStateMast = &StateCalib;   // calib state
-    }
-    else if (INIT_2_ACQ)
+    if (INIT_2_ACQ)
     {
       pStateMast = &StateAcq;
     }
@@ -386,22 +366,6 @@ void StateGetMastData(void)
       MastManualStop();
     }
   }
-}
-
-
-//===============================================================
-// Name     : StateCalib
-// Purpose  : Calibrate the mast
-//===============================================================
-void StateCalib(void)
-{
-  oCalibMode = 0;
-  mastAngle.currentValue = 0;
-  mastAngle.previousValue = 0;
-
-  WriteMastPos2Eeprom (); // Write zero to EEPROM
-
-  SEND_CALIB_DONE;  // Confirm that the calib is done
 }
 
 

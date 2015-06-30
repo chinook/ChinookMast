@@ -30,7 +30,6 @@
 // State Machine public function prototypes
 //==============================================================================
 void StateInit        (void);     // Initialization state of the system
-void StateCalib       (void);     // Stop pitch if pitch is on good position
 void StateManual      (void);     // Assess manual flags and adjust the mast in consequence
 void StateAcq         (void);     // Get data from peripherals
 void StateDisconnect  (void);     // Send disconnect msg to backplane
@@ -74,7 +73,6 @@ void (*pStateMast)(void);       // State pointer, used to navigate between state
 #define MAST_MIN_OK           (mastAngle.currentValue >= MAST_MIN)
 #define MAST_DIR_DOWN         SW1
 #define MAST_DIR_UP           !MAST_DIR_DOWN
-#define MAST_CALIB_MODE       oCalibMode
 #define MANUAL_MODE           oManualMode
 #define MANUAL_FLAG_CHANGE    oManualFlagChng
 #define DISCONNECT_OK         0
@@ -88,8 +86,7 @@ void (*pStateMast)(void);       // State pointer, used to navigate between state
 //==============================================================================
 
 /******* TRANSITION CONDITION INIT **********/
-#define INIT_2_ACQ            !MAST_CALIB_MODE
-#define INIT_2_CALIB           MAST_CALIB_MODE
+#define INIT_2_ACQ            1
 
 
 /******* TRANSITION CONDITION CALIB **********/
@@ -97,80 +94,40 @@ void (*pStateMast)(void);       // State pointer, used to navigate between state
 
 
 /******* TRANSITION CONDITION ACQ **********/
-#define ACQ_2_MANUAL          !MAST_CALIB_MODE &&  MANUAL_MODE && MANUAL_FLAG_CHANGE
+#define ACQ_2_MANUAL           MANUAL_MODE && MANUAL_FLAG_CHANGE
 #define ACQ_2_DISCONNECT       DISCONNECT_OK
-#define ACQ_2_REG             !MAST_CALIB_MODE && !MANUAL_MODE && REG_TIMER_OK
-#define ACQ_2_GET_MAST_DATA   !MAST_CALIB_MODE &&  MANUAL_MODE && REG_TIMER_OK
+#define ACQ_2_REG             !MANUAL_MODE && REG_TIMER_OK
+#define ACQ_2_GET_MAST_DATA    MANUAL_MODE && REG_TIMER_OK
 #define ACQ_2_SEND_DATA        SEND_DATA_TIMER_OK
 
 
 /******* TRANSITION CONDITION GET MAST DATA **********/
-#define GET_MAST_DATA_2_ACQ       1
+#define GET_MAST_DATA_2_ACQ    1
 
 
 /******* TRANSITION CONDITION SEND DATA **********/
-#define SEND_DATA_2_ACQ       1
+#define SEND_DATA_2_ACQ        1
 
 
 /******* TRANSITION CONDITION MANUAL **********/
-#define MANUAL_2_ACQ          1
+#define MANUAL_2_ACQ           1
 
 
 /******* TRANSITION CONDITION REG **********/
-#define REG_2_ACQ             1
+#define REG_2_ACQ              1
 
 
 /******* TRANSITION CONDITION DISCONNECT **********/
-#define DISCONNECT_2_CLOSE    1
+#define DISCONNECT_2_CLOSE     1
 
 
 /******* TRANSITION CONDITION CLOSE **********/
-#define CLOSE_2_IDLE          1
+#define CLOSE_2_IDLE           1
 
 
 /******* TRANSITION CONDITION IDLE **********/
-#define IDLE_2_INIT           0
+#define IDLE_2_INIT            0
 
-
-
-/******* TRANSITION CONDITION INIT **********/
-//#define INIT_2_CALIB          MAST_CALIB_MODE
-//#define INIT_2_MANUAL         MANUAL_MODE && MANUAL_FLAG_CHANGE
-//#define INIT_2_STOP           !MAST_CALIB_MODE && MANUAL_MODE && MAST_OK || !MANUAL_MODE
-//#define INIT_2_LEFT           !MAST_CALIB_MODE && MANUAL_MODE && MAST_LEFT &&!MAST_MIN_OK
-//#define INIT_2_RIGHT          !MAST_CALIB_MODE && MANUAL_MODE && MAST_RIGHT &&!MAST_MAX_OK
-
-/******* TRANSITION CONDITION CALIB ********/
-//#define CALIB_2_INIT          0
-//#define INIT_2_MANUAL         MANUAL_MODE && MANUAL_FLAG_CHANGE
-//#define CALIB_2_STOP          !MAST_CALIB_MODE && MANUAL_MODE && MAST_OK || !MANUAL_MODE
-//#define CALIB_2_LEFT          !MAST_CALIB_MODE && MANUAL_MODE && MAST_LEFT &&!MAST_MIN_OK
-//#define CALIB_2_RIGHT         !MAST_CALIB_MODE && MANUAL_MODE && MAST_RIGHT  &&!MAST_MAX_OK
-
-/******* TRANSITION CONDITION CALIB ********/
-//#define MANUAL_2_CALIB        0
-//#define MANUAL_2_INIT         0
-//#define CALIB_2_STOP          !MAST_CALIB_MODE && MANUAL_MODE && MAST_OK || !MANUAL_MODE
-//#define CALIB_2_LEFT          !MAST_CALIB_MODE && MANUAL_MODE && MAST_LEFT &&!MAST_MIN_OK
-//#define CALIB_2_RIGHT         !MAST_CALIB_MODE && MANUAL_MODE && MAST_RIGHT  &&!MAST_MAX_OK
-
-/******* TRANSITION CONDITION STOP *********/
-//#define STOP_2_INIT           0
-//#define STOP_2_CALIB          MAST_CALIB_MODE
-//#define STOP_2_LEFT           !MAST_CALIB_MODE && MANUAL_MODE && MAST_LEFT &&!MAST_MIN_OK
-//#define STOP_2_RIGHT          !MAST_CALIB_MODE && MANUAL_MODE && MAST_RIGHT  &&!MAST_MAX_OK
-
-/******* TRANSITION CONDITION RIGHT **********/
-//#define RIGHT_2_INIT          0
-//#define RIGHT_2_CALIB         MAST_CALIB_MODE
-//#define RIGHT_2_STOP          !MAST_CALIB_MODE && MANUAL_MODE && (MAST_OK || MAST_MAX_OK) || !MANUAL_MODE
-//#define RIGHT_2_LEFT          !MAST_CALIB_MODE && MANUAL_MODE && MAST_LEFT &&!MAST_MIN_OK
-
-/******* TRANSITION CONDITION LEFT *******/
-//#define LEFT_2_INIT           0
-//#define LEFT_2_CALIB          MAST_CALIB_MODE
-//#define LEFT_2_STOP           !MAST_CALIB_MODE && MANUAL_MODE && (MAST_OK || MAST_MIN_OK) || !MANUAL_MODE
-//#define LEFT_2_RIGHT          !MAST_CALIB_MODE && MANUAL_MODE && MAST_RIGHT  && !MAST_MAX_OK
 
 #endif	/* STATE_MACHINE_MAST_H */
 
