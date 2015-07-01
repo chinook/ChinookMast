@@ -15,5 +15,9 @@ Tester algo avec mât
 Revoir le stop (lors du changement de mode)	// Done
 Redondance EEPROM
 
+Vérifier la vitesse du véhicule avant de faire SET_ZERO
+
+Commenter
+
 
 Interrupts SPI

@@ -252,6 +252,8 @@ void StateInit(void)
   // Send ID to backplane by CAN protocol
   SEND_ID_TO_BACKPLANE;
 
+  Timer.DelayMs(10);
+  
   // Send the mode of operation to the steering wheel
   SEND_MODE_TO_STEERING_WHEEL;
 
@@ -379,7 +381,7 @@ void StateReg(void)
 
   Regulator();
 
-  WriteMastPos2Eeprom();
+//  WriteMastPos2Eeprom();
 }
 
 
@@ -389,7 +391,12 @@ void StateReg(void)
 //===============================================================
 void StateDisconnect(void)
 {
-  MastManualStop();
+  if (mastCurrentSpeed != 0)
+  {
+    MastManualStop();
+  }
+
+  WriteMastPos2Eeprom();
   
   SEND_DISCONNECT_TO_BACKPLANE;
 }
@@ -405,6 +412,8 @@ void StateClose(void)
   INTDisableInterrupts();   // Disable all interrupts of the system.
 
 //  Wdt.Disable();
+  
+  LED_ALL_OFF();
 
   I2c.Close(I2C4);
 
@@ -451,6 +460,8 @@ void StateIdle(void)
 void StateSendData(void)
 {
   oTimerSendData = 0;
+
+  static UINT8 iCounterToTwoSec = 0;
   
   if (SEND_DATA_TO_UART)
   {
@@ -468,8 +479,17 @@ void StateSendData(void)
   SEND_MAST_DIRECTION;  // Via CAN bus
 
   WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors
-  
-  WriteMastPos2Eeprom();
+
+  if (iCounterToTwoSec < 10)
+  {
+    iCounterToTwoSec++;
+  }
+  else
+  {
+    iCounterToTwoSec = 0;
+    LED_DEBUG3_TOGGLE;
+    WriteMastPos2Eeprom();
+  }
 }
 
 

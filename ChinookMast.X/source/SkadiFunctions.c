@@ -127,6 +127,10 @@ void SetMode(sSkadi_t *skadi, sSkadiArgs_t args)
     if (!oManualMode)
     {
       oManualMode = 1;
+      if (mastCurrentSpeed != 0)
+      {
+        MastManualStop();
+      }
       SEND_MODE_TO_STEERING_WHEEL;
       buffer.length = sprintf(buffer.buffer, "Mast is in Manual Mode (oManualMode == 1)\r\n\n");
     }

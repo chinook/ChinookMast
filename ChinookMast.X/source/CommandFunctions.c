@@ -120,7 +120,7 @@ void SetPwm (float cmd)
       inPi.previousValue = 0;
       outPi.currentValue = 0;
       outPi.previousValue = 0;
-      LED_CAN_TOGGLE;
+      LED_DEBUG4_TOGGLE;
     }
     else if (oFirstTimeInMastStop)
     {
@@ -243,7 +243,7 @@ void Regulator (void)
   }
 
   error = windAngle.currentValue - mastAngle.currentValue;
-
+  
   if (ABS(error) <= ERROR_THRESHOLD)  // Don't need to move the mast
   {
     cmd = 0;
@@ -262,6 +262,8 @@ void Regulator (void)
   {
     oEmergencyStop = 0;
     oFirstTimeInMastStop = 1;
+
+    error -= SIGN(error) * ERROR_THRESHOLD;
 
     inPi.previousValue = inPi.currentValue;
     inPi.currentValue  = K * error - mastSpeed.currentValue;

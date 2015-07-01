@@ -119,8 +119,8 @@ void MastManualLeft (void)
 {
   DRVB_SLEEP = 1;
 
-  Pwm.SetDutyCycle(PWM_2, 850);
-  Pwm.SetDutyCycle(PWM_3, 150);
+  Pwm.SetDutyCycle(PWM_2, 750);
+  Pwm.SetDutyCycle(PWM_3, 250);
 //  Pwm.SetDutyCycle(PWM_2, 600);
 //  Pwm.SetDutyCycle(PWM_3, 400);
 
@@ -132,8 +132,8 @@ void MastManualRight (void)
 {
   DRVB_SLEEP = 1;
 
-  Pwm.SetDutyCycle(PWM_2, 150);
-  Pwm.SetDutyCycle(PWM_3, 850);
+  Pwm.SetDutyCycle(PWM_2, 250);
+  Pwm.SetDutyCycle(PWM_3, 750);
 //  Pwm.SetDutyCycle(PWM_2, 400);
 //  Pwm.SetDutyCycle(PWM_3, 600);
 
@@ -223,7 +223,7 @@ void AssessButtons (void)
             oManualFlagChng = 1;
           }
         }
-        else if (oManualMode)
+        else if (oManualMode && !oEnableMastStopProcedure)
         {
           oManualMastLeft = 1;
           oManualFlagChng = 1;
@@ -239,6 +239,10 @@ void AssessButtons (void)
           if (oTimerChngMode)              // If at least one second has passed
           {
             oManualMode ^= 1;       // Change mode
+            if (mastCurrentSpeed != 0)
+            {
+              MastManualStop();
+            }
             SEND_MODE_TO_STEERING_WHEEL;  // Send change of mode to the steering wheel
           }
         }
@@ -276,7 +280,7 @@ void AssessButtons (void)
             oManualFlagChng = 1;
           }
         }
-        else if (oManualMode)
+        else if (oManualMode && !oEnableMastStopProcedure)
         {
           oManualMastRight = 1;
           oManualFlagChng = 1;
@@ -292,6 +296,10 @@ void AssessButtons (void)
           if (oTimerChngMode)              // If at least one second has passed
           {
             oManualMode ^= 1;       // Change mode
+            if (mastCurrentSpeed != 0)
+            {
+              MastManualStop();
+            }
             SEND_MODE_TO_STEERING_WHEEL;  // Send change of mode to the steering wheel
           }
         }
@@ -329,7 +337,7 @@ void AssessButtons (void)
             oManualFlagChng = 1;
           }
         }
-        else if (oManualMode)
+        else if (oManualMode && !oEnableMastStopProcedure)
         {
           oManualMastLeft = 1;
           oManualFlagChng = 1;
@@ -345,6 +353,10 @@ void AssessButtons (void)
           if (oTimerChngMode)              // If at least one second has passed
           {
             oManualMode ^= 1;       // Change mode
+            if (mastCurrentSpeed != 0)
+            {
+              MastManualStop();
+            }
             SEND_MODE_TO_STEERING_WHEEL;  // Send change of mode to the steering wheel
           }
         }
@@ -399,7 +411,7 @@ void AssessButtons (void)
             oManualFlagChng = 1;
           }
         }
-        else if (oManualMode)
+        else if (oManualMode && !oEnableMastStopProcedure)
         {
           oManualMastRight = 1;
           oManualFlagChng = 1;
@@ -415,6 +427,10 @@ void AssessButtons (void)
           if (oTimerChngMode)              // If at least one second has passed
           {
             oManualMode ^= 1;       // Change mode
+            if (mastCurrentSpeed != 0)
+            {
+              MastManualStop();
+            }
             SEND_MODE_TO_STEERING_WHEEL;  // Send change of mode to the steering wheel
           }
         }
