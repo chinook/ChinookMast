@@ -730,3 +730,96 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
   // enabled will not have any effect because the base event is still present.
   INTClearFlag(INT_CAN1);
 }
+
+
+/*******************************************************************************
+ ***********************                               *************************
+ ********************           SPI INTERRUPTS            **********************
+ ***********************                               *************************
+ *******************************************************************************/
+
+//=============================================
+// Configure the UART 6 interrupt handler
+//=============================================
+
+void __ISR(_SPI_4_VECTOR, S4_INTERRUPT_PRIORITY) Spi4InterruptHandler(void)
+{
+  UINT8  i
+        ,iMax   // Read/write max 8 bytes/interrupt
+        ,data   // used in UartFifoWrite/Read functions
+        ;
+
+  if ( INTGetFlag ( INT_SOURCE_SPI_ERROR(SPI4 + 1)) )
+  {
+    LED_ERROR_ON;
+    INTClearFlag(INT_SOURCE_SPI_ERROR(SPI4 + 1));
+  }
+
+	// TX interrupt handling
+  //===========================================================
+  if ( INTGetEnable ( INT_SOURCE_SPI_TX(SPI4 + 1) ) )               // If TX interrupts enabled
+  {
+    if ( INTGetFlag ( INT_SOURCE_SPI_TX(SPI4 + 1) ) )               // If TX interrupt occured
+    {
+      if ( UARTTransmitterIsReady(SPI4 + 1) && !Uart.Var.uartTxFifo[UART6].bufEmpty )  // If TX buffer is ready to receive data and the user's TX buffer is not empty
+      {
+        if (Uart.Var.uartTxFifo[UART6].lineBuffer.length < 8)     // Write max 8 bytes/interrupt
+        {
+          iMax = Uart.Var.uartTxFifo[UART6].lineBuffer.length;
+        }
+        else
+        {
+          iMax = 8;
+        }
+
+        for (i = 0; i < iMax; i++)
+        {
+          UartFifoRead((void *) &Uart.Var.uartTxFifo[UART6], &data);  // Copy from user
+          U6TXREG = data;                                         // Put data in PIC32's TX buffer
+        }
+      }
+
+      if (Uart.Var.uartTxFifo[UART6].bufEmpty)                    // If User's TX buffer is empty
+      {
+        Uart.DisableTxInterrupts(UART6);                          // Disable TX interrupts
+      }
+
+      INTClearFlag(INT_SOURCE_SPI_TX(SPI4 + 1));                    // Clear the TX interrupt Flag
+    }
+  }
+  //===========================================================
+
+
+	// RX interrupt handling
+  //===========================================================
+  if ( INTGetEnable ( INT_SOURCE_SPI_RX(SPI4 + 1) ) )               // If RX interrupts enabled
+  {
+    if ( INTGetFlag ( INT_SOURCE_SPI_RX(SPI4 + 1) ) )               // If RX interrupt occured
+    {
+      i = 0;
+      iMax = 8;                                                   // Read max 8 bytes/interrupt
+      while (   UARTReceivedDataIsAvailable(UART6)                // While RX data available
+            && !Uart.Var.uartRxFifo[UART6].bufFull                // and user's RX buffer not full
+            && (i < iMax)                                         // and under 8 bytes read
+            )
+      { // while ^
+        data = UARTGetDataByte(SPI4 + 1);                            // Get data for PIC32's RX FIFO buffer and copy it to user (next line)
+        if ( UartFifoWrite((void *) &Uart.Var.uartRxFifo[UART6], &data) < 0 ) // If copy to user did not work
+        {
+          break;                                                  // Exit while loop
+        }
+        i++;
+      } // end while
+
+      if (!Uart.Var.uartRxFifo[UART6].bufEmpty)                   // If there is data in the user's RX buffer
+      {
+        Uart.Var.oIsRxDataAvailable[UART6] = 1;                   // Set according flag
+      }
+
+      INTClearFlag (INT_SOURCE_SPI_RX(SPI4 + 1) );                  // Clear the RX interrupt Flag
+
+    }
+	}
+  //===========================================================
+}
+//=============================================

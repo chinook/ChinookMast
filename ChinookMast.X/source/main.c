@@ -83,12 +83,29 @@ void main(void)
 //============================
 
   StateInit();
-  INT32 allo = 0;
+  INT32 allo = 0, dummy = 0;
+  UINT16 i = 0;
 	while(1)  //infinite loop
 	{
 
-    WriteDrive(DRVB, 0x0003);
-    allo = ReadDrive(DRVB, 0x8000);
+    while(SpiChnIsBusy(SPI4+1));
+    DRVB_SC = 1;
+    SPI4BUF = 0x0003;
+    while(SpiChnIsBusy(SPI4+1));
+    DRVB_SC = 0;
+    for (i = 0; i < 50; i++);
+
+    dummy = SPI4BUF;
+
+    while(SpiChnIsBusy(SPI4+1));
+    DRVB_SC = 1;
+    SPI4BUF = 0x8000;
+    while(SpiChnIsBusy(SPI4+1));
+    DRVB_SC = 0;
+    for (i = 0; i < 50; i++);
+    allo = SPI4BUF;
+
+
     if (allo == 0x8003)
     {
       LED_CAN_ON;
@@ -103,8 +120,8 @@ void main(void)
     //======================================
     // Mast State machine with Drive A
     //======================================
-    (*pStateMast)();          // jump to next state
-    StateScheduler();   // Decides which state will be next
+//    (*pStateMast)();          // jump to next state
+//    StateScheduler();   // Decides which state will be next
 
 	}  // end while
 }   //END MAIN CODE

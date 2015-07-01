@@ -63,7 +63,7 @@ void WriteDrive(INT32 DRV, INT32 msg)
     while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 1;
     Spi.SendCharacter(SPI4, msg);
-//    for(i=0;i<10000;i++);
+    for(i=0;i<10000;i++);
     while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 0;
   }
