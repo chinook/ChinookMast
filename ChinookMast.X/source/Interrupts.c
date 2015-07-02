@@ -44,11 +44,9 @@ volatile BOOL  oCapture1      = 0
 UINT8 iMastStop = 0;
 INT8  mastDir = 0;
 
-volatile UINT32 rxWindAngle = 0;
+volatile UINT32 rxWindAngle = 0;  // Received from CAN
 
-extern volatile BOOL  oButtonLeft
-                     ,oButtonRight
-                     ,oManualMode
+extern volatile BOOL  oManualMode
                      ,oCountTimeToChngMode
                      ;
 
@@ -78,17 +76,17 @@ void __ISR(_TIMER_1_VECTOR, T1_INTERRUPT_PRIORITY) Timer1InterruptHandler(void)
 //=============================================
 void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
 {
+  /*
+   * Following code performs a smooth stop. It goes from 30% speed to 0 in order
+   * to have a smooth curve. Used in manual mode and for emergency stops in
+   * automatic mode (if the mast is too far).
+   */
   if (oEnableMastStopProcedure)
   {
     if (iMastStop == 0)
     {
       mastDir = SIGN(mastCurrentSpeed);
     }
-
-//    if (mastCurrentSpeed == 0)  // Mast already stopped
-//    {
-//      iMastStop = 17;
-//    }
 
     if (iMastStop < 16)
     {
@@ -98,13 +96,11 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
       {
         Pwm.SetDutyCycle(PWM_2, 500 + (150 - iMastStop*10));
         Pwm.SetDutyCycle(PWM_3, 500 - (150 - iMastStop*10));
-//        Timer.DelayMs(20);
       }
       else if (mastDir == MAST_DIR_RIGHT)
       {
         Pwm.SetDutyCycle(PWM_2, 500 - (150 - iMastStop*10));
         Pwm.SetDutyCycle(PWM_3, 500 + (150 - iMastStop*10));
-//        Timer.DelayMs(20);
       }
       iMastStop++;
     }
@@ -118,16 +114,9 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
 
       DRVB_SLEEP = 0;
 
-//      oCapture1 = 0;
-//      oCapture2 = 0;
-//      oCapture3 = 0;
-//      oCapture4 = 0;
-
       oEnableMastStopProcedure = 0;
 
       mastCurrentSpeed = 0;
-
-//      WriteMastPos2Eeprom();
     }
   }
 
@@ -413,10 +402,6 @@ void __ISR(_INPUT_CAPTURE_4_VECTOR, IC4_INT_PRIORITY) InputCapture4InterruptHand
 //=============================================
 void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
 {
-//  if (INTGetFlag(INT_I2C4S))  // Slave interrupt
-//  {
-//    INTClearFlag(INT_I2C4S);
-//  }
   sI2cCmdBuffer_t masterData;
   
   if (INTGetFlag(INT_I2C4B))  //Bus Collision interrupt
@@ -495,13 +480,6 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
               }
             }
           }
-//          if (iCurrentState >=8)
-//          {
-//            if (!I2CByteWasAcknowledged(I2C4))
-//            {
-//              iCurrentState -= 3;
-//            }
-//          }
           break;
       //====================================================== 
 
@@ -519,7 +497,6 @@ void __ISR(_I2C_4_VECTOR, I2C4_INT_PRIORITY) I2c4InterruptHandler(void)
           }
           else
           {
-//            I2c.EnableInterrupt(I2C4, I2C_MASTER_INTERRUPT);  // Start another writing process
             INTSetFlag(INT_I2C4M);                    // Start another writing process
           }
           break;
@@ -666,8 +643,6 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
   // Check if the source of the interrupt is RX_EVENT. This is redundant since
   // only this event is enabled in this example but this shows one scheme for
   // handling events
-  
-//  LED_CAN_TOGGLE;
 
   if ((CANGetModuleEvent(CAN1) & CAN_RX_EVENT) != 0)
   {
@@ -712,7 +687,7 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
     }
 
     /*
-     * CHANNEL 2 = TELEMETRY
+     * CHANNEL 2 = WIND ANGLE
      */
     if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL2_EVENT)
     {
@@ -725,7 +700,6 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 
       CANUpdateChannel(CAN1, CAN_CHANNEL2);
       CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
-
     }
   }
 

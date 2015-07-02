@@ -39,19 +39,21 @@
 //==============================================================================
 
 /**************************************************************
- * Function name  : TemplateFunction
- * Purpose        : Give a template for developpers to start from.
+ * Function name  : WriteDrive
+ * Purpose        : Write a cmd to the drive.
  * Arguments      : None.
  * Returns        : None.
  *************************************************************/
 void WriteDrive(INT32 DRV, INT32 msg)
 {
   int i=0;
+
   if(DRV == DRVA)
   {
     while(SpiChnIsBusy(SPI4+1));
     DRVA_SC = 1;
     Spi.SendCharacter(SPI4, msg);
+    for (i = 0; i < 1000; i++);   // Small delay necessary for the drive
     while(SpiChnIsBusy(SPI4+1));
     DRVA_SC = 0;
   }
@@ -59,9 +61,8 @@ void WriteDrive(INT32 DRV, INT32 msg)
   {
     while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 1;
-//    for (i = 0; i < 1000; i++);
     Spi.SendCharacter(SPI4, msg);
-    for (i = 0; i < 1000; i++);
+    for (i = 0; i < 1000; i++);   // Small delay necessary for the drive
     while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 0;
   }
@@ -71,6 +72,7 @@ void WriteDrive(INT32 DRV, INT32 msg)
     DRVB_SC = 1;
     DRVA_SC = 1;
     Spi.SendCharacter(SPI4, msg);
+    for (i = 0; i < 1000; i++);   // Small delay necessary for the drive
     while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 0;
     DRVA_SC = 0;
@@ -79,8 +81,8 @@ void WriteDrive(INT32 DRV, INT32 msg)
 
 
 /**************************************************************
- * Function name  : TemplateFunction
- * Purpose        : Give a template for developpers to start from.
+ * Function name  : ReadDrive
+ * Purpose        : Read a msg from the drive. Not used
  * Arguments      : None.
  * Returns        : None.
  *************************************************************/

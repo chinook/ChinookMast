@@ -229,6 +229,7 @@ void StateScheduler(void)
    */
 }
 
+
 //===============================================================
 // Name     : StateInit
 // Purpose  : Initialization of the system.
@@ -327,7 +328,11 @@ void StateGetMastData(void)
 
   float tempWind;
   memcpy ((void *) &tempWind, (void *) &rxWindAngle, 4);
-  
+
+  /*
+   * If the wind is not in the acceptable range, change the command to the MAX
+   * or MIN. Mast must not go beyond these values.
+   */
   if (tempWind > MAST_MAX)
   {
     windAngle.currentValue = MAST_MAX;
@@ -346,8 +351,11 @@ void StateGetMastData(void)
   mastSpeed.currentValue  = mastCurrentSpeed;
 
   // Get mast position from mast speed
-  TustinZ((void *) &mastSpeed, (void *) &mastAngle);
+  TustinZ((void *) &mastSpeed, (void *) &mastAngle);    // Discrete integrator
 
+  /*
+   * Some kind of modulo
+   */
   if (mastAngle.currentValue > 180)
   {
     mastAngle.currentValue -= 360;
@@ -357,6 +365,9 @@ void StateGetMastData(void)
     mastAngle.currentValue += 360;
   }
 
+  /*
+   * Check mast limits
+   */
   if (mastSpeed.currentValue != 0)
   {
     if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )        // Mast too far
@@ -380,8 +391,6 @@ void StateReg(void)
   oTimerReg = 0;
 
   Regulator();
-
-//  WriteMastPos2Eeprom();
 }
 
 

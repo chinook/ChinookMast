@@ -75,7 +75,7 @@ void (*pStateMast)(void);       // State pointer, used to navigate between state
 #define MAST_DIR_UP           !MAST_DIR_DOWN
 #define MANUAL_MODE           oManualMode
 #define MANUAL_FLAG_CHANGE    oManualFlagChng
-#define DISCONNECT_OK         0
+#define DISCONNECT_OK         0                                   // Need to be coded
 #define REG_TIMER_OK          oTimerReg
 #define SEND_DATA_TIMER_OK    oTimerSendData
 

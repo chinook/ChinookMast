@@ -60,13 +60,31 @@ sCmdValue_t  inPi   = {0}
             ;
 
 // Regulator parameters
+
+/*
+ * These are the tested working values WITH the mast attached to the motor
+ * shaft, but WITHOUT the blades.
+ */
 volatile float KP = 0.015f
               ,KI = 0.030f
               ,K  = 0.300f
               ,PWM_MAX_DUTY_CYCLE = 0.980f
               ,PWM_MIN_DUTY_CYCLE = 0.040f
               ,ERROR_THRESHOLD    = 1.000f
+              ,T                  = 0.100f    // Same as TIMER_1
               ;
+/*
+ * These are the tested working values WITHOUT the mast attached to the motor
+ * shaft.
+ */
+//volatile float KP = 0.015f
+//              ,KI = 0.030f
+//              ,K  = 0.300f
+//              ,PWM_MAX_DUTY_CYCLE = 0.980f
+//              ,PWM_MIN_DUTY_CYCLE = 0.010f
+//              ,ERROR_THRESHOLD    = 0.100f
+//              ,T                  = 0.100f    // Same as TIMER_1
+//              ;
 //=====================================
 
 
@@ -89,7 +107,8 @@ BOOL  oFirstTimeInMastStop    = 0
 // Mast regulation functions
 //==============================================================================
 
-/* Function : TustinZ
+/*
+ * Function : TustinZ
  * Desc :     Discrete integrator using Tustin's method
  * Graphic example :
  *
@@ -97,7 +116,13 @@ BOOL  oFirstTimeInMastStop    = 0
  *  --- = --- * -------
  *   s     2     z - 1
  *
- *  y(n) = y(n-1) + T/2 * ( x(n-1) + x(n) )
+ *         _______
+ *  x(n)  |   1   | y(n)
+ * ------>| ----- |------>
+ *        |   s   |
+ *        |_______|
+ *
+ *  iLaplace => y(n) = y(n-1) + T/2 * ( x(n-1) + x(n) )
  *
  */
 void TustinZ (sCmdValue_t *input, sCmdValue_t *output)
@@ -112,17 +137,19 @@ void SetPwm (float cmd)
 {
   if (cmd == 0)
   {
-    if (oEmergencyStop)
+    if (oEmergencyStop)   // When mast has gone beyond the acceptable limits
     {
       MastManualStop();
       oEmergencyStop = 0;
+
+      // Reset PI internal values
       inPi.currentValue = 0;
       inPi.previousValue = 0;
       outPi.currentValue = 0;
       outPi.previousValue = 0;
       LED_DEBUG4_TOGGLE;
     }
-    else if (oFirstTimeInMastStop)
+    else if (oFirstTimeInMastStop)  // Do this procedure only once after every movement of the mast
     {
 
       DRVB_SLEEP = 0;
@@ -131,16 +158,18 @@ void SetPwm (float cmd)
       mastCurrentSpeed = 0;
 
       oFirstTimeInMastStop = 0;
+
+      // Reset PI internal values
       inPi.currentValue = 0;
       inPi.previousValue = 0;
       outPi.currentValue = 0;
       outPi.previousValue = 0;
 
-      WriteDrive(DRVB, STATUS_Mastw);
+      WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors
       
       WriteMastPos2Eeprom();
 
-      if (oPrintData)
+      if (oPrintData)   // Used for debugging with skadi
       {
         UINT16 i;
         INT32 err = 0;
@@ -168,7 +197,7 @@ void SetPwm (float cmd)
       }
     }
   }
-  else
+  else // if (cmd != 0)
   {
     oFirstTimeInMastStop = 1;
     
@@ -210,9 +239,12 @@ void Regulator (void)
 
   // Update wind angle
   windAngle.previousValue = windAngle.currentValue;
+  memcpy ((void *) &tempWind, (void *) &rxWindAngle, 4);  // Copy contents of UINT32 into float
 
-  memcpy ((void *) &tempWind, (void *) &rxWindAngle, 4);
-
+  /*
+   * If the wind is not in the acceptable range, change the command to the MAX
+   * or MIN. Mast must not go beyond these values.
+   */
   if (tempWind > MAST_MAX)
   {
     windAngle.currentValue = MAST_MAX;
@@ -231,8 +263,11 @@ void Regulator (void)
   mastSpeed.currentValue  = mastCurrentSpeed;
 
   // Get mast position from mast speed
-  TustinZ((void *) &mastSpeed, (void *) &mastAngle);
+  TustinZ((void *) &mastSpeed, (void *) &mastAngle);  // Discrete integrator
 
+  /*
+   * Some kind of modulo
+   */
   if (mastAngle.currentValue > 180)
   {
     mastAngle.currentValue -= 360;
@@ -241,6 +276,13 @@ void Regulator (void)
   {
     mastAngle.currentValue += 360;
   }
+
+  /*
+   * The rest of the code goes like the graphic at the top of this function.
+   * The only parts added adjust the command from PWM_MIN_DUTY_CYCLE to
+   * PWM_MAX_DUTY_CYCLE. The algorithm also checks if the mast has passed the
+   * limits MAST_MIN and MAST_MAX.
+   */
 
   error = windAngle.currentValue - mastAngle.currentValue;
   
@@ -263,7 +305,7 @@ void Regulator (void)
     oEmergencyStop = 0;
     oFirstTimeInMastStop = 1;
 
-    error -= SIGN(error) * ERROR_THRESHOLD;
+    error -= SIGN(error) * ERROR_THRESHOLD;   // Substract the ERROR_THRESHOLD to reduce the risk of an abrupt stop by the mast
 
     inPi.previousValue = inPi.currentValue;
     inPi.currentValue  = K * error - mastSpeed.currentValue;
@@ -272,7 +314,7 @@ void Regulator (void)
 
     cmd = inPi.currentValue * KP + outPi.currentValue * KI;
 
-    if (ABS(cmd) > PWM_MAX_DUTY_CYCLE)
+    if      (ABS(cmd) > PWM_MAX_DUTY_CYCLE)
     {
       cmd = SIGN(cmd) * PWM_MAX_DUTY_CYCLE;
     }
@@ -282,7 +324,7 @@ void Regulator (void)
     }
   }
 
-  if (oPrintData && oFirstTimeInMastStop)
+  if (oPrintData && oFirstTimeInMastStop)   // Used for debugging with skadi
   {
     if (data.length < N_DATA_TO_ACQ)
     {
@@ -315,7 +357,13 @@ void AssessMastValues (void)
   INT8 firstIc;
   UINT64 meanTime   = 0;
   INT8 dir    = 0;
-  
+
+  /*
+   * If a capture event has occured on both inputs, check the time of both and
+   * get the direction of the mast (MAST_DIR_LEFT or MAST_DIR_RIGHT). Then, using
+   * the known ratios of ENCODER / MOTOR / MAST, calculate the speed of the mast
+   * in degrees / second [deg/s].
+   */
   if (oCapture2 && oCapture4)
   {
     oCapture2 = 0;

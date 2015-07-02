@@ -31,13 +31,9 @@
 // Public functions prototypes
 //==============================================================================
 
-/**************************************************************
- * Function name  : TemplateFunction
- * Purpose        : Give a template for developpers to start from.
- * Arguments      : None.
- * Returns        : 0 on success, -1 on failure.
- *************************************************************/
-//static inline INT8 TemplateFunction (void);
+void  WriteDrive(INT32 DRV, INT32 msg);
+INT32 ReadDrive (INT32 DRV, INT32 msg);
+void  InitDriver(void);
 
 
 //==============================================================================
@@ -209,35 +205,6 @@ typedef union
 //==============================================================================
 // Variable declarations
 //==============================================================================
-void WriteDrive(INT32 DRV, INT32 msg);
-INT32 ReadDrive(INT32 DRV, INT32 msg);
-void InitDriver(void);
-/***********************************
-// * Template structure
-// **********************************/
-//typedef struct sTemplate
-//{
-//  UINT16  variableName;
-//  UINT8   secondVariable;
-//  float   thirdVariable;
-//  double  fourthVariable;
-//} sTemplate;
-
-/***********************************
- * Template global variable
- **********************************/
-//INT32 globalVariable = -10;
-
-/***********************************
- * Global struct
- **********************************/
-//sTemplate templateStruct;
-//  {
-//     .variableName    = 12
-//    ,.secondVariable  = 0xFF
-//    ,.thirdVariable   = 0.0f
-//    ,.fourthVariable  = 0.0f
-//  }
 
 
 #endif	/* HEADER_TEMPLATE_H */

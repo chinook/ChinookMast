@@ -33,20 +33,6 @@
 #define MAST_DIR_LEFT               -1
 #define MAST_DIR_RIGHT               1
 
-//#define ERROR_THRESHOLD              5.0f
-//#define ERROR_THRESHOLD              0.5f
-//#define ERROR_THRESHOLD              0.2f
-
-//#define KP                           0.015f
-//#define KI                           0.050f
-////#define KI                           0.075f
-////#define KI                           0.100f
-////#define K                            1.500f
-//#define K                            0.400f
-#define T                            0.100f
-//#define PWM_MAX_DUTY_CYCLE           0.980f
-//#define PWM_MIN_DUTY_CYCLE           0.080f
-
 #define MOTOR_ENCODER_RATIO         49.0f
 #define MAST_MOTOR_RATIO            50.0f
 
@@ -54,21 +40,18 @@
 
 #define MOTOR_DEG_PER_PULSE         360.0f/245.0f
 
-#define N_DATA_TO_ACQ               300
-
-//#define PRINT_DATA                  1
+#define N_DATA_TO_ACQ               300   // Used when debugging with SKADI
 
 
+/*
+ * Structure used for the Tustin discrete integrators
+ */
 typedef struct sCmdValue
 {
   float  previousValue
         ,currentValue
         ;
 } sCmdValue_t;
-
-//==============================================================================
-// Variable declarations
-//==============================================================================
 
 
 //==============================================================================
@@ -83,9 +66,12 @@ void Regulator  (void);
 void AssessMastValues (void);
 // =======================================
 
+// Various MATH functions
 #define ABS(x)  ( (x >= 0)?  x : -x )
 #define SIGN(x) ( (x >= 0)?  1 : -1 )
 
+
+// Used for debugging with SKADI
 typedef struct
 {
   float windPrevious  [N_DATA_TO_ACQ];

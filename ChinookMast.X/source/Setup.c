@@ -46,12 +46,12 @@ sSkadiCommand_t skadiCommandTable[] =
    {"setwind"     , SetWind     , 1 , "\t| Set wind angle [deg].\t\t\t\t| 1 arg : Min = -179.0, Max = 179.0"            }
   ,{"setpos"      , SetPos      , 1 , "\t| Set mast angle [deg].\t\t\t\t| 1 arg : Min = -179.0, Max = 179.0"            }
   ,{"setmode"     , SetMode     , 1 , "\t| Set mast mode of operation.\t\t\t| 1 arg : 1 = Manual, 0 = Auto"             }
-  ,{"setparam"    , SetParam    , 2 , "\t| Set K, KI, KP, PWM MAX, PWM MIN and ERROR.\t| 2 args : var and val\n"        }
+  ,{"setparam"    , SetParam    , 2 , "\t| Set K, KI, KP, PWM_MAX, PWM_MIN and ERROR.\t| 2 args : var and val\n"        }
   ,{"getwind"     , GetWind     , 0 , "\t| Read the wind current angle [deg].\t\t| No arg needed"                       }
   ,{"getpos"      , GetPos      , 0 , "\t| Read the mast current position [deg].\t\t| 0 arg"                            }
   ,{"getmode"     , GetMode     , 0 , "\t| Get the mast current mode of operation.\t| 0 arg"                            }
   ,{"getspeed"    , GetSpeed    , 0 , "\t| Read the mast current speed [deg/s].\t\t| 0 arg"                             }
-  ,{"getparam"    , GetParam    , 0 , "\t| Print K, KI, KP, PWM MAX, PWM MIN and ERROR.\t| 0 arg\n"                     }
+  ,{"getparam"    , GetParam    , 0 , "\t| Print K, KI, KP, PWM_MAX, PWM_MIN and ERROR.\t| 0 arg\n"                     }
   ,{"writestatus" , WriteStatus , 0 , "\t| Write STATUS msg to drive.\t\t\t| 0 arg"                                     }
   ,{"setprint"    , SetPrint    , 1 , "\t| Print or not data from regulation.\t\t| 1 arg : 1 = Print, 0 = Don't print"  }
   ,{"clc"         , ClearScreen , 0 , "\t\t| Clear terminal window.\t\t\t| 0 arg"                                       }
@@ -69,7 +69,8 @@ void InitTimer(void)
 //	Open timers
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%
   timerCounterValue = Timer.Open(TIMER_1, 100, SCALE_MS);   // Timer used for regulating the mast. Period = 100 ms
-  timerCounterValue = Timer.Open(TIMER_2, 11, SCALE_MS);    // Timer used for input capture AND stopping the mast. Period = 11 ms
+  timerCounterValue = Timer.Open(TIMER_2, 21, SCALE_MS);    // Timer used for input capture AND stopping the mast. Period = 21 ms
+//  timerCounterValue = Timer.Open(TIMER_2, 11, SCALE_MS);    // Timer used for input capture AND stopping the mast. Period = 11 ms
   timerCounterValue = Timer.Open(TIMER_3, 500, SCALE_US);   // Timer used for PWM. Period = 500 ms (f = 2kHz)
 //  timerCounterValue = Timer.Open(TIMER_4,  15, SCALE_MS);   // Timer used for sending data to other devices. Period = 15 ms (f ~ 66.67 Hz)
   timerCounterValue = Timer.Open(TIMER_4, 200, SCALE_MS);   // Timer used for sending data to other devices. Period = 200 ms
@@ -91,7 +92,7 @@ void InitTimer(void)
 //===========================
 void InitSkadi(void)
 {
-  Skadi.Init(skadiCommandTable, sizeof(skadiCommandTable)/sizeof(sSkadiCommand_t), UART6, TRUE);
+  Skadi.Init(skadiCommandTable, sizeof(skadiCommandTable)/sizeof(sSkadiCommand_t), UART6, TRUE);  // TRUE ==> Use interrupts with UART
 }
 
 //===========================
@@ -125,6 +126,8 @@ void InitSpi(void)
 //===========================
 void InitPwm(void)
 {
+  // DRIVE B
+  //==========================================================
   // Open PWM2 using Timer3 with 50% duty cycle and 0% offset
   Pwm.Open(PWM_2);
   Pwm.SetDutyCycle  (PWM_2, 500);
@@ -134,7 +137,11 @@ void InitPwm(void)
   Pwm.Open(PWM_3);
   Pwm.SetDutyCycle  (PWM_3, 500);
   Pwm.SetPulseOffset(PWM_3, 500);
+  //==========================================================
 
+
+  // DRIVE A
+  //==========================================================
 //  // Open PWM4 using Timer3 with 50% duty cycle and 0% offset
 //  Pwm.Open(PWM_4);
 //  Pwm.SetDutyCycle  (PWM_4, 500);
@@ -144,6 +151,7 @@ void InitPwm(void)
 //  Pwm.Open(PWM_5);
 //  Pwm.SetDutyCycle  (PWM_5, 500);
 //  Pwm.SetPulseOffset(PWM_5, 500);
+  //==========================================================
 }
 
 
@@ -348,14 +356,18 @@ void InitInputCapture(void)
   // Capture every rising edge, 1 interrupt each capture, use the 32 bits Timer 23, capture the first rising edge, Input Capture ON
 //  UINT16 config = IC_EVERY_RISE_EDGE | IC_INT_1CAPTURE | IC_CAP_32BIT | IC_FEDGE_RISE | IC_ON;
 
-  // Driver A
+  // DRIVE A
+  //==========================================================
 //  InputCapture.Open(IC1, config);
 //  InputCapture.Open(IC3, config);
 //
 //  InputCapture.ConfigInterrupt(IC1, IC1_INTERRUPT_PRIORITY, IC1_INTERRUPT_SUBPRIORITY);
 //  InputCapture.ConfigInterrupt(IC3, IC3_INTERRUPT_PRIORITY, IC3_INTERRUPT_SUBPRIORITY);
+  //==========================================================
 
-  // Driver B
+
+  // DRIVE B
+  //==========================================================
   InputCapture.Open(IC2, config);
   InputCapture.Open(IC4, config);
 
@@ -364,6 +376,7 @@ void InitInputCapture(void)
   
   INTClearFlag(INT_IC2);
   INTClearFlag(INT_IC4);
+  //==========================================================
 
 }
 

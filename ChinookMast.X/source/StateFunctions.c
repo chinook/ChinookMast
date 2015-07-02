@@ -27,51 +27,53 @@
 //==============================================================================
 // Variable declarations
 //==============================================================================
-//const UINT16 EEPROM_POS_REGISTER = 0x0200;
 
+// EEPROM register containing mast last orientation
 I2cEepromInternalRegister_t eepromFirstRegister =
 {
   .index.pageIndex = 0b00010000
  ,.index.byteIndex = 0b000000
 };
 
+// All the buttons used. 3 on the steering wheel, 3 on the board
 volatile sButtonStates_t buttons =
 {
   .chng   .byte = 0
  ,.buttons.byte = 0
-          
+
+ // switches on board are at 1 when not pressed
  ,.buttons.bits.boardSw1 = 1
  ,.buttons.bits.boardSw2 = 1
  ,.buttons.bits.boardSw3 = 1
 };
 
-extern volatile float  mastCurrentSpeed      // Actual speed of Mast
+extern volatile float  mastCurrentSpeed       // Actual speed of Mast
                       ;
+
+extern volatile sCmdValue_t mastAngle;        // Discrete position of mast
 
 extern volatile BOOL oCapture1
                     ,oCapture2
                     ,oCapture3
                     ,oCapture4
-                    ,oEnableMastStopProcedure
-                    ,oTimerReg
-                    ,oTimerChngMode
+                    ,oEnableMastStopProcedure // Stop procedure using TIMER 2
+                    ,oTimerReg                // From TIMER 1
+                    ,oTimerChngMode           // Flag used when changing mode
                     ,oManualMode
-                    ,oCountTimeToChngMode
-                    ,oManualFlagChng
+                    ,oCountTimeToChngMode     // Flag used when changing mode
+                    ,oManualFlagChng          // In manual mode, indicates that a change has occured on the buttons
                     ,oManualMastRight
                     ,oManualMastLeft
                     ;
-
-extern volatile sCmdValue_t mastAngle;
-
-//==============================================================================
-// State Machine private functions prototypes
-//==============================================================================
 
 
 //==============================================================================
 // EEPROM functions
 //==============================================================================
+
+/*
+ * Write last recorded position of mast to EEPROM
+ */
 void WriteMastPos2Eeprom (void)
 {
   UINT8 dataBuffer[7];
@@ -87,7 +89,9 @@ void WriteMastPos2Eeprom (void)
   I2c.AddDataToFifoWriteQueue(I2C4, &dataBuffer[0], 7, TRUE);
 }
 
-
+/*
+ * Read last recorded position of mast. Used at init
+ */
 void ReadMastPosFromEeprom (void)
 {
   UINT8 mastPos[4];
@@ -124,7 +128,7 @@ void MastManualLeft (void)
 //  Pwm.SetDutyCycle(PWM_2, 600);
 //  Pwm.SetDutyCycle(PWM_3, 400);
 
-  WriteDrive(DRVB, STATUS_Mastw);
+  WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
 }
 
 
@@ -137,16 +141,16 @@ void MastManualRight (void)
 //  Pwm.SetDutyCycle(PWM_2, 400);
 //  Pwm.SetDutyCycle(PWM_3, 600);
 
-  WriteDrive(DRVB, STATUS_Mastw);
+  WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
 }
 
 
 void MastManualStop (void)
 {
-  oEnableMastStopProcedure = 1;
+  oEnableMastStopProcedure = 1;     // Start stop procedure using TIMER 2
   LED_STATUS_TOGGLE;
 
-  WriteDrive(DRVB, STATUS_Mastw);
+  WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
 }
 
 
@@ -182,7 +186,7 @@ void AssessButtons (void)
   // </editor-fold>
 
   // <editor-fold defaultstate="collapsed" desc="Assess changes">
-  if (buttons.chng.byte)
+  if (buttons.chng.byte)  // If any change has occured on any button
   {
     // <editor-fold defaultstate="collapsed" desc="SW1 on board">
     if (buttons.chng.bits.boardSw1)
