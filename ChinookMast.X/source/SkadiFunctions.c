@@ -305,8 +305,8 @@ void SetPos(sSkadi_t *skadi, sSkadiArgs_t args)
 /**************************************************************
  * Function name  : SetParam
  * Purpose        : Adjust one of the regulator parameters
- * Arguments      : 2. Variable and value.
- * Example        : setparam PWM_MIN 0.01
+ * Arguments      : Received from Skadi functions
+ * Returns        : None.
  *************************************************************/
 void SetParam(sSkadi_t *skadi, sSkadiArgs_t args)
 {

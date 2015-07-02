@@ -36,8 +36,6 @@
 #define MOTOR_ENCODER_RATIO         49.0f
 #define MAST_MOTOR_RATIO            50.0f
 
-#define INP_CAP_EVENTS_FOR_AVERAGE  20
-
 #define MOTOR_DEG_PER_PULSE         360.0f/245.0f
 
 #define N_DATA_TO_ACQ               300   // Used when debugging with SKADI
