@@ -141,8 +141,8 @@ void MastManualLeft (void)
   {
     DRVA_SLEEP = 1;
 
-    Pwm.SetDutyCycle(PWM_3, 750);
-    Pwm.SetDutyCycle(PWM_4, 250);
+    Pwm.SetDutyCycle(PWM_4, 750);
+    Pwm.SetDutyCycle(PWM_5, 250);
 
     WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors at the drive
   }

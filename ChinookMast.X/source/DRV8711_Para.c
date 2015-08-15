@@ -202,10 +202,6 @@ void InitDriver(void)
     WriteDrive(DRVB, 0x2180);
     WriteDrive(DRVB, STATUS_Mastw);
   }
-  else
-  {
-    DRVB_SC = 0;
-  }
   //==========================================================
 
 
@@ -224,9 +220,8 @@ void InitDriver(void)
     WriteDrive(DRVA, 0x2180);
     WriteDrive(DRVA, STATUS_Mastw);
   }
-  else
-  {
-    DRVA_SC = 0;
-  }
   //==========================================================
+
+  DRVA_SC = 0;
+  DRVB_SC = 0;
 }

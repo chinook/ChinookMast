@@ -65,26 +65,26 @@ sCmdValue_t  inPi   = {0}
  * These are the tested working values WITH the mast attached to the motor
  * shaft, but WITHOUT the blades.
  */
-volatile float KP = 0.015f
-              ,KI = 0.030f
-              ,K  = 0.300f
-              ,PWM_MAX_DUTY_CYCLE = 0.980f
-              ,PWM_MIN_DUTY_CYCLE = 0.040f
-              ,ERROR_THRESHOLD    = 1.000f
-              ,T                  = 0.100f    // Same as TIMER_1
-              ;
-/*
- * These are the tested working values WITHOUT the mast attached to the motor
- * shaft.
- */
 //volatile float KP = 0.015f
 //              ,KI = 0.030f
 //              ,K  = 0.300f
 //              ,PWM_MAX_DUTY_CYCLE = 0.980f
-//              ,PWM_MIN_DUTY_CYCLE = 0.010f
-//              ,ERROR_THRESHOLD    = 0.100f
+//              ,PWM_MIN_DUTY_CYCLE = 0.040f
+//              ,ERROR_THRESHOLD    = 1.000f
 //              ,T                  = 0.100f    // Same as TIMER_1
 //              ;
+/*
+ * These are the tested working values WITHOUT the mast attached to the motor
+ * shaft.
+ */
+volatile float KP = 0.015f
+              ,KI = 0.030f
+              ,K  = 0.300f
+              ,PWM_MAX_DUTY_CYCLE = 0.980f
+              ,PWM_MIN_DUTY_CYCLE = 0.010f
+              ,ERROR_THRESHOLD    = 0.100f
+              ,T                  = 0.100f    // Same as TIMER_1
+              ;
 //=====================================
 
 
@@ -494,7 +494,7 @@ void AssessMastValues (void)
 
       if ( !((rx1 > 2000000) || (rx3 > 2000000)) )  // It would mean 0.34 deg/s for the motor shaft, consider it zero
       {
-        firstIc = InputCapture.GetDirection(IC2, IC4, rx3, SCALE_US);
+        firstIc = InputCapture.GetDirection(IC1, IC3, rx3, SCALE_US);
 
         if (firstIc == IC1)
         {
