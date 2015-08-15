@@ -121,27 +121,63 @@ void ReadMastPosFromEeprom (void)
 //==============================================================================
 void MastManualLeft (void)
 {
-  DRVB_SLEEP = 1;
+  // DRIVE B
+  //==========================================================
+  if (USE_DRIVE_B == 1)
+  {
+    DRVB_SLEEP = 1;
 
-  Pwm.SetDutyCycle(PWM_2, 750);
-  Pwm.SetDutyCycle(PWM_3, 250);
-//  Pwm.SetDutyCycle(PWM_2, 600);
-//  Pwm.SetDutyCycle(PWM_3, 400);
+    Pwm.SetDutyCycle(PWM_2, 750);
+    Pwm.SetDutyCycle(PWM_3, 250);
 
-  WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
+    WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
+  }
+  //==========================================================
+
+
+  // DRIVE A
+  //==========================================================
+  if (USE_DRIVE_A == 1)
+  {
+    DRVA_SLEEP = 1;
+
+    Pwm.SetDutyCycle(PWM_3, 750);
+    Pwm.SetDutyCycle(PWM_4, 250);
+
+    WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors at the drive
+  }
+  //==========================================================
 }
 
 
 void MastManualRight (void)
 {
-  DRVB_SLEEP = 1;
+  // DRIVE B
+  //==========================================================
+  if (USE_DRIVE_B == 1)
+  {
+    DRVB_SLEEP = 1;
 
-  Pwm.SetDutyCycle(PWM_2, 250);
-  Pwm.SetDutyCycle(PWM_3, 750);
-//  Pwm.SetDutyCycle(PWM_2, 400);
-//  Pwm.SetDutyCycle(PWM_3, 600);
+    Pwm.SetDutyCycle(PWM_2, 250);
+    Pwm.SetDutyCycle(PWM_3, 750);
 
-  WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
+    WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
+  }
+  //==========================================================
+
+
+  // DRIVE A
+  //==========================================================
+  if (USE_DRIVE_A == 1)
+  {
+    DRVA_SLEEP = 1;
+
+    Pwm.SetDutyCycle(PWM_4, 250);
+    Pwm.SetDutyCycle(PWM_5, 750);
+
+    WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors at the drive
+  }
+  //==========================================================
 }
 
 
@@ -150,7 +186,22 @@ void MastManualStop (void)
   oEnableMastStopProcedure = 1;     // Start stop procedure using TIMER 2
   LED_STATUS_TOGGLE;
 
-  WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
+  // DRIVE B
+  //==========================================================
+  if (USE_DRIVE_B == 1)
+  {
+    WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
+  }
+  //==========================================================
+
+
+  // DRIVE A
+  //==========================================================
+  if (USE_DRIVE_A == 1)
+  {
+    WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors at the drive
+  }
+  //==========================================================
 }
 
 

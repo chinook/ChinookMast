@@ -37,7 +37,9 @@ volatile BOOL  oCapture1      = 0
               ,oTimerSendData = 0
               ,oTimerChngMode = 0
               ,oEnableMastStopProcedure = 0
+              ,oFirstCapture1 = 1
               ,oFirstCapture2 = 1
+              ,oFirstCapture3 = 1
               ,oFirstCapture4 = 1
               ;
 
@@ -94,13 +96,43 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
 
       if (mastDir == MAST_DIR_LEFT)
       {
-        Pwm.SetDutyCycle(PWM_2, 500 + (150 - iMastStop*10));
-        Pwm.SetDutyCycle(PWM_3, 500 - (150 - iMastStop*10));
+        // DRIVE B
+        //==========================================================
+        if (USE_DRIVE_B == 1)
+        {
+          Pwm.SetDutyCycle(PWM_2, 500 + (150 - iMastStop*10));
+          Pwm.SetDutyCycle(PWM_3, 500 - (150 - iMastStop*10));
+        }
+        //==========================================================
+          
+        // DRIVE A
+        //==========================================================
+        if (USE_DRIVE_A == 1)
+        {
+          Pwm.SetDutyCycle(PWM_4, 500 + (150 - iMastStop*10));
+          Pwm.SetDutyCycle(PWM_5, 500 - (150 - iMastStop*10));
+        //==========================================================
+        }
       }
       else if (mastDir == MAST_DIR_RIGHT)
       {
-        Pwm.SetDutyCycle(PWM_2, 500 - (150 - iMastStop*10));
-        Pwm.SetDutyCycle(PWM_3, 500 + (150 - iMastStop*10));
+        // DRIVE B
+        //==========================================================
+        if (USE_DRIVE_B == 1)
+        {
+          Pwm.SetDutyCycle(PWM_2, 500 - (150 - iMastStop*10));
+          Pwm.SetDutyCycle(PWM_3, 500 + (150 - iMastStop*10));
+        }
+        //==========================================================
+
+        // DRIVE A
+        //==========================================================
+        if (USE_DRIVE_A == 1)
+        {
+          Pwm.SetDutyCycle(PWM_4, 500 - (150 - iMastStop*10));
+          Pwm.SetDutyCycle(PWM_5, 500 + (150 - iMastStop*10));
+        }
+        //==========================================================
       }
       iMastStop++;
     }
@@ -109,10 +141,27 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
       iMastStop = 0;
       mastDir   = 0;
 
-      Pwm.SetDutyCycle(PWM_2, 500);
-      Pwm.SetDutyCycle(PWM_3, 500);
+      // DRIVE B
+      //==========================================================
+      if (USE_DRIVE_B == 1)
+      {
+        Pwm.SetDutyCycle(PWM_2, 500);
+        Pwm.SetDutyCycle(PWM_3, 500);
 
-      DRVB_SLEEP = 0;
+        DRVB_SLEEP = 0;
+      }
+      //==========================================================
+
+      // DRIVE A
+      //==========================================================
+      if (USE_DRIVE_A == 1)
+      {
+        Pwm.SetDutyCycle(PWM_4, 500);
+        Pwm.SetDutyCycle(PWM_5, 500);
+
+        DRVA_SLEEP = 0;
+      }
+      //==========================================================
 
       oEnableMastStopProcedure = 0;
 
@@ -287,7 +336,14 @@ void __ISR(_INPUT_CAPTURE_1_VECTOR, IC1_INT_PRIORITY) InputCapture1InterruptHand
   InputCapture.Var.previousCaptureCountValue[IC1] = InputCapture.Var.currentCaptureCountValue[IC1];
   InputCapture.Var.currentCaptureCountValue [IC1] = InputCapture.ReadCapture(IC1);
 
-  oCapture1 = 1;   // Flag that tells that a new Capture event occured
+  if (!oFirstCapture1)
+  {
+    oCapture1 = 1;   // Flag that tells that a new Capture event occured
+  }
+  else
+  {
+    oFirstCapture1 = 0;
+  }
 
   // Clear the interrupt flag
   INTClearFlag(INT_IC1);
@@ -350,7 +406,14 @@ void __ISR(_INPUT_CAPTURE_3_VECTOR, IC3_INT_PRIORITY) InputCapture3InterruptHand
   InputCapture.Var.previousCaptureCountValue[IC3] = InputCapture.Var.currentCaptureCountValue[IC3];
   InputCapture.Var.currentCaptureCountValue [IC3] = InputCapture.ReadCapture(IC3);
 
-  oCapture3 = 1;   // Flag that tells that a new Capture event occured
+  if (!oFirstCapture3)
+  {
+    oCapture3 = 1;   // Flag that tells that a new Capture event occured
+  }
+  else
+  {
+    oFirstCapture3 = 0;
+  }
 
   // Clear the interrupt flag
   INTClearFlag(INT_IC3);

@@ -426,21 +426,35 @@ void StateClose(void)
 
   I2c.Close(I2C4);
 
-  Pwm.Close(PWM_2);
-  Pwm.Close(PWM_3);
-//  Pwm.Close(PWM_4);
-//  Pwm.Close(PWM_5);
+  // DRIVE B
+  //==========================================================
+  if (USE_DRIVE_B == 1)
+  {
+    Pwm.Close(PWM_2);
+    Pwm.Close(PWM_3);
+
+    InputCapture.Close(IC2);
+    InputCapture.Close(IC4);
+  }
+  //==========================================================
+
+  // DRIVE A
+  //==========================================================
+  if (USE_DRIVE_A == 1)
+  {
+    Pwm.Close(PWM_4);
+    Pwm.Close(PWM_5);
+
+    InputCapture.Close(IC1);
+    InputCapture.Close(IC3);
+  }
+  //==========================================================
 
   Spi.Close(SPI4);
 
 //  Can.Close(CAN1);
 
   Uart.Close(UART6);
-
-//  InputCapture.Close(IC1);
-  InputCapture.Close(IC2);
-//  InputCapture.Close(IC3);
-  InputCapture.Close(IC4);
 
   Timer.Close(TIMER_1);
   Timer.Close(TIMER_2);
@@ -487,7 +501,21 @@ void StateSendData(void)
   
   SEND_MAST_DIRECTION;  // Via CAN bus
 
-  WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors
+  // DRIVE B
+  //==========================================================
+  if (USE_DRIVE_B == 1)
+  {
+    WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors
+  }
+  //==========================================================
+
+  // DRIVE A
+  //==========================================================
+  if (USE_DRIVE_A == 1)
+  {
+    WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors
+  }
+  //==========================================================
 
   if (iCounterToTwoSec < 10)
   {

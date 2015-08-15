@@ -128,29 +128,35 @@ void InitPwm(void)
 {
   // DRIVE B
   //==========================================================
-  // Open PWM2 using Timer3 with 50% duty cycle and 0% offset
-  Pwm.Open(PWM_2);
-  Pwm.SetDutyCycle  (PWM_2, 500);
-  Pwm.SetPulseOffset(PWM_2,   0);
+  if (USE_DRIVE_B == 1)
+  {
+    // Open PWM2 using Timer3 with 50% duty cycle and 0% offset
+    Pwm.Open(PWM_2);
+    Pwm.SetDutyCycle  (PWM_2, 500);
+    Pwm.SetPulseOffset(PWM_2,   0);
 
-  // Open PWM3 using Timer3 with 50% duty cycle and 50% offset
-  Pwm.Open(PWM_3);
-  Pwm.SetDutyCycle  (PWM_3, 500);
-  Pwm.SetPulseOffset(PWM_3, 500);
+    // Open PWM3 using Timer3 with 50% duty cycle and 50% offset
+    Pwm.Open(PWM_3);
+    Pwm.SetDutyCycle  (PWM_3, 500);
+    Pwm.SetPulseOffset(PWM_3, 500);
+  }
   //==========================================================
 
 
   // DRIVE A
   //==========================================================
-//  // Open PWM4 using Timer3 with 50% duty cycle and 0% offset
-//  Pwm.Open(PWM_4);
-//  Pwm.SetDutyCycle  (PWM_4, 500);
-//  Pwm.SetPulseOffset(PWM_4,   0);
-//
-//  // Open PWM5 using Timer3 with 50% duty cycle and 50% offset
-//  Pwm.Open(PWM_5);
-//  Pwm.SetDutyCycle  (PWM_5, 500);
-//  Pwm.SetPulseOffset(PWM_5, 500);
+  if (USE_DRIVE_A == 1)
+  {
+    // Open PWM4 using Timer3 with 50% duty cycle and 0% offset
+    Pwm.Open(PWM_4);
+    Pwm.SetDutyCycle  (PWM_4, 500);
+    Pwm.SetPulseOffset(PWM_4,   0);
+
+    // Open PWM5 using Timer3 with 50% duty cycle and 50% offset
+    Pwm.Open(PWM_5);
+    Pwm.SetDutyCycle  (PWM_5, 500);
+    Pwm.SetPulseOffset(PWM_5, 500);
+  }
   //==========================================================
 }
 
@@ -358,24 +364,33 @@ void InitInputCapture(void)
 
   // DRIVE A
   //==========================================================
-//  InputCapture.Open(IC1, config);
-//  InputCapture.Open(IC3, config);
-//
-//  InputCapture.ConfigInterrupt(IC1, IC1_INTERRUPT_PRIORITY, IC1_INTERRUPT_SUBPRIORITY);
-//  InputCapture.ConfigInterrupt(IC3, IC3_INTERRUPT_PRIORITY, IC3_INTERRUPT_SUBPRIORITY);
+  if (USE_DRIVE_A == 1)
+  {
+    InputCapture.Open(IC1, config);
+    InputCapture.Open(IC3, config);
+
+    InputCapture.ConfigInterrupt(IC1, IC1_INTERRUPT_PRIORITY, IC1_INTERRUPT_SUBPRIORITY);
+    InputCapture.ConfigInterrupt(IC3, IC3_INTERRUPT_PRIORITY, IC3_INTERRUPT_SUBPRIORITY);
+
+    INTClearFlag(INT_IC1);
+    INTClearFlag(INT_IC3);
+  }
   //==========================================================
 
 
   // DRIVE B
   //==========================================================
-  InputCapture.Open(IC2, config);
-  InputCapture.Open(IC4, config);
+  if (USE_DRIVE_B == 1)
+  {
+    InputCapture.Open(IC2, config);
+    InputCapture.Open(IC4, config);
 
-  InputCapture.ConfigInterrupt(IC2, IC2_INTERRUPT_PRIORITY, IC2_INTERRUPT_SUBPRIORITY);
-  InputCapture.ConfigInterrupt(IC4, IC4_INTERRUPT_PRIORITY, IC4_INTERRUPT_SUBPRIORITY);
-  
-  INTClearFlag(INT_IC2);
-  INTClearFlag(INT_IC4);
+    InputCapture.ConfigInterrupt(IC2, IC2_INTERRUPT_PRIORITY, IC2_INTERRUPT_SUBPRIORITY);
+    InputCapture.ConfigInterrupt(IC4, IC4_INTERRUPT_PRIORITY, IC4_INTERRUPT_SUBPRIORITY);
+
+    INTClearFlag(INT_IC2);
+    INTClearFlag(INT_IC4);
+  }
   //==========================================================
 
 }
@@ -408,8 +423,24 @@ void StartInterrupts(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable InputCapture interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  InputCapture.EnableInterrupt(IC2);
-  InputCapture.EnableInterrupt(IC4);
+
+  // DRIVE B
+  //====================================
+  if (USE_DRIVE_B == 1)
+  {
+    InputCapture.EnableInterrupt(IC2);
+    InputCapture.EnableInterrupt(IC4);
+  }
+  //====================================
+
+  // DRIVE A
+  //====================================
+  if (USE_DRIVE_A == 1)
+  {
+    InputCapture.EnableInterrupt(IC1);
+    InputCapture.EnableInterrupt(IC3);
+  }
+  //====================================
 
 
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

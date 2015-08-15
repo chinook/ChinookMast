@@ -152,9 +152,26 @@ void SetPwm (float cmd)
     else if (oFirstTimeInMastStop)  // Do this procedure only once after every movement of the mast
     {
 
-      DRVB_SLEEP = 0;
-      Pwm.SetDutyCycle(PWM_2, 500);
-      Pwm.SetDutyCycle(PWM_3, 500);
+      // DRIVE B
+      //==========================================================
+      if (USE_DRIVE_B == 1)
+      {
+        DRVB_SLEEP = 0;
+        Pwm.SetDutyCycle(PWM_2, 500);
+        Pwm.SetDutyCycle(PWM_3, 500);
+      }
+      //==========================================================
+
+      // DRIVE A
+      //==========================================================
+      if (USE_DRIVE_A == 1)
+      {
+        DRVA_SLEEP = 0;
+        Pwm.SetDutyCycle(PWM_4, 500);
+        Pwm.SetDutyCycle(PWM_5, 500);
+      }
+      //==========================================================
+
       mastCurrentSpeed = 0;
 
       oFirstTimeInMastStop = 0;
@@ -165,7 +182,21 @@ void SetPwm (float cmd)
       outPi.currentValue = 0;
       outPi.previousValue = 0;
 
-      WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors
+      // DRIVE B
+      //==========================================================
+      if (USE_DRIVE_B == 1)
+      {
+        WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors
+      }
+      //==========================================================
+
+      // DRIVE A
+      //==========================================================
+      if (USE_DRIVE_A == 1)
+      {
+        WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors
+      }
+      //==========================================================
       
       WriteMastPos2Eeprom();
 
@@ -205,15 +236,47 @@ void SetPwm (float cmd)
 
     if (SIGN(cmd) == MAST_DIR_LEFT)
     {
-      DRVB_SLEEP = 1;
-      Pwm.SetDutyCycle(PWM_2, 500 + pwm);
-      Pwm.SetDutyCycle(PWM_3, 500 - pwm);
+      // DRIVE B
+      //==========================================================
+      if (USE_DRIVE_B == 1)
+      {
+        DRVB_SLEEP = 1;
+        Pwm.SetDutyCycle(PWM_2, 500 + pwm);
+        Pwm.SetDutyCycle(PWM_3, 500 - pwm);
+      }
+      //==========================================================
+
+      // DRIVE A
+      //==========================================================
+      if (USE_DRIVE_A == 1)
+      {
+        DRVA_SLEEP = 1;
+        Pwm.SetDutyCycle(PWM_4, 500 + pwm);
+        Pwm.SetDutyCycle(PWM_5, 500 - pwm);
+      }
+      //==========================================================
     }
     else if (SIGN(cmd) == MAST_DIR_RIGHT)
     {
-      DRVB_SLEEP = 1;
-      Pwm.SetDutyCycle(PWM_2, 500 - pwm);
-      Pwm.SetDutyCycle(PWM_3, 500 + pwm);
+      // DRIVE B
+      //==========================================================
+      if (USE_DRIVE_B == 1)
+      {
+        DRVB_SLEEP = 1;
+        Pwm.SetDutyCycle(PWM_2, 500 - pwm);
+        Pwm.SetDutyCycle(PWM_3, 500 + pwm);
+      }
+      //==========================================================
+
+      // DRIVE A
+      //==========================================================
+      if (USE_DRIVE_A == 1)
+      {
+        DRVA_SLEEP = 1;
+        Pwm.SetDutyCycle(PWM_4, 500 - pwm);
+        Pwm.SetDutyCycle(PWM_5, 500 + pwm);
+      }
+      //==========================================================
     }
   }
 }
@@ -353,7 +416,11 @@ void Regulator (void)
 //==============================================================================
 void AssessMastValues (void)
 {
-  INT64 rx2, rx4;
+  INT64  rx1
+        ,rx2
+        ,rx3
+        ,rx4
+        ;
   INT8 firstIc;
   UINT64 meanTime   = 0;
   INT8 dir    = 0;
@@ -364,44 +431,99 @@ void AssessMastValues (void)
    * the known ratios of ENCODER / MOTOR / MAST, calculate the speed of the mast
    * in degrees / second [deg/s].
    */
-  if (oCapture2 && oCapture4)
+
+  // DRIVE B
+  //============================================================================
+  if (USE_DRIVE_B == 1)
   {
-    oCapture2 = 0;
-    oCapture4 = 0;
-
-    rx2 = InputCapture.GetTimeBetweenCaptures(IC2, SCALE_US);
-    rx4 = InputCapture.GetTimeBetweenCaptures(IC4, SCALE_US);
-
-    if ( !((rx2 > 2000000) || (rx4 > 2000000)) )  // It would mean 0.34 deg/s for the motor shaft, consider it zero
+    if (oCapture2 && oCapture4)
     {
-      firstIc = InputCapture.GetDirection(IC2, IC4, rx4, SCALE_US);
+      oCapture2 = 0;
+      oCapture4 = 0;
 
-      if (firstIc == IC2)
+      rx2 = InputCapture.GetTimeBetweenCaptures(IC2, SCALE_US);
+      rx4 = InputCapture.GetTimeBetweenCaptures(IC4, SCALE_US);
+
+      if ( !((rx2 > 2000000) || (rx4 > 2000000)) )  // It would mean 0.34 deg/s for the motor shaft, consider it zero
       {
-        dir = MAST_DIR_LEFT;
-      }
-      else if (firstIc == IC4)
-      {
-        dir = MAST_DIR_RIGHT;
-      }
+        firstIc = InputCapture.GetDirection(IC2, IC4, rx4, SCALE_US);
 
-//      meanTime = (rx2 + rx4) / 2;
-      meanTime = (rx2 + rx4) >> 1;   // Divide by 2
+        if (firstIc == IC2)
+        {
+          dir = MAST_DIR_LEFT;
+        }
+        else if (firstIc == IC4)
+        {
+          dir = MAST_DIR_RIGHT;
+        }
 
-      float mastTime = SIGN(dir) * (float) meanTime * TIMER_SCALE_US;
+  //      meanTime = (rx2 + rx4) / 2;
+        meanTime = (rx2 + rx4) >> 1;   // Divide by 2
 
-      if (mastTime == 0)
-      {
-        mastCurrentSpeed = 0;
+        float mastTime = SIGN(dir) * (float) meanTime * TIMER_SCALE_US;
+
+        if (mastTime == 0)
+        {
+          mastCurrentSpeed = 0;
+        }
+        else
+        {
+          mastCurrentSpeed = MOTOR_DEG_PER_PULSE / (mastTime * MAST_MOTOR_RATIO);
+        }
       }
       else
       {
-        mastCurrentSpeed = MOTOR_DEG_PER_PULSE / (mastTime * MAST_MOTOR_RATIO);
+        mastCurrentSpeed = 0;
       }
     }
-    else
+  }
+  //============================================================================
+
+
+  // DRIVE A
+  //============================================================================
+  if (USE_DRIVE_A == 1)
+  {
+    if (oCapture1 && oCapture3)
     {
-      mastCurrentSpeed = 0;
+      oCapture1 = 0;
+      oCapture3 = 0;
+
+      rx1 = InputCapture.GetTimeBetweenCaptures(IC1, SCALE_US);
+      rx3 = InputCapture.GetTimeBetweenCaptures(IC3, SCALE_US);
+
+      if ( !((rx1 > 2000000) || (rx3 > 2000000)) )  // It would mean 0.34 deg/s for the motor shaft, consider it zero
+      {
+        firstIc = InputCapture.GetDirection(IC2, IC4, rx3, SCALE_US);
+
+        if (firstIc == IC1)
+        {
+          dir = MAST_DIR_LEFT;
+        }
+        else if (firstIc == IC3)
+        {
+          dir = MAST_DIR_RIGHT;
+        }
+
+  //      meanTime = (rx1 + rx3) / 2;
+        meanTime = (rx1 + rx3) >> 1;   // Divide by 2
+
+        float mastTime = SIGN(dir) * (float) meanTime * TIMER_SCALE_US;
+
+        if (mastTime == 0)
+        {
+          mastCurrentSpeed = 0;
+        }
+        else
+        {
+          mastCurrentSpeed = MOTOR_DEG_PER_PULSE / (mastTime * MAST_MOTOR_RATIO);
+        }
+      }
+      else
+      {
+        mastCurrentSpeed = 0;
+      }
     }
   }
+  //============================================================================
 }
