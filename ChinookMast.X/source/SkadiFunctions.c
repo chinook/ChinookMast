@@ -50,6 +50,7 @@ extern volatile UINT32 rxWindAngle;
 
 extern volatile BOOL   oManualMode
                       ,oPrintData
+                      ,oNewWindAngle
                       ;
 
 //==============================================================================
@@ -376,13 +377,11 @@ void SetWind(sSkadi_t *skadi, sSkadiArgs_t args)
   sUartLineBuffer_t buffer;
 
   float wind = atof(args.elements[0]);   // Convert argument to float
-//  float wind = atoi(args.elements[0]);   // Convert argument to int
 
   if ((wind >= -179) && (wind <= 179))
-//  if ((wind >= -1790) && (wind <= 1790))
   {
-//    wind /= 10.0f;
     memcpy((void *) &rxWindAngle, (void *) &wind, 4);
+    oNewWindAngle = 1;
     buffer.length = sprintf(buffer.buffer, "WindAngle = %f\r\n\n", wind);
     Uart.PutTxFifoBuffer(UART6, &buffer);
   }

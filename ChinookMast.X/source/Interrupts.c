@@ -33,6 +33,7 @@ volatile BOOL  oCapture1      = 0
               ,oCapture2      = 0
               ,oCapture3      = 0
               ,oCapture4      = 0
+              ,oNewWindAngle  = 0
               ,oTimerReg      = 0
               ,oTimerSendData = 0
               ,oTimerChngMode = 0
@@ -760,6 +761,8 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
       message = CANGetRxMessage(CAN1, CAN_CHANNEL2);
 
       memcpy((void *) &rxWindAngle, &message->data[0], 4);
+      
+      oNewWindAngle = 1;
 
       CANUpdateChannel(CAN1, CAN_CHANNEL2);
       CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);

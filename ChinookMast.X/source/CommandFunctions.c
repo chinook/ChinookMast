@@ -34,11 +34,18 @@ extern volatile UINT32 rxWindAngle;
 //=====================================
 
 
+// Used for the average of the wind angle
+//========================================
+volatile UINT32 nWindAngleSamples = 0;
+volatile float  meanWindAngle = 0;
+//========================================
+
+
 // Used when acquiring data from regulator
-//=====================================
+//=========================================
 sCmdData_t    data        = {0};
 volatile BOOL oPrintData  =  0;
-//=====================================
+//=========================================
 
 
 // Mast general values
@@ -83,7 +90,8 @@ volatile float KP = 0.015f
               ,PWM_MAX_DUTY_CYCLE = 0.980f
               ,PWM_MIN_DUTY_CYCLE = 0.010f
               ,ERROR_THRESHOLD    = 0.100f
-              ,T                  = 0.100f    // Same as TIMER_1
+//              ,T                  = 0.100f    // Same as TIMER_1
+              ,T                  = 1.000f    // Same as TIMER_1
               ;
 //=====================================
 
@@ -302,7 +310,19 @@ void Regulator (void)
 
   // Update wind angle
   windAngle.previousValue = windAngle.currentValue;
-  memcpy ((void *) &tempWind, (void *) &rxWindAngle, 4);  // Copy contents of UINT32 into float
+  
+//  memcpy ((void *) &tempWind, (void *) &rxWindAngle, 4);  // Copy contents of UINT32 into float
+
+  if (nWindAngleSamples != 0)
+  {
+    tempWind = meanWindAngle / nWindAngleSamples;
+    meanWindAngle = 0;
+    nWindAngleSamples = 0;
+  }
+  else  // If no new sample was received
+  {
+    tempWind = windAngle.previousValue;   // Keep previous value as current value
+  }
 
   /*
    * If the wind is not in the acceptable range, change the command to the MAX

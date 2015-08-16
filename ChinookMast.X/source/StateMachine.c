@@ -28,6 +28,13 @@ extern volatile sButtonStates_t buttons;
 
 extern volatile UINT32 rxWindAngle;
 
+
+// Used for the average of the wind angle
+//========================================
+extern volatile UINT32 nWindAngleSamples;
+extern volatile float  meanWindAngle;
+//========================================
+
 extern volatile sCmdValue_t windAngle
                            ,mastAngle
                            ,mastSpeed
@@ -41,6 +48,7 @@ extern volatile BOOL oCapture1
                     ,oCapture2
                     ,oCapture3
                     ,oCapture4
+                    ,oNewWindAngle
                     ,oTimerReg
                     ,oTimerSendData
                     ,oTimerChngMode
@@ -327,7 +335,18 @@ void StateGetMastData(void)
   windAngle.previousValue = windAngle.currentValue;
 
   float tempWind;
-  memcpy ((void *) &tempWind, (void *) &rxWindAngle, 4);
+//  memcpy ((void *) &tempWind, (void *) &rxWindAngle, 4);
+
+  if (nWindAngleSamples != 0)
+  {
+    tempWind = meanWindAngle / nWindAngleSamples;
+    meanWindAngle = 0;
+    nWindAngleSamples = 0;
+  }
+  else  // If no new sample was received
+  {
+    tempWind = windAngle.previousValue;   // Keep previous value as current value
+  }
 
   /*
    * If the wind is not in the acceptable range, change the command to the MAX
@@ -486,19 +505,6 @@ void StateSendData(void)
 
   static UINT8 iCounterToTwoSec = 0;
   
-  if (SEND_DATA_TO_UART)
-  {
-    sUartLineBuffer_t buffer;
-    buffer.length = sprintf ( buffer.buffer
-                            , "\n\rCurrent speed\t\t= %f\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
-                            , mastSpeed.currentValue
-                            , mastAngle.currentValue
-                            , windAngle.currentValue
-                            );
-    
-    Uart.PutTxFifoBuffer(UART6, &buffer);
-  }
-  
   SEND_MAST_DIRECTION;  // Via CAN bus
 
   // DRIVE B
@@ -525,6 +531,21 @@ void StateSendData(void)
   {
     iCounterToTwoSec = 0;
     LED_DEBUG3_TOGGLE;
+
+    if (SEND_DATA_TO_UART)
+    {
+      sUartLineBuffer_t buffer;
+      buffer.length = sprintf ( buffer.buffer
+                              , "\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
+  //                            , "\n\rCurrent speed\t\t= %f\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
+  //                            , mastSpeed.currentValue
+                              , mastAngle.currentValue
+                              , windAngle.currentValue
+                              );
+
+      Uart.PutTxFifoBuffer(UART6, &buffer);
+    }
+    
     WriteMastPos2Eeprom();
   }
 }
@@ -536,6 +557,8 @@ void StateSendData(void)
 //===============================================================
 void StateAcq(void)
 {
+  float tempWindAngle = 0;
+
   if (oManualMode)
   {
     LED_DEBUG0_ON;
@@ -543,6 +566,13 @@ void StateAcq(void)
   else
   {
     LED_DEBUG0_OFF;
+  }
+
+  if (oNewWindAngle)
+  {
+    nWindAngleSamples++;
+    memcpy ((void *) &tempWindAngle, (void *) &rxWindAngle, 4);  // Copy contents of UINT32 into float
+    meanWindAngle += tempWindAngle;
   }
 
   AssessButtons();
