@@ -100,8 +100,8 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
       mastDir = SIGN(mastCurrentSpeed);
     }
 
-    if (iMastStop < 41)
-//    if (iMastStop < 16)
+//    if (iMastStop < 41)
+    if (iMastStop < 16)
     {
       DRVB_SLEEP = 1;
 
@@ -111,10 +111,10 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
         //==========================================================
         if (USE_DRIVE_B == 1)
         {
-          Pwm.SetDutyCycle(PWM_2, 500 + (400 - iMastStop*10));
-          Pwm.SetDutyCycle(PWM_3, 500 - (400 - iMastStop*10));
-//          Pwm.SetDutyCycle(PWM_2, 500 + (150 - iMastStop*10));
-//          Pwm.SetDutyCycle(PWM_3, 500 - (150 - iMastStop*10));
+//          Pwm.SetDutyCycle(PWM_2, 500 + (400 - iMastStop*10));
+//          Pwm.SetDutyCycle(PWM_3, 500 - (400 - iMastStop*10));
+          Pwm.SetDutyCycle(PWM_2, 500 + (150 - iMastStop*10));
+          Pwm.SetDutyCycle(PWM_3, 500 - (150 - iMastStop*10));
         }
         //==========================================================
           

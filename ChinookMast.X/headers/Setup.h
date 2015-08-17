@@ -61,7 +61,7 @@ void StartInterrupts  (void);
 // Regulator timer
 //==============================================================================
 #define TIMER_GET_POS             0.100f
-#define TIMER_POS_TO_REG_RATIO    10
+#define TIMER_POS_TO_REG_RATIO    5
 #define TIMER_REG                 TIMER_GET_POS * (float) TIMER_POS_TO_REG_RATIO
 
 //==============================================================================

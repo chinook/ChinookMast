@@ -127,10 +127,10 @@ void MastManualLeft (void)
   {
     DRVB_SLEEP = 1;
 
-    Pwm.SetDutyCycle(PWM_2, 950);
-    Pwm.SetDutyCycle(PWM_3, 050);
-//    Pwm.SetDutyCycle(PWM_2, 750);
-//    Pwm.SetDutyCycle(PWM_3, 250);
+//    Pwm.SetDutyCycle(PWM_2, 950);
+//    Pwm.SetDutyCycle(PWM_3, 050);
+    Pwm.SetDutyCycle(PWM_2, 750);
+    Pwm.SetDutyCycle(PWM_3, 250);
 
     WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
   }
@@ -160,10 +160,10 @@ void MastManualRight (void)
   {
     DRVB_SLEEP = 1;
 
-    Pwm.SetDutyCycle(PWM_2, 050);
-    Pwm.SetDutyCycle(PWM_3, 950);
-//    Pwm.SetDutyCycle(PWM_2, 250);
-//    Pwm.SetDutyCycle(PWM_3, 750);
+//    Pwm.SetDutyCycle(PWM_2, 050);
+//    Pwm.SetDutyCycle(PWM_3, 950);
+    Pwm.SetDutyCycle(PWM_2, 250);
+    Pwm.SetDutyCycle(PWM_3, 750);
 
     WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
   }

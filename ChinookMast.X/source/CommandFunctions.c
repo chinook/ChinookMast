@@ -74,7 +74,8 @@ sCmdValue_t  inPi   = {0}
  */
 volatile float KP = 0.015f
               ,KI = 0.030f
-              ,K  = 0.300f
+//              ,K  = 0.300f
+              ,K  = 0.200f
               ,PWM_MAX_DUTY_CYCLE = 0.980f
               ,PWM_MIN_DUTY_CYCLE = 0.040f
               ,ERROR_THRESHOLD    = 5.000f
