@@ -78,7 +78,7 @@ volatile float KP = 0.015f
               ,PWM_MAX_DUTY_CYCLE = 0.980f
               ,PWM_MIN_DUTY_CYCLE = 0.040f
               ,ERROR_THRESHOLD    = 5.000f
-              ,T                  = 1.000f    // Same as TIMER_1
+              ,T                  = 0.300f    // Same as TIMER_1
               ;
 /*
  * These are the tested working values WITHOUT the mast attached to the motor
