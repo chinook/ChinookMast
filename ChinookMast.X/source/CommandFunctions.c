@@ -78,7 +78,7 @@ volatile float KP = 0.015f
               ,PWM_MAX_DUTY_CYCLE = 0.980f
               ,PWM_MIN_DUTY_CYCLE = 0.040f
               ,ERROR_THRESHOLD    = 5.000f
-              ,T                  = 0.300f    // Same as TIMER_1
+              ,T                  = 1.000f    // TIMER_1 * 10
               ;
 /*
  * These are the tested working values WITHOUT the mast attached to the motor
@@ -102,7 +102,7 @@ extern volatile BOOL oCapture1
                     ,oCapture2
                     ,oCapture3
                     ,oCapture4
-                    ,oTimerReg
+                    ,oTimerGetPos
                     ;
 
 BOOL  oFirstTimeInMastStop    = 0
@@ -133,10 +133,10 @@ BOOL  oFirstTimeInMastStop    = 0
  *  iLaplace => y(n) = y(n-1) + T/2 * ( x(n-1) + x(n) )
  *
  */
-void TustinZ (sCmdValue_t *input, sCmdValue_t *output)
+void TustinZ (sCmdValue_t *input, sCmdValue_t *output, float sampleTime)
 {
   output->previousValue = output->currentValue;
-  output->currentValue  = output->previousValue + T/2 * (input->currentValue + input->previousValue);
+  output->currentValue  = output->previousValue + sampleTime/2 * (input->currentValue + input->previousValue);
 }
 
 
@@ -346,7 +346,7 @@ void Regulator (void)
   mastSpeed.currentValue  = mastCurrentSpeed;
 
   // Get mast position from mast speed
-  TustinZ((void *) &mastSpeed, (void *) &mastAngle);  // Discrete integrator
+  TustinZ((void *) &mastSpeed, (void *) &mastAngle, T);  // Discrete integrator
 
   /*
    * Some kind of modulo
@@ -393,7 +393,7 @@ void Regulator (void)
     inPi.previousValue = inPi.currentValue;
     inPi.currentValue  = K * error - mastSpeed.currentValue;
 
-    TustinZ((void *) &inPi, (void *) &outPi);
+    TustinZ((void *) &inPi, (void *) &outPi, T);
 
     cmd = inPi.currentValue * KP + outPi.currentValue * KI;
 

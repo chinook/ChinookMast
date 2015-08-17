@@ -28,6 +28,10 @@ extern volatile sButtonStates_t buttons;
 
 extern volatile UINT32 rxWindAngle;
 
+extern volatile UINT16 timerRegCounter;
+
+extern volatile float T;
+
 
 // Used for the average of the wind angle
 //========================================
@@ -49,7 +53,7 @@ extern volatile BOOL oCapture1
                     ,oCapture3
                     ,oCapture4
                     ,oNewWindAngle
-                    ,oTimerReg
+                    ,oTimerGetPos
                     ,oTimerSendData
                     ,oTimerChngMode
                     ;
@@ -329,7 +333,7 @@ void StateManual(void)
 //===============================================================
 void StateGetMastData(void)
 {
-  oTimerReg = 0;
+  oTimerGetPos = 0;
   
   // Update wind direction
   windAngle.previousValue = windAngle.currentValue;
@@ -370,7 +374,7 @@ void StateGetMastData(void)
   mastSpeed.currentValue  = mastCurrentSpeed;
 
   // Get mast position from mast speed
-  TustinZ((void *) &mastSpeed, (void *) &mastAngle);    // Discrete integrator
+  TustinZ((void *) &mastSpeed, (void *) &mastAngle, T);    // Discrete integrator
 
   /*
    * Some kind of modulo
@@ -407,7 +411,7 @@ void StateGetMastData(void)
 //===============================================================
 void StateReg(void)
 {
-  oTimerReg = 0;
+  oTimerGetPos = 0;
 
   Regulator();
 }

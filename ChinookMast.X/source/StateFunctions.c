@@ -57,7 +57,7 @@ extern volatile BOOL oCapture1
                     ,oCapture3
                     ,oCapture4
                     ,oEnableMastStopProcedure // Stop procedure using TIMER 2
-                    ,oTimerReg                // From TIMER 1
+                    ,oTimerGetPos                // From TIMER 1
                     ,oTimerChngMode           // Flag used when changing mode
                     ,oManualMode
                     ,oCountTimeToChngMode     // Flag used when changing mode
