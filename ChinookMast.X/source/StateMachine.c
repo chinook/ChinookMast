@@ -94,6 +94,10 @@ void StateScheduler(void)
     {
       pStateMast = &StateReg;
     }
+    else if (ACQ_2_GET_WIND)
+    {
+      pStateMast = &StateGetWind;
+    }
     else if (ACQ_2_GET_MAST_DATA)
     {
       pStateMast = &StateGetMastData;
@@ -349,6 +353,8 @@ void StateGetWind(void)
 {
   oTimerReg = 0;
 
+  LED_CAN_TOGGLE;
+  
   // Update wind direction
   windAngle.previousValue = windAngle.currentValue;
 
@@ -393,6 +399,8 @@ void StateGetMastData(void)
 {
   oTimerGetPos = 0;
 
+  LED_DEBUG2_TOGGLE;
+  
   /*
   // Update wind direction
   windAngle.previousValue = windAngle.currentValue;
@@ -475,6 +483,8 @@ void StateGetMastData(void)
 void StateReg(void)
 {
   oTimerReg = 0;
+
+  LED_DEBUG4_TOGGLE;
 
   Regulator();
 }
@@ -603,9 +613,9 @@ void StateSendData(void)
     {
       sUartLineBuffer_t buffer;
       buffer.length = sprintf ( buffer.buffer
-                              , "\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
-  //                            , "\n\rCurrent speed\t\t= %f\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
-  //                            , mastSpeed.currentValue
+//                              , "\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
+                              , "\n\rCurrent speed\t\t= %f\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
+                              , mastSpeed.currentValue
                               , mastAngle.currentValue
                               , windAngle.currentValue
                               );
@@ -637,6 +647,7 @@ void StateAcq(void)
 
   if (oNewWindAngle)
   {
+    oNewWindAngle = 0;
     nWindAngleSamples++;
     memcpy ((void *) &tempWindAngle, (void *) &rxWindAngle, 4);  // Copy contents of UINT32 into float
     meanWindAngle += tempWindAngle;
