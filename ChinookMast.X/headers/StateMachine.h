@@ -37,7 +37,8 @@ void StateClose       (void);     // Close all peripheral and enter sleep mode
 void StateSendData    (void);     // Send various data to other devices
 void StateReg         (void);     // Regulate the mast
 void StateIdle        (void);     // Wait for power-down
-void StateGetMastData (void);     // Get position of mast if in manual mode
+void StateGetWind     (void);     // Get wind angle if in manual mode
+void StateGetMastData (void);     // Get position of mast
 void StateScheduler   (void);     // State Scheduler. Decides which state is next
 
 
@@ -76,7 +77,8 @@ void (*pStateMast)(void);       // State pointer, used to navigate between state
 #define MANUAL_MODE           oManualMode
 #define MANUAL_FLAG_CHANGE    oManualFlagChng
 #define DISCONNECT_OK         0                                   // Need to be coded
-#define REG_TIMER_OK          oTimerGetPos
+#define TIMER_REG_OK          oTimerReg
+#define TIMER_POS_OK          oTimerGetPos
 #define SEND_DATA_TIMER_OK    oTimerSendData
 
 #define PULSE_PER_DEGREE      30
@@ -96,13 +98,18 @@ void (*pStateMast)(void);       // State pointer, used to navigate between state
 /******* TRANSITION CONDITION ACQ **********/
 #define ACQ_2_MANUAL           MANUAL_MODE && MANUAL_FLAG_CHANGE
 #define ACQ_2_DISCONNECT       DISCONNECT_OK
-#define ACQ_2_REG             !MANUAL_MODE && REG_TIMER_OK
-#define ACQ_2_GET_MAST_DATA    MANUAL_MODE && REG_TIMER_OK
+#define ACQ_2_REG             !MANUAL_MODE && TIMER_REG_OK
+#define ACQ_2_GET_WIND         MANUAL_MODE && TIMER_REG_OK
+#define ACQ_2_GET_MAST_DATA    TIMER_POS_OK
 #define ACQ_2_SEND_DATA        SEND_DATA_TIMER_OK
 
 
 /******* TRANSITION CONDITION GET MAST DATA **********/
 #define GET_MAST_DATA_2_ACQ    1
+
+
+/******* TRANSITION CONDITION GET WIND **********/
+#define GET_WIND_2_ACQ    1
 
 
 /******* TRANSITION CONDITION SEND DATA **********/

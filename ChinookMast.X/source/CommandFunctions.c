@@ -78,7 +78,7 @@ volatile float KP = 0.015f
               ,PWM_MAX_DUTY_CYCLE = 0.980f
               ,PWM_MIN_DUTY_CYCLE = 0.040f
               ,ERROR_THRESHOLD    = 5.000f
-              ,T                  = 1.000f    // TIMER_1 * 10
+              ,T                  = TIMER_REG    // TIMER_1 * 10
               ;
 /*
  * These are the tested working values WITHOUT the mast attached to the motor
@@ -102,7 +102,7 @@ extern volatile BOOL oCapture1
                     ,oCapture2
                     ,oCapture3
                     ,oCapture4
-                    ,oTimerGetPos
+                    ,oTimerReg
                     ;
 
 BOOL  oFirstTimeInMastStop    = 0
@@ -341,6 +341,7 @@ void Regulator (void)
     windAngle.currentValue = tempWind;
   }
 
+  /*
   // Update mast speed
   mastSpeed.previousValue = mastSpeed.currentValue;
   mastSpeed.currentValue  = mastCurrentSpeed;
@@ -350,7 +351,7 @@ void Regulator (void)
 
   /*
    * Some kind of modulo
-   */
+   *
   if (mastAngle.currentValue > 180)
   {
     mastAngle.currentValue -= 360;
@@ -359,6 +360,7 @@ void Regulator (void)
   {
     mastAngle.currentValue += 360;
   }
+  */
 
   /*
    * The rest of the code goes like the graphic at the top of this function.

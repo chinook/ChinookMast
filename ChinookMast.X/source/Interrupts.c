@@ -34,7 +34,8 @@ volatile BOOL  oCapture1      = 0
               ,oCapture3      = 0
               ,oCapture4      = 0
               ,oNewWindAngle  = 0
-              ,oTimerGetPos      = 0
+              ,oTimerReg      = 0
+              ,oTimerGetPos   = 0
               ,oTimerSendData = 0
               ,oTimerChngMode = 0
               ,oEnableMastStopProcedure = 0
@@ -47,7 +48,7 @@ volatile BOOL  oCapture1      = 0
 UINT8 iMastStop = 0;
 INT8  mastDir = 0;
 
-volatile UINT16 timerRegCounter = 0;
+UINT16 timerRegCounter = 0;
 
 volatile UINT32 rxWindAngle = 0;  // Received from CAN
 
@@ -69,7 +70,13 @@ extern volatile sButtonStates_t buttons;
 void __ISR(_TIMER_1_VECTOR, T1_INTERRUPT_PRIORITY) Timer1InterruptHandler(void)
 {
   oTimerGetPos = 1;
+  
   timerRegCounter++;
+  if (timerRegCounter >= TIMER_POS_TO_REG_RATIO)
+  {
+    oTimerReg = 1;
+    timerRegCounter = 0;
+  }
 
   // Increment the number of overflows from this timer. Used primarily by Input Capture
   Timer.Var.nOverflows[0]++;

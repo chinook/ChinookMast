@@ -28,8 +28,6 @@ extern volatile sButtonStates_t buttons;
 
 extern volatile UINT32 rxWindAngle;
 
-extern volatile UINT16 timerRegCounter;
-
 extern volatile float T;
 
 
@@ -54,6 +52,7 @@ extern volatile BOOL oCapture1
                     ,oCapture4
                     ,oNewWindAngle
                     ,oTimerGetPos
+                    ,oTimerReg
                     ,oTimerSendData
                     ,oTimerChngMode
                     ;
@@ -151,6 +150,21 @@ void StateScheduler(void)
     else
     {
       pStateMast = &StateGetMastData;    // Stay in current state
+    }
+  }
+
+  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  // Current state = StateGetWind
+  //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  else if (pStateMast == &StateGetWind)
+  {
+    if (GET_WIND_2_ACQ)
+    {
+      pStateMast = &StateAcq;
+    }
+    else
+    {
+      pStateMast = &StateGetWind;    // Stay in current state
     }
   }
 
@@ -328,13 +342,13 @@ void StateManual(void)
 
 
 //===============================================================
-// Name     : StateGetMastData
-// Purpose  : Get position of mast if in manual mode
+// Name     : StateGetWind
+// Purpose  : Get wind angle if in manual mode
 //===============================================================
-void StateGetMastData(void)
+void StateGetWind(void)
 {
-  oTimerGetPos = 0;
-  
+  oTimerReg = 0;
+
   // Update wind direction
   windAngle.previousValue = windAngle.currentValue;
 
@@ -368,13 +382,59 @@ void StateGetMastData(void)
   {
     windAngle.currentValue = tempWind;
   }
+}
+
+
+//===============================================================
+// Name     : StateGetMastData
+// Purpose  : Get position of mast
+//===============================================================
+void StateGetMastData(void)
+{
+  oTimerGetPos = 0;
+
+  /*
+  // Update wind direction
+  windAngle.previousValue = windAngle.currentValue;
+
+  float tempWind;
+//  memcpy ((void *) &tempWind, (void *) &rxWindAngle, 4);
+
+  if (nWindAngleSamples != 0)
+  {
+    tempWind = meanWindAngle / nWindAngleSamples;
+    meanWindAngle = 0;
+    nWindAngleSamples = 0;
+  }
+  else  // If no new sample was received
+  {
+    tempWind = windAngle.previousValue;   // Keep previous value as current value
+  }
+
+  /*
+   * If the wind is not in the acceptable range, change the command to the MAX
+   * or MIN. Mast must not go beyond these values.
+   *
+  if (tempWind > MAST_MAX)
+  {
+    windAngle.currentValue = MAST_MAX;
+  }
+  else if (tempWind < MAST_MIN)
+  {
+    windAngle.currentValue = MAST_MIN;
+  }
+  else if (tempWind != windAngle.currentValue)
+  {
+    windAngle.currentValue = tempWind;
+  }
+  */
 
   // Update mast speed
   mastSpeed.previousValue = mastSpeed.currentValue;
   mastSpeed.currentValue  = mastCurrentSpeed;
 
   // Get mast position from mast speed
-  TustinZ((void *) &mastSpeed, (void *) &mastAngle, T);    // Discrete integrator
+  TustinZ((void *) &mastSpeed, (void *) &mastAngle, TIMER_GET_POS);    // Discrete integrator
 
   /*
    * Some kind of modulo
@@ -389,17 +449,20 @@ void StateGetMastData(void)
   }
 
   /*
-   * Check mast limits
+   * Check mast limits if in manual mode
    */
-  if (mastSpeed.currentValue != 0)
+  if (oManualMode)
   {
-    if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )        // Mast too far
+    if (mastSpeed.currentValue != 0)
     {
-      MastManualStop();
-    }
-    else if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
-    {
-      MastManualStop();
+      if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )        // Mast too far
+      {
+        MastManualStop();
+      }
+      else if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
+      {
+        MastManualStop();
+      }
     }
   }
 }
@@ -411,7 +474,7 @@ void StateGetMastData(void)
 //===============================================================
 void StateReg(void)
 {
-  oTimerGetPos = 0;
+  oTimerReg = 0;
 
   Regulator();
 }
