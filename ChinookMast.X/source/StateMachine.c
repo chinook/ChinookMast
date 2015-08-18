@@ -579,5 +579,8 @@ void StateAcq(void)
 
   AssessMastValues();
 
+  UINT32 coreTickRate = Timer.Tic(1500, SCALE_US);
   Skadi.GetCmdMsgFifo();
+  INT32 time = Timer.Toc(1500, coreTickRate);
+  UINT8 test = 0;
 }
