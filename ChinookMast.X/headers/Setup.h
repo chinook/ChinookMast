@@ -287,17 +287,19 @@ BYTE Can1MessageFifoArea [ CAN_NB_CHANNELS     // Space used by CAN
                          * CAN_TX_RX_MESSAGE_SIZE_BYTES
                          ];
 
-#define MAST_BOARD_SID        0x30
-#define MAST_DISCONNECT_SID   0x31
-#define MAST_DIRECTION_SID    0x32
-#define MAST_MODE_SID         0x33
-#define MAST_CALIB_DONE_SID   0x34
+#define MAST_BOARD_SID                0x30
+#define MAST_DISCONNECT_SID           0x31
+#define MAST_DIRECTION_SID            0x32
+#define MAST_MODE_SID                 0x33
+#define MAST_CALIB_DONE_SID           0x34
+#define IDENTIFICATION_TO_BACKPLANE   0x70
+#define DISCONNECT_FROM_BACKPLANE     0x71
 
 // Message 0 : Identification
-#define SEND_ID_TO_BACKPLANE          Can.SendByte(CAN1, MAST_BOARD_SID, 0x00)
+#define SEND_ID_TO_BACKPLANE          Can.SendByte(CAN1, IDENTIFICATION_TO_BACKPLANE, MAST_BOARD_SID)
 
 // Message 1 : Disconnect
-#define SEND_DISCONNECT_TO_BACKPLANE  Can.SendByte(CAN1, MAST_DISCONNECT_SID, 0x00)
+#define SEND_DISCONNECT_TO_BACKPLANE  Can.SendByte(CAN1, DISCONNECT_FROM_BACKPLANE, MAST_DISCONNECT_SID)
 
 // Message 2 : Mast orientation
 #define SEND_MAST_DIRECTION           Can.SendFloat(CAN1, MAST_DIRECTION_SID, mastAngle.currentValue)
