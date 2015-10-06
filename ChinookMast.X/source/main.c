@@ -83,6 +83,7 @@ void main(void)
 	pStateMast = &StateInit;
 //============================
 
+  int allo = 1;
 
 	while(1)  //infinite loop
 	{
