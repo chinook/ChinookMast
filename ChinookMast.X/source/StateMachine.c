@@ -251,11 +251,11 @@ void StateInit(void)
   INIT_TIMER;
   INIT_INPUT_CAPTURE;
   INIT_UART;
-  INIT_SKADI;
   INIT_SPI;
   INIT_PWM;
   INIT_I2C;
   INIT_CAN;
+  INIT_SKADI;
   START_INTERRUPTS;
 
   // Send ID to backplane by CAN protocol
