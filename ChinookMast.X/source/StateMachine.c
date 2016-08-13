@@ -23,6 +23,7 @@
 #include "..\headers\Interrupts.h"
 #include "..\headers\StateFunctions.h"
 #include "..\headers\CommandFunctions.h"
+#include "..\headers\Potentiometer.h"
 
 extern volatile sButtonStates_t buttons;
 
@@ -52,6 +53,7 @@ extern volatile BOOL oCapture1
                     ,oTimerReg
                     ,oTimerSendData
                     ,oTimerChngMode
+                    ,oAdcReady
                     ;
 
 volatile BOOL  oManualMode            = 1
@@ -369,8 +371,15 @@ void StateGetMastData(void)
   mastSpeed.previousValue = mastSpeed.currentValue;
   mastSpeed.currentValue  = mastCurrentSpeed;
 
-  // Get mast position from mast speed
-  TustinZ((void *) &mastSpeed, (void *) &mastAngle);    // Discrete integrator
+  if (USE_POTENTIOMETER)
+  {
+    
+  }
+  else
+  {
+    // Get mast position from mast speed
+    TustinZ((void *) &mastSpeed, (void *) &mastAngle);    // Discrete integrator
+  }
 
   /*
    * Some kind of modulo
@@ -557,15 +566,21 @@ void StateSendData(void)
 //===============================================================
 void StateAcq(void)
 {
-  float tempWindAngle = 0;
+  float tempWindAngle   = 0;
+  UINT16 tempAdcValue   = 0;
+  static BOOL oModeMem  = 0;
 
-  if (oManualMode)
+  if (oModeMem != oManualMode)
   {
-    LED_DEBUG0_ON;
-  }
-  else
-  {
-    LED_DEBUG0_OFF;
+    if (oManualMode)
+    {
+      LED_DEBUG0_ON;
+    }
+    else
+    {
+      LED_DEBUG0_OFF;
+    }
+    oModeMem = oManualMode;
   }
 
   if (oNewWindAngle)
@@ -577,10 +592,21 @@ void StateAcq(void)
 
   AssessButtons();
 
-  AssessMastValues();
+  if (USE_POTENTIOMETER)
+  {
+    if (oAdcReady)
+    {
+      oAdcReady = 0;
+      tempAdcValue = Adc.Var.adcReadValues[2];
+    }
+  }
+  else
+  {
+    AssessMastValues();
+  }
 
-  UINT32 coreTickRate = Timer.Tic(1500, SCALE_US);
+//  UINT32 coreTickRate = Timer.Tic(1500, SCALE_US);
   Skadi.GetCmdMsgFifo();
-  INT32 time = Timer.Toc(1500, coreTickRate);
-  UINT8 test = 0;
+//  INT32 time = Timer.Toc(1500, coreTickRate);
+//  UINT8 test = 0;
 }

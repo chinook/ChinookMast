@@ -162,8 +162,8 @@ typedef union
 //===============================================
 // Input Capture interrupts priorities and subpriorities
 //===============================================
-#define IC1_INTERRUPT_PRIORITY          7           // Used in ChinookLib function
-#define IC1_INT_PRIORITY                ipl7auto    // Used in ISR
+#define IC1_INTERRUPT_PRIORITY          5           // Used in ChinookLib function
+#define IC1_INT_PRIORITY                ipl5auto    // Used in ISR
 #define IC2_INTERRUPT_PRIORITY          7           // Used in ChinookLib function
 #define IC2_INT_PRIORITY                ipl7auto    // Used in ISR
 #define IC3_INTERRUPT_PRIORITY          7           // Used in ChinookLib function
@@ -195,6 +195,16 @@ typedef union
 #define I2C4_INT_PRIORITY               ipl5auto    // Used in ISR
 
 #define I2C4_INTERRUPT_SUBPRIORITY      2
+//===============================================
+
+
+//===============================================
+// ADC interrupts priorities and subpriorities
+//===============================================
+#define ADC_INTERRUPT_PRIORITY          7           // Used in ChinookLib function
+#define ADC_INT_PRIORITY                ipl7auto    // Used in ISR
+
+#define ADC_INTERRUPT_SUBPRIORITY       0           
 //===============================================
 
 

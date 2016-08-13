@@ -23,7 +23,6 @@
 #define	STATE_MACHINE_MAST_H
 
 #include "Setup.h"
-//#include "StateFunctions.h"
 
 
 //==============================================================================

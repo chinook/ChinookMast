@@ -20,4 +20,7 @@ source/../headers/Interrupts.h  \
  source/../headers/StateFunctions.h  \
 source/../headers/DRV8711_Para.h  \
  source/../headers/CommandFunctions.h  \
-source/../headers/StateMachine.h 
+source/../headers/StateMachine.h  \
+ source/../headers/Potentiometer.h  \
+source/../headers/StateFunctions.h  \
+ source/../headers/CommandFunctions.h 
