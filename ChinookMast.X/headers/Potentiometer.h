@@ -28,10 +28,13 @@ typedef struct sPotValues
   UINT16 potValuesInBits[N_SAMPLES_TO_AVERAGE];
   UINT16 potStepValues  [N_SAMPLES_TO_AVERAGE];
   BOOL   oInDeadZone    [N_SAMPLES_TO_AVERAGE];
+  UINT16 lastAverage;
   UINT16 nSamples;
-  UINT16 stepZero;            /*! Which step represents zero */
-  UINT16 bitZero;             /*! Which bit at the zero step represents zero perfect zero */
-  const UINT16 dynamicLimit;  /*! In bits */
+  UINT16 stepZero;                /*! Which step represents zero */
+  UINT16 bitZero;                 /*! Which bit at the zero step represents zero perfect zero */
+  const UINT16 deadZoneUpperLim;  /*! In bits */
+  const UINT16 deadZoneLowerLim;  /*! In bits */
+  const UINT16 deadZoneAvgValue;  /*! Value to use when in deadzone from either side */
   volatile sCmdValue_t *angle;
   volatile sCmdValue_t *speed;
 } sPotValues_t;
@@ -46,8 +49,9 @@ typedef struct sPotValues
 // Public function prototypes
 //==============================================================================
 
-void MastBitToAngle (UINT16 bits, float *angle, sPotValues_t *potValues);
-void MastGetSpeed   (sCmdValue_t *mastPos, sCmdValue_t *mastSpeed, float acqTime);
-INT8 AdcAddSample   (UINT16 newSample, sPotValues_t *potValues);
+void MastUpdateAngle  (sPotValues_t *potValues);
+void MastGetSpeed     (sPotValues_t *potValues, float acqTime);
+INT8 AdcAddSample     (UINT16 newSample, sPotValues_t *potValues);
+INT8 PotAverage       (sPotValues_t *potValues);
 
 #endif	/* __POTENTIOMETER__ */

@@ -29,6 +29,8 @@ extern volatile sButtonStates_t buttons;
 
 extern volatile UINT32 rxWindAngle;
 
+extern volatile float T;
+
 
 // Used for the average of the wind angle
 //========================================
@@ -69,7 +71,10 @@ sPotValues_t potValues =
  ,.potStepValues    = {0}
  ,.potValuesInBits  = {0}
  ,.oInDeadZone      = {0}
- ,.dynamicLimit     = 310
+ ,.deadZoneUpperLim = 1000
+ ,.deadZoneLowerLim = 23
+ ,.deadZoneAvgValue = 0
+ ,.lastAverage      = 0
  ,.angle            = NULL
  ,.speed            = NULL
  ,.bitZero          = 0
@@ -386,16 +391,16 @@ void StateGetMastData(void)
     windAngle.currentValue = tempWind;
   }
 
-  // Update mast speed
-  mastSpeed.previousValue = mastSpeed.currentValue;
-  mastSpeed.currentValue  = mastCurrentSpeed;
-
   if (USE_POTENTIOMETER)
   {
-    
+    MastGetSpeed(&potValues, T);
   }
   else
   {
+    // Update mast speed
+    mastSpeed.previousValue = mastSpeed.currentValue;
+    mastSpeed.currentValue  = mastCurrentSpeed;
+    
     // Get mast position from mast speed
     TustinZ((void *) &mastSpeed, (void *) &mastAngle);    // Discrete integrator
   }
@@ -588,6 +593,7 @@ void StateAcq(void)
   float tempWindAngle   = 0;
   UINT16 tempAdcValue   = 0;
   static BOOL oModeMem  = 0;
+  INT8 err = 0;
 
   if (oModeMem != oManualMode)
   {
@@ -617,6 +623,13 @@ void StateAcq(void)
     {
       oAdcReady = 0;
       tempAdcValue = Adc.Var.adcReadValues[2];
+      PotAddSample(tempAdcValue, &potValues);
+      if (potValues.nSamples >= N_SAMPLES_TO_AVERAGE)
+      {
+        PotAverage(&potValues);
+        MastUpdateAngle(&potValues);
+      }
+      
     }
   }
   else
