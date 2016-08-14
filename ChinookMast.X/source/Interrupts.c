@@ -42,6 +42,7 @@ volatile BOOL  oCapture1      = 0
               ,oFirstCapture2 = 1
               ,oFirstCapture3 = 1
               ,oFirstCapture4 = 1
+              ,oAdcReady      = 0
               ;
 
 UINT8 iMastStop = 0;
@@ -56,6 +57,24 @@ extern volatile BOOL  oManualMode
 extern volatile float mastCurrentSpeed;
 
 extern volatile sButtonStates_t buttons;
+
+
+//==============================================================================
+//	ADC INTERRUPTS
+//==============================================================================
+
+//=============================================
+// Configure the ADC interrupt handler
+//=============================================
+void __ISR(_ADC_VECTOR, ADC_INT_PRIORITY) AdcInterruptHandler(void)
+{
+  oAdcReady = 1;
+  
+  Adc.Read();               // Read the enabled channels and puts them in Adc.Var.adcReadValues[]
+  INTClearFlag(INT_AD1);    // Clear the ADC conversion done interrupt Flag
+}
+//=============================================
+
 
 //==============================================================================
 //	TIMER INTERRUPTS

@@ -1,6 +1,6 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //
-// Chinook Project Template
+// Chinook Mast
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //
@@ -10,9 +10,7 @@
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //
-// Purpose : This is the main C file of the template project used by all
-//           developpers of Chinook. It uses ChinookLib, which is another
-//           repository on Github.
+// Purpose : This is the main C file of the mast project.
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //
@@ -25,6 +23,7 @@
 
 
 #include "..\headers\Setup.h"
+#include "..\headers\Potentiometer.h"
 #include "..\headers\Interrupts.h"
 #include "..\headers\StateMachine.h"
 #include "..\headers\HardwareProfile.h"
