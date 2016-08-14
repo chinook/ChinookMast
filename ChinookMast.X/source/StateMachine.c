@@ -68,15 +68,35 @@ volatile BOOL  oManualMode            = 1
 sPotValues_t potValues = 
 {
   .nSamples         = 0
- ,.potStepValues    = {0}
- ,.potValuesInBits  = {0}
- ,.oInDeadZone      = {0}
- ,.deadZoneUpperLim = 1000
- ,.deadZoneLowerLim = 23
- ,.deadZoneAvgValue = 0
+ ,.potSamples       = 
+  {
+    .bufEmpty       = 1
+   ,.bufFull        = 0
+   ,.inIdx          = 0
+   ,.lineBuffer     = {0}
+   ,.maxBufSize     = 256
+   ,.outIdx         = 0
+  }
  ,.lastAverage      = 0
  ,.angle            = NULL
  ,.speed            = NULL
+  
+ ,.potStepSamples   = 
+  {
+    .bufEmpty       = 1
+   ,.bufFull        = 0
+   ,.inIdx          = 0
+   ,.lineBuffer     = {0}
+   ,.maxBufSize     = 256
+   ,.outIdx         = 0
+  }
+ ,.potStepValue     = 0
+  
+ ,.oInDeadZone      = 0
+ ,.deadZoneUpperLim = 1000
+ ,.deadZoneLowerLim = 23
+ ,.deadZoneAvgValue = 0
+    
  ,.bitZero          = 0
  ,.stepZero         = 0
 };

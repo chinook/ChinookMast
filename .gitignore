@@ -4,3 +4,4 @@
 *.d
 ChinookMast.X/dist/default/production/ChinookMast.X.production.elf
 ChinookMast.X/dist/default/production/ChinookMast.X.production.map
+ChinookMast.X/nbproject/Makefile-genesis.properties

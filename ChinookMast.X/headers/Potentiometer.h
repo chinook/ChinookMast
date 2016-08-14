@@ -22,12 +22,44 @@
 //==============================================================================
 #define N_SAMPLES_TO_AVERAGE      200u
 #define ADC_BIT_MAX               1023.0f
+#define POT_DEG_PER_REVOLUTION    7.2f
+
+
+//=========================================
+// sUartLineBuffer_t
+// Purpose : structure used when receiving
+//           data from UART line
+//=========================================
+typedef struct sPotLineBuffer
+{
+  size_t length;
+  UINT16 buffer [256];
+} sPotLineBuffer_t;
+//=========================================
+
+
+//=========================================
+// sUartFifoBuffer_t
+// Purpose : structure used for the FIFO
+//           functions.
+//=========================================
+typedef struct sPotFifoBuffer
+{
+  UINT8             inIdx;
+  UINT8             outIdx;
+  BOOL              bufFull;
+  BOOL              bufEmpty;
+  const UINT16      maxBufSize;
+  sPotLineBuffer_t  lineBuffer;
+} sPotFifoBuffer_t;
+//=========================================
 
 typedef struct sPotValues
 {
-  UINT16 potValuesInBits[N_SAMPLES_TO_AVERAGE];
-  UINT16 potStepValues  [N_SAMPLES_TO_AVERAGE];
-  BOOL   oInDeadZone    [N_SAMPLES_TO_AVERAGE];
+  sPotFifoBuffer_t potSamples;
+  sPotFifoBuffer_t potStepSamples;
+  UINT16 potStepValue;
+  BOOL   oInDeadZone;
   UINT16 lastAverage;
   UINT16 nSamples;
   UINT16 stepZero;                /*! Which step represents zero */
