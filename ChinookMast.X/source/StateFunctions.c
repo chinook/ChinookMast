@@ -503,3 +503,28 @@ void AssessButtons (void)
   }
   // </editor-fold>
 }
+
+
+//==============================================================================
+// Math functions
+//==============================================================================
+
+INT8 SignFloat (float value)
+{
+  return (value >= 0) ? 1 : -1;
+}
+
+INT8 SignInt (INT32 value)
+{
+  return (value >= 0) ? 1 : -1;
+}
+
+float AbsFloat (float value)
+{
+  return (value >= 0) ? value : -value;
+}
+
+INT32 AbsInt (INT32 value)
+{
+  return (value >= 0) ? value : -value;
+}

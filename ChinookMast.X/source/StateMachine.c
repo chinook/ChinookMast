@@ -63,6 +63,19 @@ volatile BOOL  oManualMode            = 1
               ,oManualMastLeft        = 0
               ;
 
+sPotValues_t potValues = 
+{
+  .nSamples         = 0
+ ,.potStepValues    = {0}
+ ,.potValuesInBits  = {0}
+ ,.oInDeadZone      = {0}
+ ,.dynamicLimit     = 310
+ ,.angle            = NULL
+ ,.speed            = NULL
+ ,.bitZero          = 0
+ ,.stepZero         = 0
+};
+
 
 //==============================================================================
 //	STATES OF STATE MACHINE
@@ -278,6 +291,12 @@ void StateInit(void)
 
   // Init registers for the drive
   InitDriver();
+  
+  if (USE_POTENTIOMETER)
+  {
+    potValues.angle = &mastAngle;
+    potValues.speed = &mastSpeed;
+  }
 }
 
 

@@ -23,16 +23,7 @@
 //==============================================================================
 // Variable declarations
 //==============================================================================
-sPotValues_t potValues = 
-{
-  .adcDeadZoneNeg   =  0
- ,.adcDeadZonePos   =  0
- ,.nSamples         =  0
- ,.potStepValues    = {0}
- ,.potValuesInBits  = {0}
- ,.dynamicLimit     =  0
- ,.oInDeadZone      =  0
-};
+
 
 //==============================================================================
 // Private function prototypes
@@ -43,9 +34,9 @@ sPotValues_t potValues =
 // Function definitions
 //==============================================================================
 
-INT8 MastBitToAngle (UINT16 bits, float *angle)
+void MastBitToAngle (UINT16 bits, float *angle, sPotValues_t *potValues)
 {
-  *angle = (float) bits / ADC_BIT_MAX + ADC_BIT_MAX / MAST_MOTOR_RATIO * potValues.potStepValues[1];
+  *angle = ((float) bits / ADC_BIT_MAX) + (ADC_BIT_MAX / MAST_MOTOR_RATIO * potValues->potStepValues[1]);
 }
 
 
@@ -53,4 +44,22 @@ void MastGetSpeed (sCmdValue_t *mastPos, sCmdValue_t *mastSpeed, float acqTime)
 {
   mastSpeed->previousValue = mastSpeed->currentValue;
   mastSpeed->currentValue  = (mastPos->currentValue - mastPos->previousValue) / acqTime;
+}
+
+
+INT8 PotAddSample (UINT16 newSample, sPotValues_t *potValues)
+{
+  if (potValues->nSamples < N_SAMPLES_TO_AVERAGE)
+  {
+    potValues->potValuesInBits[potValues->nSamples] = newSample;
+  
+    if (AbsFloat(newSample - potValues->angle potValues->dynamicLimit))
+    potValues->nSamples++;
+  }
+  else
+  {
+    return -1;  // Should be processed
+  }
+  
+  
 }
