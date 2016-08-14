@@ -1,3 +1,6 @@
 *.o
 *\build\*
 *\dist\*
+*.d
+ChinookMast.X/dist/default/production/ChinookMast.X.production.elf
+ChinookMast.X/dist/default/production/ChinookMast.X.production.map
