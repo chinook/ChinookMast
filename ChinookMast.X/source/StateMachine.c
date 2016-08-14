@@ -92,7 +92,8 @@ sPotValues_t potValues =
   }
  ,.potStepValue     = 0
   
- ,.oInDeadZone      = 0
+ ,.oInUpperDeadZone = 0
+ ,.oInLowerDeadZone = 0
  ,.deadZoneUpperLim = 1000
  ,.deadZoneLowerLim = 23
  ,.deadZoneAvgValue = 0

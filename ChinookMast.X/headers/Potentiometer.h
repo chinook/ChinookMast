@@ -21,8 +21,10 @@
 // General definitions
 //==============================================================================
 #define N_SAMPLES_TO_AVERAGE      200u
-#define ADC_BIT_MAX               1023.0f
+#define ADC_BITS_PER_REVOLUTION   1024u
+#define ADC_TOTAL_BITS            51200u
 #define POT_DEG_PER_REVOLUTION    7.2f
+#define POT_TO_MOTOR_RATIO        50
 
 
 //=========================================
@@ -59,8 +61,9 @@ typedef struct sPotValues
   sPotFifoBuffer_t potSamples;
   sPotFifoBuffer_t potStepSamples;
   UINT16 potStepValue;
-  BOOL   oInDeadZone;
-  UINT16 lastAverage;
+  BOOL   oInUpperDeadZone;
+  BOOL   oInLowerDeadZone;
+  UINT32 lastAverage;
   UINT16 nSamples;
   UINT16 stepZero;                /*! Which step represents zero */
   UINT16 bitZero;                 /*! Which bit at the zero step represents zero perfect zero */

@@ -39,8 +39,8 @@ inline INT8 PotFifoRead (sPotFifoBuffer_t *fifo, UINT16 *data);
 void MastUpdateAngle (sPotValues_t *potValues)
 {
   potValues->angle->previousValue = potValues->angle->currentValue;
-  potValues->angle->currentValue  = (float) potValues->lastAverage / ADC_BIT_MAX
-                                  + ADC_BIT_MAX / MAST_MOTOR_RATIO * potValues->potStepValue;
+//  potValues->angle->currentValue  = (float) potValues->lastAverage / ADC_BIT_MAX
+//                                  + ADC_BIT_MAX / MAST_MOTOR_RATIO * potValues->potStepValue;
 }
 
 
@@ -53,25 +53,25 @@ void MastGetSpeed (sPotValues_t *potValues, float acqTime)
 
 INT8 PotAddSample (UINT16 newSample, sPotValues_t *potValues)
 {
-  if (potValues->nSamples < N_SAMPLES_TO_AVERAGE)
+  if (potValues->oInUpperDeadZone)
   {
-    if (potValues)
-    if ( (newSample >= potValues->deadZoneUpperLim) || (newSample <= potValues->deadZoneLowerLim) )
-    {
-      potValues->potValuesInBits[potValues->nSamples] = potValues->deadZoneAvgValue;
-      potValues->oInDeadZone = 1;
-    }
-    else
-    {
-      potValues->potValuesInBits[potValues->nSamples] = newSample;
-      potValues->oInDeadZone = 0;
-    }
-    potValues->nSamples++;
+    
   }
-  else
+  if (newSample >= potValues->deadZoneUpperLim)
   {
-    return -1;  // The average should be processed
+    newSample = potValues->deadZoneAvgValue;
+    PotFifoWrite(&potValues->potSamples, &newSample);
+    
+    potValues->potValuesInBits[potValues->nSamples] = potValues->deadZoneAvgValue;
+    potValues->oInDeadZone = 1;
   }
+  else if (newSample <= potValues->deadZoneLowerLim)
+  {
+    potValues->potValuesInBits[potValues->nSamples] = newSample;
+    potValues->oInDeadZone = 0;
+  }
+  
+  potValues->nSamples++;
   
   return 0;
 }
@@ -80,20 +80,30 @@ INT8 PotAverage(sPotValues_t *potValues)
 {
   UINT16 iSample  = 0
         ,iMax     = potValues->nSamples
-        ,temp     = 0
+        ,tempBit  = 0
+        ,tempStep
         ;
   
   UINT32 average = 0;
   
   for (iSample = 0; iSample < iMax; iSample++)
   {
-    PotFifoRead(&potValues->potSamples, &temp);
-    average += temp;
+    if (PotFifoRead(&potValues->potSamples, &tempBit) < 0)
+    {
+      break;
+    }
+    if (PotFifoRead(&potValues->potStepSamples, &tempStep) < 0)
+    {
+      break;
+    }
+    average += tempBit + tempStep * ADC_BITS_PER_REVOLUTION;
   }
   
   average = (float) average / (float) iMax + 0.5f;
   
   potValues->lastAverage = average;
+  
+  potValues->nSamples -= iSample;
   
   return 0;
 }
@@ -103,7 +113,8 @@ inline INT8 PotFifoWrite(sPotFifoBuffer_t *fifo, UINT16 *data)
 {
   if (fifo->bufFull)
   {
-    return -1;
+//    return -1;
+    fifo->outIdx = (fifo->outIdx + 1) % fifo->maxBufSize;
   }
   fifo->bufEmpty = 0;
   fifo->lineBuffer.buffer[fifo->inIdx] = *data;
