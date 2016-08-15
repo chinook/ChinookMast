@@ -8,3 +8,5 @@ ChinookMast.X/nbproject/Makefile-genesis.properties
 Makefile-*
 Package-*
 */dist*/
+Makefile-*
+private/
