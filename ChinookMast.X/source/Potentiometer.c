@@ -28,8 +28,9 @@
 //==============================================================================
 // Private function prototypes
 //==============================================================================
-inline INT8 PotFifoWrite(sPotFifoBuffer_t *fifo, UINT16 *data);
-inline INT8 PotFifoRead (sPotFifoBuffer_t *fifo, UINT16 *data);
+inline INT8   PotFifoWrite    (sPotFifoBuffer_t *fifo, UINT16 *data);
+inline INT8   PotFifoRead     (sPotFifoBuffer_t *fifo, UINT16 *data);
+inline UINT32 PotFifoLongRead (sPotFifoBuffer_t *fifo, UINT16 *data, size_t length);
 
 
 //==============================================================================
@@ -51,24 +52,99 @@ void MastGetSpeed (sPotValues_t *potValues, float acqTime)
 }
 
 
-INT8 PotAddSample (UINT16 newSample, sPotValues_t *potValues)
+INT8 PotAddSample (sPotValues_t *potValues, UINT16 newSample)
 {
-  if (potValues->oInUpperDeadZone)
+  UINT16 tempStep;
+  sPotFifoBuffer_t   *potStepBuf    = &potValues->potStepSamples
+                    ,*potSampleBuf  = &potValues->potSamples
+                    ;
+  
+  if (potValues->oInLowerDeadZone || potValues->oInUpperDeadZone)
   {
-    
+    // Still in dead zone
+    if ( (newSample < (1023 - potValues->dynamicLim)) || (newSample > potValues->dynamicLim) )
+    {
+      newSample = potValues->deadZoneAvgValue;
+      PotFifoWrite(potSampleBuf, &newSample);
+    }
+    else if (newSample >= potValues->deadZoneUpperLim)
+    {
+      newSample = potValues->deadZoneAvgValue;
+      PotFifoWrite(potSampleBuf, &newSample);
+
+      if (potValues->oInLowerDeadZone)
+      {
+        potValues->oInLowerDeadZone = 0;
+        tempStep = (potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx - 1) % potStepBuf->maxBufSize] - 1) % POT_TO_MOTOR_RATIO;
+      }
+      else
+      {
+        tempStep = potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx - 1) % potStepBuf->maxBufSize];
+      }
+      PotFifoWrite(potStepBuf, &tempStep);
+
+      potValues->oInUpperDeadZone = 1;
+    }
+    else if (newSample <= potValues->deadZoneLowerLim)
+    {
+      newSample = potValues->deadZoneAvgValue;
+      PotFifoWrite(potSampleBuf, &newSample);
+
+      if (potValues->oInUpperDeadZone)
+      {
+        potValues->oInUpperDeadZone = 0;
+        tempStep = (potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx - 1) % potStepBuf->maxBufSize] + 1) % POT_TO_MOTOR_RATIO;
+      }
+      else
+      {
+        tempStep = potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx - 1) % potStepBuf->maxBufSize];
+      }
+      PotFifoWrite(potStepBuf, &tempStep);
+
+      potValues->oInLowerDeadZone = 1;
+    }
+    else
+    {
+      if (newSample >= potValues->deadZoneUpperLim)
+      {
+        newSample = potValues->deadZoneAvgValue;
+        PotFifoWrite(potSampleBuf, &newSample);
+
+        tempStep = potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx - 1) % potStepBuf->maxBufSize];
+        PotFifoWrite(potStepBuf, &tempStep);
+
+        potValues->oInUpperDeadZone = 1;
+      }
+    }
   }
-  if (newSample >= potValues->deadZoneUpperLim)
+  else // Was not in deadzone
   {
-    newSample = potValues->deadZoneAvgValue;
-    PotFifoWrite(&potValues->potSamples, &newSample);
-    
-    potValues->potValuesInBits[potValues->nSamples] = potValues->deadZoneAvgValue;
-    potValues->oInDeadZone = 1;
-  }
-  else if (newSample <= potValues->deadZoneLowerLim)
-  {
-    potValues->potValuesInBits[potValues->nSamples] = newSample;
-    potValues->oInDeadZone = 0;
+    if (newSample >= potValues->deadZoneUpperLim)
+    {
+      newSample = potValues->deadZoneAvgValue;
+      PotFifoWrite(potSampleBuf, &newSample);
+
+      tempStep = potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx - 1) % potStepBuf->maxBufSize];
+      PotFifoWrite(potStepBuf, &tempStep);
+
+      potValues->oInUpperDeadZone = 1;
+    }
+    else if (newSample <= potValues->deadZoneLowerLim)
+    {
+      newSample = potValues->deadZoneAvgValue;
+      PotFifoWrite(potSampleBuf, &newSample);
+
+      tempStep = potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx - 1) % potStepBuf->maxBufSize];
+      PotFifoWrite(potStepBuf, &tempStep);
+
+      potValues->oInLowerDeadZone = 1;
+    }
+    else
+    {
+      PotFifoWrite(potSampleBuf, &newSample);
+      tempStep = potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx - 1) % potStepBuf->maxBufSize];
+      PotFifoWrite(potStepBuf, &tempStep);
+    }
   }
   
   potValues->nSamples++;
@@ -79,24 +155,33 @@ INT8 PotAddSample (UINT16 newSample, sPotValues_t *potValues)
 INT8 PotAverage(sPotValues_t *potValues)
 {
   UINT16 iSample  = 0
-        ,iMax     = potValues->nSamples
+        ,iMax1    = potValues->nSamples
+        ,iMax2    = potValues->nSamples
+        ,iMax     = 0
         ,tempBit  = 0
+        ,tempBits [256] = {0}
         ,tempStep
+        ,tempSteps[256] = {0}
         ;
   
   UINT32 average = 0;
   
+  iMax1 = PotFifoLongRead(&potValues->potSamples    , tempBits , iMax1);
+  iMax2 = PotFifoLongRead(&potValues->potStepSamples, tempSteps, iMax2);
+  
+  if (iMax1 != iMax2)
+  {
+    iMax = MinInt(iMax1, iMax2);
+    LED_ERROR_ON;
+  }
+  else
+  {
+    iMax = iMax1;
+  }
+  
   for (iSample = 0; iSample < iMax; iSample++)
   {
-    if (PotFifoRead(&potValues->potSamples, &tempBit) < 0)
-    {
-      break;
-    }
-    if (PotFifoRead(&potValues->potStepSamples, &tempStep) < 0)
-    {
-      break;
-    }
-    average += tempBit + tempStep * ADC_BITS_PER_REVOLUTION;
+    average += tempBits[iSample] + tempSteps[iSample] * ADC_BITS_PER_REVOLUTION;
   }
   
   average = (float) average / (float) iMax + 0.5f;
@@ -143,4 +228,48 @@ inline INT8 PotFifoRead (sPotFifoBuffer_t *fifo, UINT16 *data)
   }
   fifo->lineBuffer.length--;
   return 0;
+}
+
+
+inline UINT32 PotFifoLongRead (sPotFifoBuffer_t *fifo, UINT16 *data, size_t length)
+{
+  size_t tempLength;
+  
+  if (fifo->bufEmpty)
+  {
+    return 0;
+  }
+  
+  if (fifo->lineBuffer.length < length)
+  {
+    length = fifo->lineBuffer.length;
+  }
+  
+  fifo->bufFull = 0;
+  
+  if ( fifo->inIdx > fifo->outIdx)
+  {
+    memcpy(&data[0], &fifo->lineBuffer.buffer[fifo->outIdx], 2*length);
+  }
+  else
+  {
+    if ( (fifo->maxBufSize - fifo->outIdx) >= length)
+    {
+      memcpy(&data[0], &fifo->lineBuffer.buffer[fifo->outIdx], 2*length);
+    }
+    else
+    {
+      tempLength = fifo->maxBufSize - fifo->outIdx;
+      memcpy(&data[0], &fifo->lineBuffer.buffer[fifo->outIdx], 2*tempLength);
+      memcpy(&data[tempLength], &fifo->lineBuffer.buffer[0], 2*(length - tempLength));
+    }
+  }
+  
+  fifo->outIdx = (fifo->outIdx + length) % fifo->maxBufSize;
+  if (fifo->outIdx == fifo->inIdx)
+  {
+    fifo->bufEmpty = 1;
+  }
+  fifo->lineBuffer.length -= length;
+  return length;
 }

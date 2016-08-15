@@ -528,3 +528,23 @@ INT32 AbsInt (INT32 value)
 {
   return (value >= 0) ? value : -value;
 }
+
+float MaxFloat (float v1, float v2)
+{
+  return (v1 >= v2) ? v1 : v2;
+}
+
+INT32 MaxInt (INT32 v1, INT32 v2)
+{
+  return (v1 >= v2) ? v1 : v2;
+}
+
+float MinFloat (float v1, float v2)
+{
+  return (v1 <= v2) ? v1 : v2;
+}
+
+INT32 MinInt (INT32 v1, INT32 v2)
+{
+  return (v1 <= v2) ? v1 : v2;
+}

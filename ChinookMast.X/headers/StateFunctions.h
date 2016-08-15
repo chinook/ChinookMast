@@ -58,8 +58,15 @@ void AssessButtons (void);
 // =======================================
 INT8  SignFloat (float value);
 INT8  SignInt   (INT32 value);
+
 float AbsFloat  (float value);
 INT32 AbsInt    (INT32 value);
+
+float MaxFloat (float v1, float v2);
+INT32 MaxInt (INT32 v1, INT32 v2);
+
+float MinFloat (float v1, float v2);
+INT32 MinInt (INT32 v1, INT32 v2);
 // =======================================
 
 

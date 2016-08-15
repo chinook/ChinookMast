@@ -97,6 +97,7 @@ sPotValues_t potValues =
  ,.deadZoneUpperLim = 1000
  ,.deadZoneLowerLim = 23
  ,.deadZoneAvgValue = 0
+ ,.dynamicLim       = 155   // Roughly 0.5V when VREF+ is at 3.3V
     
  ,.bitZero          = 0
  ,.stepZero         = 0
@@ -318,11 +319,10 @@ void StateInit(void)
   // Init registers for the drive
   InitDriver();
   
-  if (USE_POTENTIOMETER)
-  {
-    potValues.angle = &mastAngle;
-    potValues.speed = &mastSpeed;
-  }
+#ifdef USE_POTENTIOMETER
+  potValues.angle = &mastAngle;
+  potValues.speed = &mastSpeed;
+#endif
 }
 
 
@@ -412,19 +412,16 @@ void StateGetMastData(void)
     windAngle.currentValue = tempWind;
   }
 
-  if (USE_POTENTIOMETER)
-  {
-    MastGetSpeed(&potValues, T);
-  }
-  else
-  {
-    // Update mast speed
-    mastSpeed.previousValue = mastSpeed.currentValue;
-    mastSpeed.currentValue  = mastCurrentSpeed;
-    
-    // Get mast position from mast speed
-    TustinZ((void *) &mastSpeed, (void *) &mastAngle);    // Discrete integrator
-  }
+#ifdef USE_POTENTIOMETER
+  MastGetSpeed(&potValues, T);
+#else
+  // Update mast speed
+  mastSpeed.previousValue = mastSpeed.currentValue;
+  mastSpeed.currentValue  = mastCurrentSpeed;
+
+  // Get mast position from mast speed
+  TustinZ((void *) &mastSpeed, (void *) &mastAngle);    // Discrete integrator
+#endif
 
   /*
    * Some kind of modulo
@@ -638,25 +635,21 @@ void StateAcq(void)
 
   AssessButtons();
 
-  if (USE_POTENTIOMETER)
+#ifdef USE_POTENTIOMETER
+  if (oAdcReady)
   {
-    if (oAdcReady)
+    oAdcReady = 0;
+    tempAdcValue = Adc.Var.adcReadValues[2];
+    PotAddSample(&potValues, tempAdcValue);
+    if (potValues.nSamples >= N_SAMPLES_TO_AVERAGE)
     {
-      oAdcReady = 0;
-      tempAdcValue = Adc.Var.adcReadValues[2];
-      PotAddSample(tempAdcValue, &potValues);
-      if (potValues.nSamples >= N_SAMPLES_TO_AVERAGE)
-      {
-        PotAverage(&potValues);
-        MastUpdateAngle(&potValues);
-      }
-      
+      PotAverage(&potValues);
+      MastUpdateAngle(&potValues);
     }
   }
-  else
-  {
-    AssessMastValues();
-  }
+#else
+  AssesstValues();
+#endif
 
 //  UINT32 coreTickRate = Timer.Tic(1500, SCALE_US);
   Skadi.GetCmdMsgFifo();

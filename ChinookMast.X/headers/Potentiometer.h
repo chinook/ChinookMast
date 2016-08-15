@@ -24,7 +24,7 @@
 #define ADC_BITS_PER_REVOLUTION   1024u
 #define ADC_TOTAL_BITS            51200u
 #define POT_DEG_PER_REVOLUTION    7.2f
-#define POT_TO_MOTOR_RATIO        50
+#define POT_TO_MOTOR_RATIO        50u
 
 
 //=========================================
@@ -60,13 +60,14 @@ typedef struct sPotValues
 {
   sPotFifoBuffer_t potSamples;
   sPotFifoBuffer_t potStepSamples;
-  UINT16 potStepValue;
-  BOOL   oInUpperDeadZone;
-  BOOL   oInLowerDeadZone;
-  UINT32 lastAverage;
-  UINT16 nSamples;
-  UINT16 stepZero;                /*! Which step represents zero */
-  UINT16 bitZero;                 /*! Which bit at the zero step represents zero perfect zero */
+  UINT16  potStepValue;
+  BOOL    oInUpperDeadZone;
+  BOOL    oInLowerDeadZone;
+  const UINT16 dynamicLim;
+  UINT32  lastAverage;
+  UINT16  nSamples;
+  UINT16  stepZero;               /*! Which step represents zero */
+  UINT16  bitZero;                /*! Which bit at the zero step represents zero perfect zero */
   const UINT16 deadZoneUpperLim;  /*! In bits */
   const UINT16 deadZoneLowerLim;  /*! In bits */
   const UINT16 deadZoneAvgValue;  /*! Value to use when in deadzone from either side */
@@ -86,7 +87,7 @@ typedef struct sPotValues
 
 void MastUpdateAngle  (sPotValues_t *potValues);
 void MastGetSpeed     (sPotValues_t *potValues, float acqTime);
-INT8 AdcAddSample     (UINT16 newSample, sPotValues_t *potValues);
+INT8 AdcAddSample     (sPotValues_t *potValues, UINT16 newSample);
 INT8 PotAverage       (sPotValues_t *potValues);
 
 #endif	/* __POTENTIOMETER__ */
