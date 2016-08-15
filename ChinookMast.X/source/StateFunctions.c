@@ -22,6 +22,7 @@
 
 #include "..\headers\StateFunctions.h"
 #include "..\headers\CommandFunctions.h"
+#include "..\headers\Potentiometer.h"
 
 
 //==============================================================================
@@ -50,6 +51,8 @@ volatile sButtonStates_t buttons =
 extern volatile float  mastCurrentSpeed       // Actual speed of Mast
                       ;
 
+extern sPotValues_t potValues;
+
 extern volatile sCmdValue_t mastAngle;        // Discrete position of mast
 
 extern volatile BOOL oCapture1
@@ -76,6 +79,24 @@ extern volatile BOOL oCapture1
  */
 void WriteMastPos2Eeprom (void)
 {
+#ifdef USE_POTENTIOMETER
+  UINT8 dataBuffer[17];
+  dataBuffer[0] = I2c.Var.eepromAddress.byte;
+  dataBuffer[1] = eepromFirstRegister.address.highByte;
+  dataBuffer[2] = eepromFirstRegister.address.lowByte;
+
+  memcpy(&dataBuffer[3 ], (void *) &mastAngle.currentValue    , 4);
+  memcpy(&dataBuffer[7 ], (void *) &potValues.lastAverage     , 4);
+  memcpy(&dataBuffer[11], (void *) &potValues.zeroInBits      , 2);
+  memcpy(&dataBuffer[13], (void *) &potValues.potStepValue    , 2);
+  memcpy(&dataBuffer[15], (void *) &potValues.oInLowerDeadZone, 1);
+  memcpy(&dataBuffer[16], (void *) &potValues.oInUpperDeadZone, 1);
+
+  while(I2c.Var.oI2cReadIsRunning[I2C4]);  // Wait for any I2C4 read sequence to end
+  while(I2c.Var.oI2cWriteIsRunning[I2C4]); // Wait for any I2C4 write sequence to end
+
+  I2c.AddDataToFifoWriteQueue(I2C4, &dataBuffer[0], 15, TRUE);
+#else
   UINT8 dataBuffer[7];
   dataBuffer[0] = I2c.Var.eepromAddress.byte;
   dataBuffer[1] = eepromFirstRegister.address.highByte;
@@ -87,6 +108,7 @@ void WriteMastPos2Eeprom (void)
   while(I2c.Var.oI2cWriteIsRunning[I2C4]); // Wait for any I2C4 write sequence to end
 
   I2c.AddDataToFifoWriteQueue(I2C4, &dataBuffer[0], 7, TRUE);
+#endif
 }
 
 /*
@@ -94,6 +116,32 @@ void WriteMastPos2Eeprom (void)
  */
 void ReadMastPosFromEeprom (void)
 {
+#ifdef USE_POTENTIOMETER
+  UINT8 buffer[14];
+  UINT8 slaveAddPlusRegBuf[3];
+
+  slaveAddPlusRegBuf[0] = I2c.Var.eepromAddress.byte;
+  slaveAddPlusRegBuf[1] = eepromFirstRegister.address.highByte;
+  slaveAddPlusRegBuf[2] = eepromFirstRegister.address.lowByte;
+
+  while(I2c.Var.oI2cWriteIsRunning[I2C4]);  // Wait for any I2C4 write sequence to end
+  while(I2c.Var.oI2cReadIsRunning[I2C4]);  // Wait for any I2C4 read sequence to end
+
+  I2c.AddDataToFifoReadQueue(I2C4, &slaveAddPlusRegBuf[0], 3, 14);
+
+  while(I2c.Var.oI2cReadIsRunning[I2C4]); // Wait for the read sequence to end
+
+  I2c.ReadRxFifo(I2C4, &buffer[0], 14);
+
+  memcpy((void *) &mastAngle.currentValue     , &buffer[0] , 4);
+  memcpy((void *) &potValues.lastAverage      , &buffer[4] , 4);
+  memcpy((void *) &potValues.zeroInBits       , &buffer[8] , 2);
+  memcpy((void *) &potValues.potStepValue     , &buffer[10], 2);
+  memcpy((void *) &potValues.oInLowerDeadZone , &buffer[11], 1);
+  memcpy((void *) &potValues.oInUpperDeadZone , &buffer[12], 1);
+
+  mastAngle.previousValue = mastAngle.currentValue;
+#else
   UINT8 mastPos[4];
   UINT8 slaveAddPlusRegBuf[3];
 
@@ -113,6 +161,7 @@ void ReadMastPosFromEeprom (void)
   memcpy((void *) &mastAngle.currentValue, &mastPos[0], 4);
 
   mastAngle.previousValue = mastAngle.currentValue;
+#endif
 }
 
 

@@ -25,6 +25,7 @@
 #define ADC_TOTAL_BITS            51200u
 #define POT_DEG_PER_REVOLUTION    7.2f
 #define POT_TO_MOTOR_RATIO        50u
+#define BITS_TO_DEG               0.00703125    // 360 deg / ADC_TOTAL_BITS
 
 
 //=========================================
@@ -65,9 +66,9 @@ typedef struct sPotValues
   BOOL    oInLowerDeadZone;
   const UINT16 dynamicLim;
   UINT32  lastAverage;
+  UINT32  zeroInBits;
   UINT16  nSamples;
   UINT16  stepZero;               /*! Which step represents zero */
-  UINT16  bitZero;                /*! Which bit at the zero step represents zero perfect zero */
   const UINT16 deadZoneUpperLim;  /*! In bits */
   const UINT16 deadZoneLowerLim;  /*! In bits */
   const UINT16 deadZoneAvgValue;  /*! Value to use when in deadzone from either side */
@@ -89,5 +90,6 @@ void MastUpdateAngle  (sPotValues_t *potValues);
 void MastGetSpeed     (sPotValues_t *potValues, float acqTime);
 INT8 AdcAddSample     (sPotValues_t *potValues, UINT16 newSample);
 INT8 PotAverage       (sPotValues_t *potValues);
+void MastAngleToBits  (sPotValues_t *potValues, float angle, UINT16 *step, UINT16 *bits);
 
 #endif	/* __POTENTIOMETER__ */

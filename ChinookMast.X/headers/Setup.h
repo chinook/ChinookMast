@@ -63,6 +63,7 @@ struct sChinook Chinook;            // Contains all ChinookLib functions
 // State Machine public functions prototypes
 //==============================================================================
 void InitTimer        (void);
+void InitAdc          (void);
 void InitPwm          (void);
 void InitPorts        (void);
 void InitCan          (void);
@@ -79,6 +80,7 @@ void StartInterrupts  (void);
 // Macro definitions
 //==============================================================================
 #define INIT_TIMER          InitTimer()
+#define INIT_ADC            InitAdc()
 #define INIT_PWM            InitPwm()
 #define INIT_PORTS          InitPorts()
 #define INIT_CAN            InitCan()

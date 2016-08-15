@@ -467,6 +467,14 @@ void StartInterrupts(void)
 //  Spi.EnableTxInterrupts(SPI4);   // Enable TX Interrupts for SPI4
 
 
+#ifdef USE_POTENTIOMETER
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Enable ADC interrupts
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  Adc.EnableInterrupts();
+  
+  
+#else
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable InputCapture interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -488,8 +496,9 @@ void StartInterrupts(void)
     InputCapture.EnableInterrupt(IC3);
   }
   //====================================
+#endif
 
-
+  
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable CAN interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

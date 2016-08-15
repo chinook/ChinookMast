@@ -22,6 +22,7 @@
 
 #include "..\headers\CommandFunctions.h"
 #include "..\headers\StateFunctions.h"
+#include "..\headers\Potentiometer.h"
 
 
 //==============================================================================
@@ -32,6 +33,8 @@
 //=====================================
 extern volatile UINT32 rxWindAngle;
 //=====================================
+
+extern sPotValues_t potValues;
 
 
 // Used for the average of the wind angle
@@ -344,11 +347,15 @@ void Regulator (void)
   }
 
   // Update mast speed
+#ifdef USE_POTENTIOMETER
+  MastGetSpeed(&potValues, T);
+#else
   mastSpeed.previousValue = mastSpeed.currentValue;
   mastSpeed.currentValue  = mastCurrentSpeed;
 
   // Get mast position from mast speed
   TustinZ((void *) &mastSpeed, (void *) &mastAngle);  // Discrete integrator
+#endif
 
   /*
    * Some kind of modulo

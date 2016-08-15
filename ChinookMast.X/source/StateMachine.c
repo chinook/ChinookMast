@@ -91,6 +91,8 @@ sPotValues_t potValues =
    ,.outIdx         = 0
   }
  ,.potStepValue     = 0
+    
+ ,.zeroInBits       = 0
   
  ,.oInUpperDeadZone = 0
  ,.oInLowerDeadZone = 0
@@ -99,7 +101,6 @@ sPotValues_t potValues =
  ,.deadZoneAvgValue = 0
  ,.dynamicLim       = 155   // Roughly 0.5V when VREF+ is at 3.3V
     
- ,.bitZero          = 0
  ,.stepZero         = 0
 };
 
@@ -291,7 +292,11 @@ void StateInit(void)
   INIT_PORTS;
 //  INIT_WDT;
   INIT_TIMER;
+#ifdef USE_POTENTIOMETER
+  INIT_ADC;
+#else
   INIT_INPUT_CAPTURE;
+#endif
   INIT_UART;
   INIT_SPI;
   INIT_PWM;
@@ -310,11 +315,26 @@ void StateInit(void)
 
   // Get last known position of the mast
   ReadMastPosFromEeprom();
-  if (ABS(mastAngle.currentValue) > 360)  // Error
+  if (AbsFloat(mastAngle.currentValue) > 360)  // Error
   {
     mastAngle.previousValue = 0;
     mastAngle.currentValue  = 0;
   }
+#ifdef USE_POTENTIOMETER
+  if (potValues.lastAverage > ADC_TOTAL_BITS)
+  {
+    potValues.lastAverage = ADC_TOTAL_BITS << 1;
+  }
+  if (potValues.zeroInBits > ADC_TOTAL_BITS)
+  {
+    potValues.zeroInBits = ADC_TOTAL_BITS << 1;
+  }
+  if (potValues.potStepValue > POT_TO_MOTOR_RATIO)
+  {
+    potValues.potStepValue = POT_TO_MOTOR_RATIO << 1;
+  }
+  potValues.potSamples.lineBuffer.buffer[potValues.potSamples.maxBufSize] = potValues.lastAverage;
+#endif
 
   // Init registers for the drive
   InitDriver();
@@ -535,7 +555,6 @@ void StateClose(void)
 
 }
 
-
 //===============================================================
 // Name     : StateIdle
 // Purpose  : Wait for power-off
@@ -544,6 +563,7 @@ void StateIdle(void)
 {
   return;
 }
+
 
 
 //===============================================================
