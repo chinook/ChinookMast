@@ -101,8 +101,8 @@ void InitAdc(void)
 
   // Hardware config. These are exemples.
   //================================================
-  UINT32 configHardware = ADC_VREF_EXT_AVSS      // Vref+ is AVdd and Vref- is AVss
-                        | ADC_SAMPLES_PER_INT_1;  // 1 samples/interrupt (we check 3 channels)
+  UINT32 configHardware = ADC_VREF_AVDD_AVSS      // Vref+ is AVdd and Vref- is AVss
+                        | ADC_SAMPLES_PER_INT_1;  // 1 sample/interrupt 
   //================================================
 
   // Port config.
@@ -298,6 +298,8 @@ void InitPorts(void)
 
   Port.D.SetPinsDigitalIn (BIT_8);      // DRVA_IO_CON1
   Port.D.SetPinsDigitalIn (BIT_10);     // DRVA_IO_CON2
+  
+  Port.B.SetPinsAnalogIn(BIT_2);        // ADC2 / MAST POT
 
   LED_STATUS_OFF;
   LED_ERROR_OFF;

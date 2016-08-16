@@ -56,7 +56,7 @@ struct sChinook Chinook;            // Contains all ChinookLib functions
 // Define this at one if you want to send the mast values via UART 
 // every (TIMER_4). Else, 0
 //==============================================================================
-#define SEND_DATA_TO_UART   0
+#define SEND_DATA_TO_UART   1
 
 
 //==============================================================================

@@ -74,7 +74,7 @@ sPotValues_t potValues =
    ,.bufFull        = 0
    ,.inIdx          = 0
    ,.lineBuffer     = {0}
-   ,.maxBufSize     = 256
+   ,.maxBufSize     = 240
    ,.outIdx         = 0
   }
  ,.lastAverage      = 0
@@ -91,15 +91,11 @@ sPotValues_t potValues =
    ,.outIdx         = 0
   }
  ,.potStepValue     = 0
+ ,.lastBits         = 0
     
  ,.zeroInBits       = 0
-  
- ,.oInUpperDeadZone = 0
- ,.oInLowerDeadZone = 0
- ,.deadZoneUpperLim = 1000
- ,.deadZoneLowerLim = 23
- ,.deadZoneAvgValue = 0
- ,.dynamicLim       = 155   // Roughly 0.5V when VREF+ is at 3.3V
+    
+ ,.deadZoneDetect   = 800
     
  ,.stepZero         = 0
 };
@@ -332,6 +328,10 @@ void StateInit(void)
   if (potValues.potStepValue > POT_TO_MOTOR_RATIO)
   {
     potValues.potStepValue = POT_TO_MOTOR_RATIO << 1;
+  }
+  if (potValues.lastBits > (ADC_BITS_PER_REVOLUTION - 1))
+  {
+    potValues.lastBits = 0;
   }
   potValues.potSamples.lineBuffer.buffer[potValues.potSamples.maxBufSize] = potValues.lastAverage;
 #endif
@@ -607,11 +607,13 @@ void StateSendData(void)
     {
       sUartLineBuffer_t buffer;
       buffer.length = sprintf ( buffer.buffer
-                              , "\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
+//                              , "\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
+                              , "\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\rCurrent adc\t\t= %d\n\r"
   //                            , "\n\rCurrent speed\t\t= %f\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
   //                            , mastSpeed.currentValue
                               , mastAngle.currentValue
                               , windAngle.currentValue
+                              , Adc.Var.adcReadValues[2]
                               );
 
       Uart.PutTxFifoBuffer(UART6, &buffer);

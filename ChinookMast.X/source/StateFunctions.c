@@ -80,22 +80,21 @@ extern volatile BOOL oCapture1
 void WriteMastPos2Eeprom (void)
 {
 #ifdef USE_POTENTIOMETER
-  UINT8 dataBuffer[17];
+  UINT8 dataBuffer[19];
   dataBuffer[0] = I2c.Var.eepromAddress.byte;
   dataBuffer[1] = eepromFirstRegister.address.highByte;
   dataBuffer[2] = eepromFirstRegister.address.lowByte;
 
   memcpy(&dataBuffer[3 ], (void *) &mastAngle.currentValue    , 4);
   memcpy(&dataBuffer[7 ], (void *) &potValues.lastAverage     , 4);
-  memcpy(&dataBuffer[11], (void *) &potValues.zeroInBits      , 2);
-  memcpy(&dataBuffer[13], (void *) &potValues.potStepValue    , 2);
-  memcpy(&dataBuffer[15], (void *) &potValues.oInLowerDeadZone, 1);
-  memcpy(&dataBuffer[16], (void *) &potValues.oInUpperDeadZone, 1);
+  memcpy(&dataBuffer[11], (void *) &potValues.lastBits        , 2);
+  memcpy(&dataBuffer[13], (void *) &potValues.zeroInBits      , 4);
+  memcpy(&dataBuffer[17], (void *) &potValues.potStepValue    , 2);
 
   while(I2c.Var.oI2cReadIsRunning[I2C4]);  // Wait for any I2C4 read sequence to end
   while(I2c.Var.oI2cWriteIsRunning[I2C4]); // Wait for any I2C4 write sequence to end
 
-  I2c.AddDataToFifoWriteQueue(I2C4, &dataBuffer[0], 15, TRUE);
+  I2c.AddDataToFifoWriteQueue(I2C4, &dataBuffer[0], 19, TRUE);
 #else
   UINT8 dataBuffer[7];
   dataBuffer[0] = I2c.Var.eepromAddress.byte;
@@ -117,7 +116,7 @@ void WriteMastPos2Eeprom (void)
 void ReadMastPosFromEeprom (void)
 {
 #ifdef USE_POTENTIOMETER
-  UINT8 buffer[14];
+  UINT8 buffer[16];
   UINT8 slaveAddPlusRegBuf[3];
 
   slaveAddPlusRegBuf[0] = I2c.Var.eepromAddress.byte;
@@ -127,18 +126,17 @@ void ReadMastPosFromEeprom (void)
   while(I2c.Var.oI2cWriteIsRunning[I2C4]);  // Wait for any I2C4 write sequence to end
   while(I2c.Var.oI2cReadIsRunning[I2C4]);  // Wait for any I2C4 read sequence to end
 
-  I2c.AddDataToFifoReadQueue(I2C4, &slaveAddPlusRegBuf[0], 3, 14);
+  I2c.AddDataToFifoReadQueue(I2C4, &slaveAddPlusRegBuf[0], 3, 16);
 
   while(I2c.Var.oI2cReadIsRunning[I2C4]); // Wait for the read sequence to end
 
-  I2c.ReadRxFifo(I2C4, &buffer[0], 14);
+  I2c.ReadRxFifo(I2C4, &buffer[0], 16);
 
   memcpy((void *) &mastAngle.currentValue     , &buffer[0] , 4);
   memcpy((void *) &potValues.lastAverage      , &buffer[4] , 4);
-  memcpy((void *) &potValues.zeroInBits       , &buffer[8] , 2);
-  memcpy((void *) &potValues.potStepValue     , &buffer[10], 2);
-  memcpy((void *) &potValues.oInLowerDeadZone , &buffer[11], 1);
-  memcpy((void *) &potValues.oInUpperDeadZone , &buffer[12], 1);
+  memcpy((void *) &potValues.lastBits         , &buffer[8] , 2);
+  memcpy((void *) &potValues.zeroInBits       , &buffer[10], 4);
+  memcpy((void *) &potValues.potStepValue     , &buffer[14], 2);
 
   mastAngle.previousValue = mastAngle.currentValue;
 #else
@@ -297,6 +295,7 @@ void AssessButtons (void)
       {
         mastAngle.currentValue = 0;
         mastAngle.previousValue = 0;
+        potValues.zeroInBits = potValues.lastAverage;
         
         WriteMastPos2Eeprom (); // Write zero to EEPROM
 

@@ -37,13 +37,7 @@ inline UINT32 PotFifoLongRead (sPotFifoBuffer_t *fifo, UINT16 *data, size_t leng
 // Function definitions
 //==============================================================================
 
-/*
- *  0             360
- *  0             51200
- *       24555              
- *          28204           25,65703125
- * -180           180
- */
+
 void MastUpdateAngle (sPotValues_t *potValues)
 {
   potValues->angle->previousValue = potValues->angle->currentValue;
@@ -97,93 +91,25 @@ INT8 PotAddSample (sPotValues_t *potValues, UINT16 newSample)
                     ,*potSampleBuf  = &potValues->potSamples
                     ;
   
-  if (potValues->oInLowerDeadZone || potValues->oInUpperDeadZone)
+  INT32 diff = (INT32) potSampleBuf->lineBuffer.buffer[MinInt(potStepBuf->inIdx - 1, potStepBuf->maxBufSize - 1)] - (INT32) newSample;
+  
+  if (AbsInt(diff) > potValues->deadZoneDetect)
   {
-    // Still in dead zone
-    if ( (newSample < (1023 - potValues->dynamicLim)) || (newSample > potValues->dynamicLim) )
+    if (SignInt(diff) == 1)
     {
-      newSample = potValues->deadZoneAvgValue;
-      PotFifoWrite(potSampleBuf, &newSample);
-    }
-    else if (newSample >= potValues->deadZoneUpperLim)
-    {
-      newSample = potValues->deadZoneAvgValue;
-      PotFifoWrite(potSampleBuf, &newSample);
-
-      if (potValues->oInLowerDeadZone)
-      {
-        potValues->oInLowerDeadZone = 0;
-        tempStep = (potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx - 1)] - 1) % POT_TO_MOTOR_RATIO;
-      }
-      else
-      {
-        tempStep = potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx - 1)];
-      }
-      PotFifoWrite(potStepBuf, &tempStep);
-
-      potValues->oInUpperDeadZone = 1;
-    }
-    else if (newSample <= potValues->deadZoneLowerLim)
-    {
-      newSample = potValues->deadZoneAvgValue;
-      PotFifoWrite(potSampleBuf, &newSample);
-
-      if (potValues->oInUpperDeadZone)
-      {
-        potValues->oInUpperDeadZone = 0;
-        tempStep = (potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx - 1)] + 1) % POT_TO_MOTOR_RATIO;
-      }
-      else
-      {
-        tempStep = potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx - 1)];
-      }
-      PotFifoWrite(potStepBuf, &tempStep);
-
-      potValues->oInLowerDeadZone = 1;
+      tempStep = (potStepBuf->lineBuffer.buffer[MinInt(potStepBuf->inIdx - 1, potStepBuf->maxBufSize - 1)] + 1) % POT_TO_MOTOR_RATIO;
     }
     else
     {
-      if (newSample >= potValues->deadZoneUpperLim)
-      {
-        newSample = potValues->deadZoneAvgValue;
-        PotFifoWrite(potSampleBuf, &newSample);
-
-        tempStep = potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx - 1)];
-        PotFifoWrite(potStepBuf, &tempStep);
-
-        potValues->oInUpperDeadZone = 1;
-      }
+      tempStep = MinInt((potStepBuf->lineBuffer.buffer[MinInt(potStepBuf->inIdx - 1, potStepBuf->maxBufSize - 1)] - 1), POT_TO_MOTOR_RATIO - 1);
     }
   }
-  else // Was not in deadzone
+  else
   {
-    if (newSample >= potValues->deadZoneUpperLim)
-    {
-      newSample = potValues->deadZoneAvgValue;
-      PotFifoWrite(potSampleBuf, &newSample);
-
-      tempStep = potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx - 1)];
-      PotFifoWrite(potStepBuf, &tempStep);
-
-      potValues->oInUpperDeadZone = 1;
-    }
-    else if (newSample <= potValues->deadZoneLowerLim)
-    {
-      newSample = potValues->deadZoneAvgValue;
-      PotFifoWrite(potSampleBuf, &newSample);
-
-      tempStep = potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx - 1)];
-      PotFifoWrite(potStepBuf, &tempStep);
-
-      potValues->oInLowerDeadZone = 1;
-    }
-    else
-    {
-      PotFifoWrite(potSampleBuf, &newSample);
-      tempStep = potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx - 1)];
-      PotFifoWrite(potStepBuf, &tempStep);
-    }
+    tempStep = potStepBuf->lineBuffer.buffer[MinInt(potStepBuf->inIdx - 1, potStepBuf->maxBufSize - 1)];
   }
+  PotFifoWrite(potSampleBuf, &newSample);
+  PotFifoWrite(potStepBuf, &tempStep);
   
   potValues->nSamples++;
   
@@ -196,9 +122,7 @@ INT8 PotAverage(sPotValues_t *potValues)
         ,iMax1    = potValues->nSamples
         ,iMax2    = potValues->nSamples
         ,iMax     = 0
-        ,tempBit  = 0
         ,tempBits [256] = {0}
-        ,tempStep
         ;
   UINT16 tempSteps[256] = {0}
         ;
@@ -221,15 +145,17 @@ INT8 PotAverage(sPotValues_t *potValues)
   for (iSample = 0; iSample < iMax; iSample++)
   {
 //    average += tempBits[iSample] + tempSteps[iSample] * ADC_BITS_PER_REVOLUTION;
-    average += tempBits[iSample] + (tempSteps[iSample] << 10);
+    average += tempBits[iSample] + (((UINT32) tempSteps[iSample]) << 10);
   }
   
   average = (float) average / (float) iMax + 0.5f;
   
-//  potValues->potStepValue = average / 1024;
+//  potValues->potStepValue = average / ADC_BITS_PER_REVOLUTION;
   potValues->potStepValue = average >> 10;
   
   potValues->lastAverage = average;
+  
+  potValues->lastBits = average % ADC_BITS_PER_REVOLUTION;
   
   potValues->nSamples -= iSample;
   

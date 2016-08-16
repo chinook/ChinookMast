@@ -62,16 +62,12 @@ typedef struct sPotValues
   sPotFifoBuffer_t potSamples;
   sPotFifoBuffer_t potStepSamples;
   UINT16  potStepValue;
-  BOOL    oInUpperDeadZone;
-  BOOL    oInLowerDeadZone;
-  const UINT16 dynamicLim;
   UINT32  lastAverage;
+  UINT16  lastBits;
   UINT32  zeroInBits;
+  UINT16  deadZoneDetect;
   UINT16  nSamples;
   UINT16  stepZero;               /*! Which step represents zero */
-  const UINT16 deadZoneUpperLim;  /*! In bits */
-  const UINT16 deadZoneLowerLim;  /*! In bits */
-  const UINT16 deadZoneAvgValue;  /*! Value to use when in deadzone from either side */
   volatile sCmdValue_t *angle;
   volatile sCmdValue_t *speed;
 } sPotValues_t;
