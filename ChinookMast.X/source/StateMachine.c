@@ -596,8 +596,8 @@ void StateSendData(void)
   }
   //==========================================================
 
-//  if (iCounterToTwoSec < 10)
-  if (iCounterToTwoSec < 1)
+  if (iCounterToTwoSec < 10)
+//  if (iCounterToTwoSec < 1)
   {
     iCounterToTwoSec++;
   }
@@ -612,10 +612,11 @@ void StateSendData(void)
       buffer.length = sprintf ( buffer.buffer
 //                              , "\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
 //                              , "\n\rCurrent pos\t= %f\n\rLast average\t= %d\n\rZero\t\t= %d\n\rStep\t\t= %d\n\rLast adc\t= %d\n\r"
-                              , "\n\rStep\t\t= %d\n\rLast adc\t= %d\n\r"
+//                              , "\n\rStep\t\t= %d\n\rLast adc\t= %d\n\r"
+                              , "\n\rCurrent speed\t= %f\n\rCurrent pos\t= %f\n\rStep\t\t= %d\n\rLast adc\t= %d\n\r"
   //                            , "\n\rCurrent speed\t\t= %f\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
-  //                            , mastSpeed.currentValue
-//                              , mastAngle.currentValue
+                              , mastSpeed.currentValue
+                              , mastAngle.currentValue
 //                              , windAngle.currentValue
 //                              , potValues.lastAverage
 //                              , potValues.zeroInBits
@@ -626,7 +627,7 @@ void StateSendData(void)
       Uart.PutTxFifoBuffer(UART6, &buffer);
     }
     
-//    WriteMastPos2Eeprom();
+    WriteMastPos2Eeprom();
   }
 }
 
