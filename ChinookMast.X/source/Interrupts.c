@@ -46,7 +46,7 @@ volatile BOOL  oCapture1      = 0
               ;
 
 UINT8 iMastStop = 0;
-INT8  mastDir = 0;
+float  mastDir = 0;
 
 volatile UINT32 rxWindAngle = 0;  // Received from CAN
 

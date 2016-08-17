@@ -30,8 +30,8 @@
 //==============================================================================
 // Macro definitions
 //==============================================================================
-#define MAST_DIR_LEFT               -1
-#define MAST_DIR_RIGHT               1
+#define MAST_DIR_LEFT               -1.0f
+#define MAST_DIR_RIGHT               1.0f
 
 #define MOTOR_ENCODER_RATIO         49.0f
 #define MAST_MOTOR_RATIO            50.0f

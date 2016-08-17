@@ -72,8 +72,6 @@ void (*pStateMast)(void);       // State pointer, used to navigate between state
 #define MAST_OK               (!oManualMastLeft && !oManualMastRight)
 #define MAST_MAX_OK           (mastAngle.currentValue <= MAST_MAX)
 #define MAST_MIN_OK           (mastAngle.currentValue >= MAST_MIN)
-#define MAST_DIR_DOWN         SW1
-#define MAST_DIR_UP           !MAST_DIR_DOWN
 #define MANUAL_MODE           oManualMode
 #define MANUAL_FLAG_CHANGE    oManualFlagChng
 #define DISCONNECT_OK         0                                   // Need to be coded
