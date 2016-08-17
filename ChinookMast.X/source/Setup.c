@@ -53,6 +53,7 @@ sSkadiCommand_t skadiCommandTable[] =
   ,{"getspeed"    , GetSpeed    , 0 , "\t| Read the mast current speed [deg/s].\t\t| 0 arg"                             }
   ,{"getparam"    , GetParam    , 0 , "\t| Print K, KI, KP, PWM_MAX, PWM_MIN and ERROR.\t| 0 arg\n"                     }
   ,{"writestatus" , WriteStatus , 0 , "\t| Write STATUS msg to drive.\t\t\t| 0 arg"                                     }
+  ,{"writemem"    , WriteMastInfo, 0, "\t| Write mast info to EEPROM.\t\t\t| 0 arg"                                     }
   ,{"setprint"    , SetPrint    , 1 , "\t| Print or not data from regulation.\t\t| 1 arg : 1 = Print, 0 = Don't print"  }
   ,{"clc"         , ClearScreen , 0 , "\t\t| Clear terminal window.\t\t\t| 0 arg"                                       }
 };
@@ -74,7 +75,7 @@ void InitTimer(void)
 //  timerCounterValue = Timer.Open(TIMER_2, 11, SCALE_MS);    // Timer used for input capture AND stopping the mast. Period = 11 ms
   timerCounterValue = Timer.Open(TIMER_3, 500, SCALE_US);   // Timer used for PWM and ADC. Period = 500 ms (f = 2kHz)
 //  timerCounterValue = Timer.Open(TIMER_4,  15, SCALE_MS);   // Timer used for sending data to other devices. Period = 15 ms (f ~ 66.67 Hz)
-  timerCounterValue = Timer.Open(TIMER_4, 200, SCALE_MS);   // Timer used for sending data to other devices. Period = 200 ms
+  timerCounterValue = Timer.Open(TIMER_4, 50, SCALE_MS);   // Timer used for sending data to other devices. Period = 200 ms
   timerCounterValue = Timer.Open(TIMER_5, 600, SCALE_MS);   // Timer used for changing mode of operation. Period = 600 ms
   
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -173,6 +174,41 @@ void InitSpi(void)
 //===========================
 void InitPwm(void)
 {
+#ifdef USE_POTENTIOMETER
+  // DRIVE B
+  //==========================================================
+  if (USE_DRIVE_B == 1)
+  {
+    // Open PWM2 using Timer3 with 50% duty cycle and 0% offset
+    Pwm.Open(PWM_2);
+//    OpenOC2( OC_ON | OC_TIMER_MODE16 | OC_TIMER2_SRC | OC_CONTINUE_PULSE , ReadPeriod2() / 2, 0);
+    Pwm.SetDutyCycle  (PWM_2, 500);
+    Pwm.SetPulseOffset(PWM_2,   0);
+
+    // Open PWM3 using Timer3 with 50% duty cycle and 50% offset
+    Pwm.Open(PWM_3);
+    Pwm.SetDutyCycle  (PWM_3, 500);
+    Pwm.SetPulseOffset(PWM_3, 500);
+  }
+  //==========================================================
+
+
+  // DRIVE A
+  //==========================================================
+  if (USE_DRIVE_A == 1)
+  {
+    // Open PWM4 using Timer3 with 50% duty cycle and 0% offset
+    Pwm.Open(PWM_4);
+    Pwm.SetDutyCycle  (PWM_4, 500);
+    Pwm.SetPulseOffset(PWM_4,   0);
+
+    // Open PWM5 using Timer3 with 50% duty cycle and 50% offset
+    Pwm.Open(PWM_5);
+    Pwm.SetDutyCycle  (PWM_5, 500);
+    Pwm.SetPulseOffset(PWM_5, 500);
+  }
+  //==========================================================
+#else
   // DRIVE B
   //==========================================================
   if (USE_DRIVE_B == 1)
@@ -205,6 +241,7 @@ void InitPwm(void)
     Pwm.SetPulseOffset(PWM_5, 500);
   }
   //==========================================================
+#endif
 }
 
 

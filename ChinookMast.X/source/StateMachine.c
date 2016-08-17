@@ -74,7 +74,7 @@ sPotValues_t potValues =
    ,.bufFull        = 0
    ,.inIdx          = 0
    ,.lineBuffer     = {0}
-   ,.maxBufSize     = 240
+   ,.maxBufSize     = 256
    ,.outIdx         = 0
   }
  ,.lastAverage      = 0
@@ -95,7 +95,7 @@ sPotValues_t potValues =
     
  ,.zeroInBits       = 0
     
- ,.deadZoneDetect   = 800
+ ,.deadZoneDetect   = 500
     
  ,.stepZero         = 0
 };
@@ -333,7 +333,9 @@ void StateInit(void)
   {
     potValues.lastBits = 0;
   }
-  potValues.potSamples.lineBuffer.buffer[potValues.potSamples.maxBufSize] = potValues.lastAverage;
+  PotAddFirstSample(&potValues);
+//  potValues.potSamples.lineBuffer.buffer[potValues.potSamples.maxBufSize] = potValues.lastAverage;
+//  potValues.potStepSamples.lineBuffer.buffer[potValues.potStepSamples.maxBufSize] = potValues.potStepValue;
 #endif
 
   // Init registers for the drive
@@ -594,7 +596,8 @@ void StateSendData(void)
   }
   //==========================================================
 
-  if (iCounterToTwoSec < 10)
+//  if (iCounterToTwoSec < 10)
+  if (iCounterToTwoSec < 1)
   {
     iCounterToTwoSec++;
   }
@@ -608,18 +611,22 @@ void StateSendData(void)
       sUartLineBuffer_t buffer;
       buffer.length = sprintf ( buffer.buffer
 //                              , "\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
-                              , "\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\rCurrent adc\t\t= %d\n\r"
+//                              , "\n\rCurrent pos\t= %f\n\rLast average\t= %d\n\rZero\t\t= %d\n\rStep\t\t= %d\n\rLast adc\t= %d\n\r"
+                              , "\n\rStep\t\t= %d\n\rLast adc\t= %d\n\r"
   //                            , "\n\rCurrent speed\t\t= %f\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
   //                            , mastSpeed.currentValue
-                              , mastAngle.currentValue
-                              , windAngle.currentValue
-                              , Adc.Var.adcReadValues[2]
+//                              , mastAngle.currentValue
+//                              , windAngle.currentValue
+//                              , potValues.lastAverage
+//                              , potValues.zeroInBits
+                              , potValues.potStepValue
+                              , potValues.lastBits
                               );
 
       Uart.PutTxFifoBuffer(UART6, &buffer);
     }
     
-    WriteMastPos2Eeprom();
+//    WriteMastPos2Eeprom();
   }
 }
 

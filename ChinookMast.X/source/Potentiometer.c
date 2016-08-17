@@ -83,6 +83,27 @@ void MastGetSpeed (sPotValues_t *potValues, float acqTime)
   potValues->speed->currentValue  = (potValues->angle->currentValue - potValues->angle->previousValue) / acqTime;
 }
 
+INT8 PotAddFirstSample (sPotValues_t *potValues)
+{
+  UINT16 tempStep  = potValues->potStepValue
+        ,newSample = potValues->lastBits
+        ;
+  sPotFifoBuffer_t   *potStepBuf    = &potValues->potStepSamples
+                    ,*potSampleBuf  = &potValues->potSamples
+                    ;
+  
+  if (tempStep >= POT_TO_MOTOR_RATIO)
+  {
+    tempStep = POT_TO_MOTOR_RATIO >> 1;
+  }
+  PotFifoWrite(potSampleBuf, &newSample);
+  PotFifoWrite(potStepBuf  , &tempStep);
+  
+  potValues->nSamples++;
+  
+  return 0;
+}
+
 
 INT8 PotAddSample (sPotValues_t *potValues, UINT16 newSample)
 {
@@ -90,23 +111,37 @@ INT8 PotAddSample (sPotValues_t *potValues, UINT16 newSample)
   sPotFifoBuffer_t   *potStepBuf    = &potValues->potStepSamples
                     ,*potSampleBuf  = &potValues->potSamples
                     ;
+//  potSampleBuf->lineBuffer.buffer[(potStepBuf->inIdx ? potStepBuf->inIdx : potStepBuf->maxBufSize) - 1] = 1000;
+//  newSample = 16;
+//  potSampleBuf->lineBuffer.buffer[(potStepBuf->inIdx ? potStepBuf->inIdx : potStepBuf->maxBufSize) - 1] = 23;
+//  newSample = 970;
   
-  INT32 diff = (INT32) potSampleBuf->lineBuffer.buffer[MinInt(potStepBuf->inIdx - 1, potStepBuf->maxBufSize - 1)] - (INT32) newSample;
+  INT32 oldChar = potSampleBuf->lineBuffer.buffer[(potStepBuf->inIdx ? potStepBuf->inIdx : potStepBuf->maxBufSize) - 1];
+  INT32 newChar = newSample;
+  INT32 diff    = oldChar - newChar;
+//  INT32 result = AbsInt(diff);
   
+//  INT32 diff = ((INT32) potSampleBuf->lineBuffer.buffer[(potStepBuf->inIdx ? potStepBuf->inIdx : potStepBuf->maxBufSize) - 1]) - ((INT32) newSample);
+
   if (AbsInt(diff) > potValues->deadZoneDetect)
   {
     if (SignInt(diff) == 1)
     {
-      tempStep = (potStepBuf->lineBuffer.buffer[MinInt(potStepBuf->inIdx - 1, potStepBuf->maxBufSize - 1)] + 1) % POT_TO_MOTOR_RATIO;
+      tempStep = (potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx ? potStepBuf->inIdx : potStepBuf->maxBufSize) - 1] + 1) % POT_TO_MOTOR_RATIO;
     }
     else
     {
-      tempStep = MinInt((potStepBuf->lineBuffer.buffer[MinInt(potStepBuf->inIdx - 1, potStepBuf->maxBufSize - 1)] - 1), POT_TO_MOTOR_RATIO - 1);
+      tempStep = potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx ? potStepBuf->inIdx : potStepBuf->maxBufSize) - 1];
+      tempStep = (tempStep ? tempStep : POT_TO_MOTOR_RATIO) - 1;
     }
   }
   else
   {
-    tempStep = potStepBuf->lineBuffer.buffer[MinInt(potStepBuf->inIdx - 1, potStepBuf->maxBufSize - 1)];
+    tempStep = potStepBuf->lineBuffer.buffer[(potStepBuf->inIdx ? potStepBuf->inIdx : potStepBuf->maxBufSize) - 1];
+  }
+  if (tempStep >= POT_TO_MOTOR_RATIO)
+  {
+    tempStep = POT_TO_MOTOR_RATIO - 1;
   }
   PotFifoWrite(potSampleBuf, &newSample);
   PotFifoWrite(potStepBuf, &tempStep);
@@ -148,7 +183,7 @@ INT8 PotAverage(sPotValues_t *potValues)
     average += tempBits[iSample] + (((UINT32) tempSteps[iSample]) << 10);
   }
   
-  average = (float) average / (float) iMax + 0.5f;
+  average = (float) average / (float) iSample + 0.5f;
   
 //  potValues->potStepValue = average / ADC_BITS_PER_REVOLUTION;
   potValues->potStepValue = average >> 10;
@@ -169,6 +204,7 @@ inline INT8 PotFifoWrite(sPotFifoBuffer_t *fifo, UINT16 *data)
   {
 //    return -1;
     fifo->outIdx = (fifo->outIdx + 1) % fifo->maxBufSize;
+    LED_STATUS_ON;
   }
   fifo->bufEmpty = 0;
   fifo->lineBuffer.buffer[fifo->inIdx] = *data;

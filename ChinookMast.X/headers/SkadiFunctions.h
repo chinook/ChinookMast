@@ -153,6 +153,14 @@ void ClearScreen();
 void WriteStatus();
 
 /**************************************************************
+ * Function name  : WriteStatus
+ * Purpose        : Call WriteMastPos2Eeprom
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void WriteMastInfo();
+
+/**************************************************************
  * Function name  : SetParam
  * Purpose        : Adjust one of the regulator parameters (K, KI or KP)
  * Arguments      : Received from Skadi functions

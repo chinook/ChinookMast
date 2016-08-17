@@ -227,6 +227,21 @@ void WriteStatus(sSkadi_t *skadi, sSkadiArgs_t args)
 
 
 /**************************************************************
+ * Function name  : WriteMastInfo
+ * Purpose        : Call WriteMastPos2Eeprom
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void WriteMastInfo(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  WriteMastPos2Eeprom();
+  sUartLineBuffer_t buffer;
+  buffer.length = sprintf(buffer.buffer, "Mast info written to EEPROM\r\n\n");
+  Uart.PutTxFifoBuffer(UART6, &buffer);
+}
+
+
+/**************************************************************
  * Function name  : GetSpeed
  * Purpose        : Send the current mast speed [deg/s]
  * Arguments      : None.

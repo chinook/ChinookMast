@@ -296,6 +296,7 @@ void AssessButtons (void)
         mastAngle.currentValue = 0;
         mastAngle.previousValue = 0;
         potValues.zeroInBits = potValues.lastAverage;
+        potValues.potStepValue = POT_TO_MOTOR_RATIO >> 1;
         
         WriteMastPos2Eeprom (); // Write zero to EEPROM
 

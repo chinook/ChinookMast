@@ -21,6 +21,7 @@
 // General definitions
 //==============================================================================
 #define N_SAMPLES_TO_AVERAGE      200u
+//#define N_SAMPLES_TO_AVERAGE      20u
 #define ADC_BITS_PER_REVOLUTION   1024u
 #define ADC_TOTAL_BITS            51200u
 #define POT_DEG_PER_REVOLUTION    7.2f
@@ -48,8 +49,8 @@ typedef struct sPotLineBuffer
 //=========================================
 typedef struct sPotFifoBuffer
 {
-  UINT8             inIdx;
-  UINT8             outIdx;
+  UINT16            inIdx;
+  UINT16            outIdx;
   BOOL              bufFull;
   BOOL              bufEmpty;
   const UINT16      maxBufSize;
@@ -82,10 +83,11 @@ typedef struct sPotValues
 // Public function prototypes
 //==============================================================================
 
-void MastUpdateAngle  (sPotValues_t *potValues);
-void MastGetSpeed     (sPotValues_t *potValues, float acqTime);
-INT8 AdcAddSample     (sPotValues_t *potValues, UINT16 newSample);
-INT8 PotAverage       (sPotValues_t *potValues);
-void MastAngleToBits  (sPotValues_t *potValues, float angle, UINT16 *step, UINT16 *bits);
+void MastUpdateAngle    (sPotValues_t *potValues);
+void MastGetSpeed       (sPotValues_t *potValues, float acqTime);
+INT8 PotAddSample       (sPotValues_t *potValues, UINT16 newSample);
+INT8 PotAddFirstSample  (sPotValues_t *potValues);
+INT8 PotAverage         (sPotValues_t *potValues);
+void MastAngleToBits    (sPotValues_t *potValues, float angle, UINT16 *step, UINT16 *bits);
 
 #endif	/* __POTENTIOMETER__ */
