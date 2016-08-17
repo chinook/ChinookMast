@@ -56,6 +56,14 @@ void SetPrint();
 void LedStatus();
 
 /**************************************************************
+ * Function name  : SetZero
+ * Purpose        : Set the current pos as the zero
+ * Arguments      : Received from Skadi functions
+ * Returns        : None.
+ *************************************************************/
+void SetZero();
+
+/**************************************************************
  * Function name  : LedError
  * Purpose        : Toggle LED_ERROR.
  * Arguments      : None.

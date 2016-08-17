@@ -23,6 +23,7 @@
 #include "..\headers\SkadiFunctions.h"
 #include "..\headers\CommandFunctions.h"
 #include "..\headers\StateFunctions.h"
+#include "..\headers\Potentiometer.h"
 
 
 //==============================================================================
@@ -36,6 +37,8 @@
 extern volatile sCmdValue_t  mastAngle
                             ,windAngle
                             ;
+
+extern sPotValues_t potValues;
 
 extern volatile float  mastCurrentSpeed
                       ,KP
@@ -405,6 +408,33 @@ void SetWind(sSkadi_t *skadi, sSkadiArgs_t args)
     buffer.length = sprintf(buffer.buffer, "Mauvais argument!\r\n\n");
     Uart.PutTxFifoBuffer(UART6, &buffer);
   }
+}
+
+
+/**************************************************************
+ * Function name  : SetZero
+ * Purpose        : Set the current pos as the zero
+ * Arguments      : Received from Skadi functions
+ * Returns        : None.
+ *************************************************************/
+void SetZero(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  sUartLineBuffer_t buffer;
+  
+  mastAngle.currentValue = 0;
+  mastAngle.previousValue = 0;
+  
+#ifdef USE_POTENTIOMETER
+  potValues.zeroInBits = potValues.lastAverage;
+  potValues.potStepValue = POT_TO_MOTOR_RATIO >> 1;
+#endif
+  
+  WriteMastPos2Eeprom (); // Write zero to EEPROM
+
+  SEND_CALIB_DONE;  // Confirm that the calib is done
+  
+  buffer.length = sprintf(buffer.buffer, "Zero set\r\n\n");
+  Uart.PutTxFifoBuffer(UART6, &buffer);
 }
 
 

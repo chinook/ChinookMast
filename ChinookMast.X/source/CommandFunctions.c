@@ -245,9 +245,9 @@ void SetPwm (float cmd)
   {
     oFirstTimeInMastStop = 1;
     
-    UINT16 pwm = ABS(cmd) * 500;
+    UINT16 pwm = AbsFloat(cmd) * 500;
 
-    if (SIGN(cmd) == MAST_DIR_LEFT)
+    if (SignFloat(cmd) == MAST_DIR_LEFT)
     {
       // DRIVE B
       //==========================================================
@@ -269,7 +269,7 @@ void SetPwm (float cmd)
       }
       //==========================================================
     }
-    else if (SIGN(cmd) == MAST_DIR_RIGHT)
+    else if (SignFloat(cmd) == MAST_DIR_RIGHT)
     {
       // DRIVE B
       //==========================================================
@@ -349,6 +349,7 @@ void Regulator (void)
   // Update mast speed
 #ifdef USE_POTENTIOMETER
   MastGetSpeed(&potValues, T);
+  mastCurrentSpeed = potValues.speed->currentValue;
 #else
   mastSpeed.previousValue = mastSpeed.currentValue;
   mastSpeed.currentValue  = mastCurrentSpeed;
@@ -378,16 +379,16 @@ void Regulator (void)
 
   error = windAngle.currentValue - mastAngle.currentValue;
   
-  if (ABS(error) <= ERROR_THRESHOLD)  // Don't need to move the mast
+  if (AbsFloat(error) <= ERROR_THRESHOLD)  // Don't need to move the mast
   {
     cmd = 0;
   }
-  else if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )   // Mast too far
+  else if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )   // Mast too far
   {
     oEmergencyStop = 1;
     cmd = 0;
   }
-  else if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) && (mastSpeed.currentValue != 0) )  // Mast too far
+  else if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) && (mastSpeed.currentValue != 0) )  // Mast too far
   {
     oEmergencyStop = 1;
     cmd = 0;
@@ -397,7 +398,7 @@ void Regulator (void)
     oEmergencyStop = 0;
     oFirstTimeInMastStop = 1;
 
-    error -= SIGN(error) * ERROR_THRESHOLD;   // Substract the ERROR_THRESHOLD to reduce the risk of an abrupt stop by the mast
+    error -= SignFloat(error) * ERROR_THRESHOLD;   // Substract the ERROR_THRESHOLD to reduce the risk of an abrupt stop by the mast
 
     inPi.previousValue = inPi.currentValue;
     inPi.currentValue  = K * error - mastSpeed.currentValue;
@@ -406,13 +407,13 @@ void Regulator (void)
 
     cmd = inPi.currentValue * KP + outPi.currentValue * KI;
 
-    if      (ABS(cmd) > PWM_MAX_DUTY_CYCLE)
+    if      (AbsFloat(cmd) > PWM_MAX_DUTY_CYCLE)
     {
-      cmd = SIGN(cmd) * PWM_MAX_DUTY_CYCLE;
+      cmd = SignFloat(cmd) * PWM_MAX_DUTY_CYCLE;
     }
-    else if (ABS(cmd) < PWM_MIN_DUTY_CYCLE)
+    else if (AbsFloat(cmd) < PWM_MIN_DUTY_CYCLE)
     {
-      cmd = SIGN(cmd) * PWM_MIN_DUTY_CYCLE;
+      cmd = SignFloat(cmd) * PWM_MIN_DUTY_CYCLE;
     }
   }
 
@@ -489,7 +490,7 @@ void AssessMastValues (void)
   //      meanTime = (rx2 + rx4) / 2;
         meanTime = (rx2 + rx4) >> 1;   // Divide by 2
 
-        float mastTime = SIGN(dir) * (float) meanTime * TIMER_SCALE_US;
+        float mastTime = SignInt(dir) * (float) meanTime * TIMER_SCALE_US;
 
         if (mastTime == 0)
         {
@@ -537,7 +538,7 @@ void AssessMastValues (void)
   //      meanTime = (rx1 + rx3) / 2;
         meanTime = (rx1 + rx3) >> 1;   // Divide by 2
 
-        float mastTime = SIGN(dir) * (float) meanTime * TIMER_SCALE_US;
+        float mastTime = SignInt(dir) * (float) meanTime * TIMER_SCALE_US;
 
         if (mastTime == 0)
         {

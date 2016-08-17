@@ -436,6 +436,7 @@ void StateGetMastData(void)
 
 #ifdef USE_POTENTIOMETER
   MastGetSpeed(&potValues, T);
+  mastCurrentSpeed = potValues.speed->currentValue;
 #else
   // Update mast speed
   mastSpeed.previousValue = mastSpeed.currentValue;
@@ -462,11 +463,11 @@ void StateGetMastData(void)
    */
   if (mastSpeed.currentValue != 0)
   {
-    if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )        // Mast too far
+    if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )        // Mast too far
     {
       MastManualStop();
     }
-    else if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
+    else if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
     {
       MastManualStop();
     }

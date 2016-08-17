@@ -47,6 +47,7 @@ sSkadiCommand_t skadiCommandTable[] =
   ,{"setpos"      , SetPos      , 1 , "\t| Set mast angle [deg].\t\t\t\t| 1 arg : Min = -179.0, Max = 179.0"            }
   ,{"setmode"     , SetMode     , 1 , "\t| Set mast mode of operation.\t\t\t| 1 arg : 1 = Manual, 0 = Auto"             }
   ,{"setparam"    , SetParam    , 2 , "\t| Set K, KI, KP, PWM_MAX, PWM_MIN and ERROR.\t| 2 args : var and val\n"        }
+  ,{"setzero"     , SetZero     , 0 , "\t| Set current pos as zero\t| 0 args.\n"                                        }
   ,{"getwind"     , GetWind     , 0 , "\t| Read the wind current angle [deg].\t\t| No arg needed"                       }
   ,{"getpos"      , GetPos      , 0 , "\t| Read the mast current position [deg].\t\t| 0 arg"                            }
   ,{"getmode"     , GetMode     , 0 , "\t| Get the mast current mode of operation.\t| 0 arg"                            }

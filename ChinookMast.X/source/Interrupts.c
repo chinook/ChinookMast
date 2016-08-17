@@ -107,7 +107,7 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
   {
     if (iMastStop == 0)
     {
-      mastDir = SIGN(mastCurrentSpeed);
+      mastDir = SignFloat(mastCurrentSpeed);
     }
 
     if (iMastStop < 16)

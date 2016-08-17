@@ -295,9 +295,10 @@ void AssessButtons (void)
       {
         mastAngle.currentValue = 0;
         mastAngle.previousValue = 0;
+#ifdef USE_POTENTIOMETER
         potValues.zeroInBits = potValues.lastAverage;
         potValues.potStepValue = POT_TO_MOTOR_RATIO >> 1;
-        
+#endif
         WriteMastPos2Eeprom (); // Write zero to EEPROM
 
         SEND_CALIB_DONE;  // Confirm that the calib is done
