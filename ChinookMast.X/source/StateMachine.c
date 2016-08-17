@@ -458,6 +458,22 @@ void StateGetMastData(void)
     mastAngle.currentValue += 360;
   }
 
+#ifdef USE_POTENTIOMETER
+  /*
+   * Check mast limits
+   */
+  if (AbsFloat(mastSpeed.currentValue) >= BITS_TO_DEG)
+  {
+    if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )        // Mast too far
+    {
+      MastManualStop();
+    }
+    else if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
+    {
+      MastManualStop();
+    }
+  }
+#else
   /*
    * Check mast limits
    */
@@ -472,6 +488,7 @@ void StateGetMastData(void)
       MastManualStop();
     }
   }
+#endif
 }
 
 

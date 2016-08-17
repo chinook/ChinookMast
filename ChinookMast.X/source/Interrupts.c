@@ -38,6 +38,7 @@ volatile BOOL  oCapture1      = 0
               ,oTimerSendData = 0
               ,oTimerChngMode = 0
               ,oEnableMastStopProcedure = 0
+              ,oWaitAfterStop = 0
               ,oFirstCapture1 = 1
               ,oFirstCapture2 = 1
               ,oFirstCapture3 = 1
@@ -158,34 +159,45 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
     }
     else
     {
-      iMastStop = 0;
-      mastDir   = 0;
-
-      // DRIVE B
-      //==========================================================
-      if (USE_DRIVE_B == 1)
+      if (!oWaitAfterStop)
       {
-        Pwm.SetDutyCycle(PWM_2, 500);
-        Pwm.SetDutyCycle(PWM_3, 500);
+        iMastStop = 0;
+        mastDir   = 0;
 
-        DRVB_SLEEP = 0;
+        // DRIVE B
+        //==========================================================
+        if (USE_DRIVE_B == 1)
+        {
+          Pwm.SetDutyCycle(PWM_2, 500);
+          Pwm.SetDutyCycle(PWM_3, 500);
+
+          DRVB_SLEEP = 0;
+        }
+        //==========================================================
+
+        // DRIVE A
+        //==========================================================
+        if (USE_DRIVE_A == 1)
+        {
+          Pwm.SetDutyCycle(PWM_4, 500);
+          Pwm.SetDutyCycle(PWM_5, 500);
+
+          DRVA_SLEEP = 0;
+        }
+        //==========================================================
+
+#ifdef USE_POTENTIOMETER
+        oWaitAfterStop = 1;
+#else
+        mastCurrentSpeed = 0;
+        oEnableMastStopProcedure = 0;
+#endif
       }
-      //==========================================================
-
-      // DRIVE A
-      //==========================================================
-      if (USE_DRIVE_A == 1)
+      else
       {
-        Pwm.SetDutyCycle(PWM_4, 500);
-        Pwm.SetDutyCycle(PWM_5, 500);
-
-        DRVA_SLEEP = 0;
+        oWaitAfterStop = 0;
+        oEnableMastStopProcedure = 0;
       }
-      //==========================================================
-
-      oEnableMastStopProcedure = 0;
-
-      mastCurrentSpeed = 0;
     }
   }
 

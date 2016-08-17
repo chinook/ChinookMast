@@ -183,9 +183,11 @@ void SetPwm (float cmd)
       }
       //==========================================================
 
+#ifndef USE_POTENTIOMETER
       mastCurrentSpeed = 0;
       mastSpeed.previousValue = 0;
       mastSpeed.currentValue = 0;
+#endif
 
       oFirstTimeInMastStop = 0;
 

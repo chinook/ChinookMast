@@ -305,7 +305,9 @@ void SetPos(sSkadi_t *skadi, sSkadiArgs_t args)
 //    mast /= 10.0f;
     mastAngle.currentValue  = mast;
     mastAngle.previousValue = mast;
+#ifndef USE_POTENTIOMETER
     mastCurrentSpeed = 0;
+#endif
     if (mast == 0)
     {
       SEND_CALIB_DONE;
