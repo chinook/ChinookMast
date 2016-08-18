@@ -477,12 +477,12 @@ void AssessButtons (void)
     }
     // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="SW3 on steering wheel">
-    if (buttons.chng.bits.steerWheelSw3)
+    // <editor-fold defaultstate="collapsed" desc="SW4 on steering wheel">
+    if (buttons.chng.bits.steerWheelSw4)
     {
-      buttons.chng.bits.steerWheelSw3 = 0;
+      buttons.chng.bits.steerWheelSw4 = 0;
 
-      if (buttons.buttons.bits.steerWheelSw3)     // If SW1 is pressed
+      if (buttons.buttons.bits.steerWheelSw4)     // If SW1 is pressed
       {
         mastAngle.currentValue = 0;
         mastAngle.previousValue = 0;

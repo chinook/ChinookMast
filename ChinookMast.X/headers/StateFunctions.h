@@ -81,7 +81,7 @@ typedef union
   struct
   {
     UINT8  steerWheelSw1  : 1
-          ,steerWheelSw3  : 1
+          ,steerWheelSw4  : 1
           ,steerWheelSw10 : 1
           ,boardSw1       : 1
           ,boardSw2       : 1
@@ -99,7 +99,7 @@ typedef union
   struct
   {
     UINT8  steerWheelSw1  : 1
-          ,steerWheelSw3  : 1
+          ,steerWheelSw4  : 1
           ,steerWheelSw10 : 1
           ,boardSw1       : 1
           ,boardSw2       : 1

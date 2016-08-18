@@ -776,10 +776,10 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
         buttons.chng.bits.steerWheelSw1     = 1;
       }
 
-      if (buttons.buttons.bits.steerWheelSw3  != switches.bits.sw3 )
+      if (buttons.buttons.bits.steerWheelSw4  != switches.bits.sw4 )
       {
-        buttons.buttons.bits.steerWheelSw3  = switches.bits.sw3;
-        buttons.chng.bits.steerWheelSw3     = 1;
+        buttons.buttons.bits.steerWheelSw4  = switches.bits.sw4;
+        buttons.chng.bits.steerWheelSw4     = 1;
       }
 
       if (buttons.buttons.bits.steerWheelSw10 != switches.bits.sw10)
