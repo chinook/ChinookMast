@@ -462,14 +462,17 @@ void StateGetMastData(void)
   /*
    * Check mast limits
    */
-  if (AbsFloat(mastSpeed.currentValue) >= BITS_TO_DEG)
+//  if (AbsFloat(mastSpeed.currentValue) >= BITS_TO_DEG_TIMES_20)
+  if (AbsFloat(mastSpeed.currentValue) >= 3.5f)
   {
     if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )        // Mast too far
     {
+      LED_DEBUG4_TOGGLE;
       MastManualStop();
     }
     else if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
     {
+      LED_DEBUG3_TOGGLE;
       MastManualStop();
     }
   }

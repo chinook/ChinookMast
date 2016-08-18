@@ -63,8 +63,8 @@ void (*pStateMast)(void);       // State pointer, used to navigate between state
 /*********** LIMITS **/
 #define MAST_MAX               90.0f
 #define MAST_MIN              -90.0f
-//#define MAST_MAX               190.0f
-//#define MAST_MIN              -190.0f
+//#define MAST_MAX               120.0f
+//#define MAST_MIN              -120.0f
 
 /*********** BASIC CONDITION *****************/
 #define MAST_LEFT             (oManualMastLeft)

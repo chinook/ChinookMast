@@ -27,6 +27,8 @@
 #define POT_DEG_PER_REVOLUTION    7.2f
 #define POT_TO_MOTOR_RATIO        50u
 #define BITS_TO_DEG               0.00703125    // 360 deg / ADC_TOTAL_BITS
+#define BITS_TO_DEG_TIMES_10      0.0703125
+#define BITS_TO_DEG_TIMES_20      0.140625
 
 
 //=========================================

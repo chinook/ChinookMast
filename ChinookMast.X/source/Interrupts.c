@@ -113,7 +113,7 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
       mastDir = SignFloat(mastCurrentSpeed);
     }
 
-    if (iMastStop < 30)
+    if (iMastStop < 16)
     {
       DRVB_SLEEP = 1;
 
@@ -123,8 +123,8 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
         //==========================================================
         if (USE_DRIVE_B == 1)
         {
-          Pwm.SetDutyCycle(PWM_2, 500 + (150 - iMastStop*5));
-          Pwm.SetDutyCycle(PWM_3, 500 - (150 - iMastStop*5));
+          Pwm.SetDutyCycle(PWM_2, 500 + (150 - iMastStop*10));
+          Pwm.SetDutyCycle(PWM_3, 500 - (150 - iMastStop*10));
         }
         //==========================================================
           
@@ -132,8 +132,8 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
         //==========================================================
         if (USE_DRIVE_A == 1)
         {
-          Pwm.SetDutyCycle(PWM_4, 500 + (150 - iMastStop*5));
-          Pwm.SetDutyCycle(PWM_5, 500 - (150 - iMastStop*5));
+          Pwm.SetDutyCycle(PWM_4, 500 + (150 - iMastStop*10));
+          Pwm.SetDutyCycle(PWM_5, 500 - (150 - iMastStop*10));
         //==========================================================
         }
       }
@@ -143,8 +143,8 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
         //==========================================================
         if (USE_DRIVE_B == 1)
         {
-          Pwm.SetDutyCycle(PWM_2, 500 - (150 - iMastStop*5));
-          Pwm.SetDutyCycle(PWM_3, 500 + (150 - iMastStop*5));
+          Pwm.SetDutyCycle(PWM_2, 500 - (150 - iMastStop*10));
+          Pwm.SetDutyCycle(PWM_3, 500 + (150 - iMastStop*10));
         }
         //==========================================================
 
@@ -152,8 +152,8 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
         //==========================================================
         if (USE_DRIVE_A == 1)
         {
-          Pwm.SetDutyCycle(PWM_4, 500 - (150 - iMastStop*5));
-          Pwm.SetDutyCycle(PWM_5, 500 + (150 - iMastStop*5));
+          Pwm.SetDutyCycle(PWM_4, 500 - (150 - iMastStop*10));
+          Pwm.SetDutyCycle(PWM_5, 500 + (150 - iMastStop*10));
         }
         //==========================================================
       }
@@ -161,8 +161,8 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
     }
     else
     {
-      if (!oWaitAfterStop)
-      {
+//      if (!oWaitAfterStop)
+//      {
 
         // DRIVE B
         //==========================================================
@@ -186,30 +186,30 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
         }
         //==========================================================
 
-#ifdef USE_POTENTIOMETER
-        oWaitAfterStop = 1;
-#else
+//#ifdef USE_POTENTIOMETER
+//        oWaitAfterStop = 1;
+//#else
         mastCurrentSpeed = 0;
         oEnableMastStopProcedure = 0;
         iMastStop = 0;
         mastDir   = 0;
-#endif
-      }
-      else
-      {
-        if (waitAfterStopCounter < 70)
-        {
-          waitAfterStopCounter++;
-        }
-        else
-        {
-          waitAfterStopCounter = 0;
-          oWaitAfterStop = 0;
-          oEnableMastStopProcedure = 0;
-          iMastStop = 0;
-          mastDir   = 0;
-        }
-      }
+//#endif
+//      }
+//      else
+//      {
+//        if (waitAfterStopCounter < 10)
+//        {
+//          waitAfterStopCounter++;
+//        }
+//        else
+//        {
+//          waitAfterStopCounter = 0;
+//          oWaitAfterStop = 0;
+//          oEnableMastStopProcedure = 0;
+//          iMastStop = 0;
+//          mastDir   = 0;
+//        }
+//      }
     }
   }
 
