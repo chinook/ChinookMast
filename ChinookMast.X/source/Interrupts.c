@@ -44,7 +44,11 @@ volatile BOOL  oCapture1      = 0
               ,oFirstCapture3 = 1
               ,oFirstCapture4 = 1
               ,oAdcReady      = 0
+              ,oTimerSetZero  = 0
+              ,oSetZeroCounterOccured = 0
               ;
+
+volatile UINT16 setZeroCounter = 0;
 
 volatile UINT8 waitAfterStopCounter = 0;
 
@@ -89,6 +93,20 @@ void __ISR(_ADC_VECTOR, ADC_INT_PRIORITY) AdcInterruptHandler(void)
 void __ISR(_TIMER_1_VECTOR, T1_INTERRUPT_PRIORITY) Timer1InterruptHandler(void)
 {
   oTimerReg = 1;
+  
+  if (oTimerSetZero)
+  {
+    setZeroCounter++;
+    if (setZeroCounter >= 21)
+    {
+      oSetZeroCounterOccured = 1;
+    }
+  }
+  else
+  {
+    setZeroCounter = 0;
+    oSetZeroCounterOccured = 0;
+  }
 
   // Increment the number of overflows from this timer. Used primarily by Input Capture
   Timer.Var.nOverflows[0]++;

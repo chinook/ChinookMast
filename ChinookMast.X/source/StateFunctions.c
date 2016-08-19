@@ -24,6 +24,9 @@
 #include "..\headers\CommandFunctions.h"
 #include "..\headers\Potentiometer.h"
 
+// Private functions prototypes
+void SetZeroFromSteeringWheel (void);
+
 
 //==============================================================================
 // Variable declarations
@@ -67,7 +70,11 @@ extern volatile BOOL oCapture1
                     ,oManualFlagChng          // In manual mode, indicates that a change has occured on the buttons
                     ,oManualMastRight
                     ,oManualMastLeft
+                    ,oTimerSetZero
+                    ,oSetZeroCounterOccured
                     ;
+
+extern volatile UINT16 setZeroCounter;
 
 
 //==============================================================================
@@ -430,8 +437,8 @@ void AssessButtons (void)
         if (buttons.buttons.bits.steerWheelSw10)    // And right switch on steering wheel is pressed
         {
           oCountTimeToChngMode = 1;                 // Start procedure to change manual mode
-          Timer.EnableInterrupt(TIMER_5);
           Timer.Reset(TIMER_5);
+          Timer.EnableInterrupt(TIMER_5);
           oTimerChngMode = 0;
 
           oManualMastLeft  = 0;                     // Stop moving
@@ -452,8 +459,8 @@ void AssessButtons (void)
       {
         if (oCountTimeToChngMode)   // And the procedure ot change mode was occuring
         {
-          oCountTimeToChngMode = 0;
           Timer.DisableInterrupt(TIMER_5);
+          oCountTimeToChngMode = 0;
 
           if (oTimerChngMode)              // If at least one second has passed
           {
@@ -484,17 +491,28 @@ void AssessButtons (void)
 
       if (buttons.buttons.bits.steerWheelSw4)     // If SW1 is pressed
       {
-        mastAngle.currentValue = 0;
-        mastAngle.previousValue = 0;
+//        mastAngle.currentValue = 0;
+//        mastAngle.previousValue = 0;
+//        
+//#ifdef USE_POTENTIOMETER
+//        potValues.zeroInBits = potValues.lastAverage;
+//        potValues.potStepValue = POT_TO_MOTOR_RATIO >> 1;
+//#endif
+//
+//        WriteMastPos2Eeprom (); // Write zero to EEPROM
+//
+//        SEND_CALIB_DONE;  // Confirm that the calib is done
         
-#ifdef USE_POTENTIOMETER
-  potValues.zeroInBits = potValues.lastAverage;
-  potValues.potStepValue = POT_TO_MOTOR_RATIO >> 1;
-#endif
-
-        WriteMastPos2Eeprom (); // Write zero to EEPROM
-
-        SEND_CALIB_DONE;  // Confirm that the calib is done
+//        SetZeroFromSteeringWheel();
+        
+        oTimerSetZero = 1;
+        
+      }
+      else
+      {
+        oTimerSetZero = 0;
+        setZeroCounter = 0;
+        oSetZeroCounterOccured = 0;
       }
     }
     // </editor-fold>
@@ -509,8 +527,8 @@ void AssessButtons (void)
         if (buttons.buttons.bits.steerWheelSw1)     // And left switch on steering wheel is pressed
         {
           oCountTimeToChngMode = 1;                 // Start procedure to change manual mode
-          Timer.EnableInterrupt(TIMER_5);
           Timer.Reset(TIMER_5);
+          Timer.EnableInterrupt(TIMER_5);
           oTimerChngMode = 0;
 
           oManualMastLeft  = 0;                     // Stop moving
@@ -531,8 +549,8 @@ void AssessButtons (void)
       {
         if (oCountTimeToChngMode)   // And the procedure ot change mode was occuring
         {
-          oCountTimeToChngMode = 0;
           Timer.DisableInterrupt(TIMER_5);
+          oCountTimeToChngMode = 0;
 
           if (oTimerChngMode)              // If at least one second has passed
           {
@@ -557,6 +575,29 @@ void AssessButtons (void)
     // </editor-fold>
   }
   // </editor-fold>
+  
+  if (oTimerSetZero && oSetZeroCounterOccured)
+  {
+    oTimerSetZero = 0;
+    setZeroCounter = 0;
+    oSetZeroCounterOccured = 0;
+    SetZeroFromSteeringWheel();
+  }
+}
+
+void SetZeroFromSteeringWheel (void)
+{
+  mastAngle.currentValue = 0;
+  mastAngle.previousValue = 0;
+        
+#ifdef USE_POTENTIOMETER
+  potValues.zeroInBits = potValues.lastAverage;
+  potValues.potStepValue = POT_TO_MOTOR_RATIO >> 1;
+#endif
+
+  WriteMastPos2Eeprom (); // Write zero to EEPROM
+
+  SEND_CALIB_DONE;  // Confirm that the calib is done
 }
 
 
