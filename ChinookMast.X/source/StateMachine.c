@@ -699,7 +699,7 @@ void StateAcq(void)
     }
   }
 #else
-  AssesstValues();
+  AssessMastValues();
 #endif
 
 //  UINT32 coreTickRate = Timer.Tic(1500, SCALE_US);

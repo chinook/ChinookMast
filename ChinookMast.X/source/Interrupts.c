@@ -771,6 +771,7 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 
   if ((CANGetModuleEvent(CAN1) & CAN_RX_EVENT) != 0)
   {
+    LED_CAN_TOGGLE;
 
     CANRxMessageBuffer *message;
 
@@ -806,6 +807,7 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
         buttons.chng.bits.steerWheelSw10    = 1;
       }
 
+      LED_CAN_TOGGLE;
       CANUpdateChannel(CAN1, CAN_CHANNEL1);
       CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
 

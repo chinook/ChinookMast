@@ -51,6 +51,9 @@ extern volatile float  mastCurrentSpeed
 
 extern volatile UINT32 rxWindAngle;
 
+//New - for ReadStatus command
+extern volatile UINT8 driveStatus;
+
 extern volatile BOOL   oManualMode
                       ,oPrintData
                       ,oNewWindAngle
@@ -222,9 +225,24 @@ void ClearScreen(sSkadi_t *skadi, sSkadiArgs_t args)
  *************************************************************/
 void WriteStatus(sSkadi_t *skadi, sSkadiArgs_t args)
 {
-  WriteDrive(DRVB, STATUS_Mastw);
+  WriteDrive(DRVA, STATUS_Mastw); //Allow drive selection?
   sUartLineBuffer_t buffer;
   buffer.length = sprintf(buffer.buffer, "STATUS msg written to drive\r\n\n");
+  Uart.PutTxFifoBuffer(UART6, &buffer);
+}
+
+/**************************************************************
+ * Function name  : ReadStatus
+ * Purpose        : Read status, send to terminal
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void ReadStatus(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  
+  ReadDrive(DRVA, STATUS_Mastw); //Allow drive selection?
+  sUartLineBuffer_t buffer;
+  buffer.length = sprintf(buffer.buffer, "Drive STATUS register content is: %c\r\n\n", driveStatus);
   Uart.PutTxFifoBuffer(UART6, &buffer);
 }
 

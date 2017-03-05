@@ -44,19 +44,19 @@ struct sChinook Chinook;            // Contains all ChinookLib functions
 //==============================================================================
 // Which drive to use
 //==============================================================================
-#define USE_DRIVE_A         0
-#define USE_DRIVE_B         1
+#define USE_DRIVE_A         1
+#define USE_DRIVE_B         0
 
 //==============================================================================
 // Are we using the potentiometer?
 //==============================================================================
-#define USE_POTENTIOMETER   1
+//#define USE_POTENTIOMETER   1
 
 //==============================================================================
 // Define this at one if you want to send the mast values via UART 
 // every (TIMER_4). Else, 0
 //==============================================================================
-#define SEND_DATA_TO_UART   1
+#define SEND_DATA_TO_UART   0
 
 
 //==============================================================================

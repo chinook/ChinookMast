@@ -319,7 +319,9 @@ void Regulator (void)
   windAngle.previousValue = windAngle.currentValue;
   
 //  memcpy ((void *) &tempWind, (void *) &rxWindAngle, 4);  // Copy contents of UINT32 into float
-
+  //========================//
+  //Wind Angle Update/Processing
+  //========================//
   if (nWindAngleSamples != 0)
   {
     tempWind = meanWindAngle / nWindAngleSamples;
@@ -348,7 +350,9 @@ void Regulator (void)
     windAngle.currentValue = tempWind;
   }
 
-  // Update mast speed
+//========================//
+//Mast Speed Update
+//========================//
 #ifdef USE_POTENTIOMETER
   MastGetSpeed(&potValues, T);
   mastCurrentSpeed = potValues.speed->currentValue;
@@ -360,6 +364,9 @@ void Regulator (void)
   TustinZ((void *) &mastSpeed, (void *) &mastAngle);  // Discrete integrator
 #endif
 
+//========================//
+//Mast Angle Update
+//========================//
   /*
    * Some kind of modulo
    */
@@ -379,6 +386,9 @@ void Regulator (void)
    * limits MAST_MIN and MAST_MAX.
    */
 
+//========================//
+// Error - Signal Processing
+//========================//
   error = windAngle.currentValue - mastAngle.currentValue;
   
   if (AbsFloat(error) <= ERROR_THRESHOLD)  // Don't need to move the mast
@@ -402,13 +412,29 @@ void Regulator (void)
 
     error -= SignFloat(error) * ERROR_THRESHOLD;   // Substract the ERROR_THRESHOLD to reduce the risk of an abrupt stop by the mast
 
+//========================//
+// inPI - Signal Processing
+//========================//    
+    
     inPi.previousValue = inPi.currentValue;
     inPi.currentValue  = K * error - mastSpeed.currentValue;
-
+    
+//========================//
+// Integral Computation
+//========================//
+    
     TustinZ((void *) &inPi, (void *) &outPi);
 
+//========================//
+// Process Command Processing
+//========================//
+    
     cmd = inPi.currentValue * KP + outPi.currentValue * KI;
 
+//========================//
+// PWM Duty Cycle Calculation
+//========================//
+    
     if      (AbsFloat(cmd) > PWM_MAX_DUTY_CYCLE)
     {
       cmd = SignFloat(cmd) * PWM_MAX_DUTY_CYCLE;

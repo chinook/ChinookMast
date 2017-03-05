@@ -160,6 +160,14 @@ void ClearScreen();
  *************************************************************/
 void WriteStatus();
 
+/***************NEW********************************************
+ * Function name  : ReadStatus
+ * Purpose        : Read status, send to terminal
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void ReadStatus();
+
 /**************************************************************
  * Function name  : WriteStatus
  * Purpose        : Call WriteMastPos2Eeprom
