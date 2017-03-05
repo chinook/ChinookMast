@@ -54,6 +54,7 @@ sSkadiCommand_t skadiCommandTable[] =
   ,{"getspeed"    , GetSpeed    , 0 , "\t| Read the mast current speed [deg/s].\t\t| 0 arg"                             }
   ,{"getparam"    , GetParam    , 0 , "\t| Print K, KI, KP, PWM_MAX, PWM_MIN and ERROR.\t| 0 arg\n"                     }
   ,{"writestatus" , WriteStatus , 0 , "\t| Write STATUS msg to drive.\t\t\t| 0 arg"                                     }
+  ,{"readstatus" , ReadStatus , 0 , "\t| Read STATUS from drive. Make sure the drive is well selected\t\t\t| 0 arg"     }
   ,{"writemem"    , WriteMastInfo, 0, "\t| Write mast info to EEPROM.\t\t\t| 0 arg"                                     }
   ,{"setprint"    , SetPrint    , 1 , "\t| Print or not data from regulation.\t\t| 1 arg : 1 = Print, 0 = Don't print"  }
   ,{"clc"         , ClearScreen , 0 , "\t\t| Clear terminal window.\t\t\t| 0 arg"                                       }

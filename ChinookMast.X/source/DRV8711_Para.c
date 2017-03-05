@@ -52,7 +52,8 @@ void WriteDrive(INT32 DRV, INT32 msg)
   {
     while(SpiChnIsBusy(SPI4+1));
     DRVA_SC = 1;
-    Spi.SendCharacter(SPI4, msg);
+//    Spi.SendCharacter(SPI4, msg);
+    Spi.BlockingTransfer(SPI4, msg);
     for (i = 0; i < 1000; i++);   // Small delay necessary for the drive
     while(SpiChnIsBusy(SPI4+1));
     DRVA_SC = 0;
@@ -61,7 +62,8 @@ void WriteDrive(INT32 DRV, INT32 msg)
   {
     while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 1;
-    Spi.SendCharacter(SPI4, msg);
+//    Spi.SendCharacter(SPI4, msg);
+    Spi.BlockingTransfer(SPI4, msg);
     for (i = 0; i < 1000; i++);   // Small delay necessary for the drive
     while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 0;
@@ -71,7 +73,8 @@ void WriteDrive(INT32 DRV, INT32 msg)
     while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 1;
     DRVA_SC = 1;
-    Spi.SendCharacter(SPI4, msg);
+//    Spi.SendCharacter(SPI4, msg);
+    Spi.BlockingTransfer(SPI4, msg);
     for (i = 0; i < 1000; i++);   // Small delay necessary for the drive
     while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 0;
@@ -95,11 +98,12 @@ INT32 ReadDrive(INT32 DRV, INT32 msg)
     while(SpiChnIsBusy(SPI4+1));
     DRVA_SC = 1;
 //    Spi.SendCharacter(SPI4, msg | (1 << 15));
-    Spi.SendCharacter(SPI4, msg);
-    while(SpiChnIsBusy(SPI4+1));
-    data = Spi.GetCharacter(SPI4);
-    while(SpiChnIsBusy(SPI4+1));
-    data = Spi.GetCharacter(SPI4);
+//    Spi.SendCharacter(SPI4, msg);
+//    while(SpiChnIsBusy(SPI4+1));
+//    data = Spi.GetCharacter(SPI4);
+//    while(SpiChnIsBusy(SPI4+1));
+//    data = Spi.GetCharacter(SPI4);
+    data = Spi.BlockingTransfer(SPI4, msg); //Mod
     DRVA_SC = 0;
     
   }
@@ -107,11 +111,12 @@ INT32 ReadDrive(INT32 DRV, INT32 msg)
     while(SpiChnIsBusy(SPI4+1));
     DRVB_SC = 1;
 //    Spi.SendCharacter(SPI4, msg | (1 << 15));
-    Spi.SendCharacter(SPI4, msg);
-    while(SpiChnIsBusy(SPI4+1));
-    data = Spi.GetCharacter(SPI4);
-    while(SpiChnIsBusy(SPI4+1));
-    data = Spi.GetCharacter(SPI4);
+//    Spi.SendCharacter(SPI4, msg);
+//    while(SpiChnIsBusy(SPI4+1));
+//    data = Spi.GetCharacter(SPI4);
+//    while(SpiChnIsBusy(SPI4+1));
+//    data = Spi.GetCharacter(SPI4);
+    data = Spi.BlockingTransfer(SPI4, msg); //Mod
     DRVB_SC = 0;
   }
   else if(DRV == DRVAB){
@@ -119,9 +124,10 @@ INT32 ReadDrive(INT32 DRV, INT32 msg)
     DRVB_SC = 1;
     DRVA_SC = 1;
 //    Spi.SendCharacter(SPI4, msg | (1 << 15));
-    Spi.SendCharacter(SPI4, msg);
-    while(SpiChnIsBusy(SPI4+1));
-    data = Spi.GetCharacter(SPI4);
+//    Spi.SendCharacter(SPI4, msg);
+//    while(SpiChnIsBusy(SPI4+1));
+//    data = Spi.GetCharacter(SPI4);
+    data = Spi.BlockingTransfer(SPI4, msg); //Mod
     DRVB_SC = 0;
     DRVA_SC = 0;
   }
@@ -199,7 +205,8 @@ void InitDriver(void)
 
     WriteDrive(DRVB, CONTROL_Mastw);
     WriteDrive(DRVB, TORQUE_Mastw);
-    WriteDrive(DRVB, 0x2180);
+    WriteDrive(DRVB, DRIVE_Mastw);
+    WriteDrive(DRVB, 0x2180); //Register TOFF, do not change unless you know what ur doin'
     WriteDrive(DRVB, STATUS_Mastw);
   }
   //==========================================================
@@ -217,6 +224,7 @@ void InitDriver(void)
 
     WriteDrive(DRVA, CONTROL_Mastw);
     WriteDrive(DRVA, TORQUE_Mastw);
+    WriteDrive(DRVA, DRIVE_Mastw);
     WriteDrive(DRVA, 0x2180);
     WriteDrive(DRVA, STATUS_Mastw);
   }

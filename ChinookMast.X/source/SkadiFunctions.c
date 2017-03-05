@@ -24,6 +24,8 @@
 #include "..\headers\CommandFunctions.h"
 #include "..\headers\StateFunctions.h"
 #include "..\headers\Potentiometer.h"
+#include "..\headers\DRV8711_Para.h"
+
 
 
 //==============================================================================
@@ -52,7 +54,7 @@ extern volatile float  mastCurrentSpeed
 extern volatile UINT32 rxWindAngle;
 
 //New - for ReadStatus command
-extern volatile UINT8 driveStatus;
+//extern volatile UINT8 driveStatus;
 
 extern volatile BOOL   oManualMode
                       ,oPrintData
@@ -239,10 +241,10 @@ void WriteStatus(sSkadi_t *skadi, sSkadiArgs_t args)
  *************************************************************/
 void ReadStatus(sSkadi_t *skadi, sSkadiArgs_t args)
 {
-  
-  ReadDrive(DRVA, STATUS_Mastw); //Allow drive selection?
+  UINT8 driveStatus;
+  driveStatus = ReadDrive(DRVA, STATUS_Mastr); //Allow drive selection?
   sUartLineBuffer_t buffer;
-  buffer.length = sprintf(buffer.buffer, "Drive STATUS register content is: %c\r\n\n", driveStatus);
+  buffer.length = sprintf(buffer.buffer, "Drive STATUS register content is: %x\r\n\n", driveStatus);
   Uart.PutTxFifoBuffer(UART6, &buffer);
 }
 

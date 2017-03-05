@@ -605,7 +605,7 @@ void StateSendData(void)
   //==========================================================
   if (USE_DRIVE_B == 1)
   {
-    WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors
+//    WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors
   }
   //==========================================================
 
@@ -613,7 +613,7 @@ void StateSendData(void)
   //==========================================================
   if (USE_DRIVE_A == 1)
   {
-    WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors
+//    WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors
   }
   //==========================================================
 
