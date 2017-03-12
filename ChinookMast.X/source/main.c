@@ -117,6 +117,7 @@ void main(void)
       if (rxBuf.buffer[0] != 'Y')
       {
         rxBuf.buffer[0] = 0;
+        rxBuf.length = 0;
       }
     }
     rxBuf.buffer[0] = 0;
@@ -148,11 +149,13 @@ void main(void)
       if (rxBuf.buffer[0] != 'N')
       {
         rxBuf.buffer[0] = 0;
+        rxBuf.length = 0;
       }
     }
     
     rxBuf.buffer[0] = 0;
     rxBuf.length = 0;
+    timeStamp = 0;
     MastManualStop();
     LED_DEBUG2_OFF;
 
