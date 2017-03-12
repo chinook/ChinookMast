@@ -82,15 +82,85 @@ void main(void)
 	pStateMast = &StateInit;
 //============================
   
-
+  StateInit();
+  
+  sUartLineBuffer_t  rxBuf = {0}
+                    ,txBuf = {0}
+                    ;
+  
+  float timeStamp = 0;
+  
+  extern volatile BOOL oTimerReg;
+  extern volatile sCmdValue_t mastSpeed;
+  extern volatile float mastCurrentSpeed;
+  
+#define TIMESTAMP_VALUE 0.1f
+  
+  LED_ALL_OFF();
+  
 	while(1)  //infinite loop
 	{
+    while(rxBuf.buffer[0] == 0)
+    {
+      while(rxBuf.length == 0)
+      {
+        Uart.GetRxFifoBuffer(UART6, &rxBuf, FALSE);
+        AssessMastValues();
+        if (oTimerReg)
+        {
+          oTimerReg = 0;
+          // Update mast speed
+          mastSpeed.previousValue = mastSpeed.currentValue;
+          mastSpeed.currentValue  = mastCurrentSpeed;
+        }
+      }
+      if (rxBuf.buffer[0] != 'Y')
+      {
+        rxBuf.buffer[0] = 0;
+      }
+    }
+    rxBuf.buffer[0] = 0;
+    rxBuf.length = 0;
+    LED_DEBUG2_ON;
+    
+    MastManualLeft();   // PWM to adjust in this function.
+    
+    while(rxBuf.buffer[0] == 0)
+    {
+      while(rxBuf.length == 0)
+      {
+        Uart.GetRxFifoBuffer(UART6, &rxBuf, FALSE);
+        AssessMastValues();
+        if (oTimerReg)
+        {
+          oTimerReg = 0;
+          // Update mast speed
+          mastSpeed.previousValue = mastSpeed.currentValue;
+          mastSpeed.currentValue  = mastCurrentSpeed;
+          
+          timeStamp += TIMESTAMP_VALUE;
+          memcpy(&txBuf.buffer[0], &timeStamp                       , 4);
+          memcpy(&txBuf.buffer[4], (void *) &mastSpeed.currentValue , 4);
+          txBuf.length = 8;
+          Uart.PutTxFifoBuffer(UART6, &txBuf);
+        }
+      }
+      if (rxBuf.buffer[0] != 'N')
+      {
+        rxBuf.buffer[0] = 0;
+      }
+    }
+    
+    rxBuf.buffer[0] = 0;
+    rxBuf.length = 0;
+    MastManualStop();
+    LED_DEBUG2_OFF;
 
     //======================================
     // Mast State machine with Drive A
     //======================================
-    (*pStateMast)();    // jump to next state
-    StateScheduler();   // Decides which state will be next
+//    (*pStateMast)();    // jump to next state
+//    StateScheduler();   // Decides which state will be next
 
 	}  // end while
 } // end main
