@@ -32,6 +32,8 @@
 #include "..\headers\CommandFunctions.h"
 #include "..\headers\StateFunctions.h"
 
+void MastStartPwm (UINT16 pwm1, UINT16 pwm2);
+
 
 //==============================================================================
 // MAIN CODE
@@ -124,7 +126,7 @@ void main(void)
     rxBuf.length = 0;
     LED_DEBUG2_ON;
     
-    MastManualLeft();   // PWM to adjust in this function.
+    MastStartPwm(750, 250);   // PWM to adjust in this function.
     
     while(rxBuf.buffer[0] == 0)
     {
@@ -167,3 +169,39 @@ void main(void)
 
 	}  // end while
 } // end main
+
+
+void MastStartPwm (UINT16 pwm1, UINT16 pwm2)
+{
+  
+  if ((pwm1 + pwm2) != 1000)
+  {
+    return;
+  }
+  // DRIVE B
+  //==========================================================
+  if (USE_DRIVE_B == 1)
+  {
+    DRVB_SLEEP = 1;
+
+    Pwm.SetDutyCycle(PWM_2, pwm1);
+    Pwm.SetDutyCycle(PWM_3, pwm2);
+
+    WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
+  }
+  //==========================================================
+
+
+  // DRIVE A
+  //==========================================================
+  if (USE_DRIVE_A == 1)
+  {
+    DRVA_SLEEP = 1;
+
+    Pwm.SetDutyCycle(PWM_4, pwm1);
+    Pwm.SetDutyCycle(PWM_5, pwm2);
+
+    WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors at the drive
+  }
+  //==========================================================
+}
