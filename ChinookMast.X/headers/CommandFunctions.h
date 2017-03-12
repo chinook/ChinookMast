@@ -33,7 +33,9 @@
 #define MAST_DIR_LEFT               -1.0f
 #define MAST_DIR_RIGHT               1.0f
 
-//#define __NEW_MOTOR__
+#define __NEW_MOTOR__
+
+
 
 #ifndef __NEW_MOTOR__
 #define MOTOR_ENCODER_RATIO         49.0f
@@ -42,8 +44,11 @@
 #define MOTOR_DEG_PER_PULSE         360.0f/245.0f
 
 #else
-
+#define MOTOR_ENCODER_RATIO         71.0f
 #define MAST_MOTOR_RATIO            60.0f
+
+#define MOTOR_DEG_PER_PULSE         360.0f/576.0f
+
 #endif
 
 #define N_DATA_TO_ACQ               300   // Used when debugging with SKADI

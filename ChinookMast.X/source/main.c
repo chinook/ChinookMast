@@ -126,7 +126,7 @@ void main(void)
     rxBuf.length = 0;
     LED_DEBUG2_ON;
     
-    MastStartPwm(750, 250);   // PWM to adjust in this function.
+    MastStartPwm(590, 410);   // PWM to adjust in this function.
     
     while(rxBuf.buffer[0] == 0)
     {
