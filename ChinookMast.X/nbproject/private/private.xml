@@ -6,12 +6,10 @@
         <group>
             <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/headers/Setup.h</file>
             <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/source/CommandFunctions.c</file>
-            <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/headers/SkadiFunctions.h</file>
             <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/source/StateMachine.c</file>
-            <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/source/DRV8711_Para.c</file>
-            <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/source/SkadiFunctions.c</file>
-            <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/headers/DRV8711_Para.h</file>
+            <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/source/StateFunctions.c</file>
             <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/source/Setup.c</file>
+            <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/source/main.c</file>
         </group>
     </open-files>
 </project-private>

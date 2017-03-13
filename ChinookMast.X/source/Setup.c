@@ -71,7 +71,7 @@ void InitTimer(void)
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //	Open timers
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  timerCounterValue = Timer.Open(TIMER_1, 100, SCALE_MS);   // Timer used for regulating the mast. Period = 100 ms
+  timerCounterValue = Timer.Open(TIMER_1, 10, SCALE_MS);   // Timer used for the data tranmission of the speed. Period = 10 ms
 //  timerCounterValue = Timer.Open(TIMER_1, 300, SCALE_MS);   // Timer used for regulating the mast. Period = 300 ms
 //  timerCounterValue = Timer.Open(TIMER_2, 21, SCALE_MS);    // Timer used for input capture AND stopping the mast. Period = 21 ms
   timerCounterValue = Timer.Open(TIMER_2, 11, SCALE_MS);    // Timer used for input capture AND stopping the mast. Period = 11 ms
@@ -371,7 +371,7 @@ void InitUart (void)
   UartFifoMode_t      oFifoMode     = UART_INTERRUPT_ON_TX_BUFFER_EMPTY | UART_INTERRUPT_ON_RX_NOT_EMPTY;
   UartLineCtrlMode_t  oLineControl  = UART_DATA_SIZE_8_BITS | UART_PARITY_NONE | UART_STOP_BITS_1;
 
-  Uart.Open(UART6, BAUD57600, oConfig, oFifoMode, oLineControl);   // Open UART 6 as : 9600 BAUD, 1 stop bit, no parity and 8 bits data, not used as main UART for Skadi
+  Uart.Open(UART6, BAUD57600, oConfig, oFifoMode, oLineControl);   // Open UART 6 as : 57600 BAUD, 1 stop bit, no parity and 8 bits data, not used as main UART for Skadi
   Uart.EnableTx(UART6);
   Uart.EnableRx(UART6);
 

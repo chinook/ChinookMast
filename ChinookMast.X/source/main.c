@@ -91,12 +91,14 @@ void main(void)
                     ;
   
   float timeStamp = 0;
+  float nonNullDummyValue = 0.001f;
+  int n;
   
-  extern volatile BOOL oTimerReg;
+  extern volatile BOOL oTimerReg;   //Timer 1 is used
   extern volatile sCmdValue_t mastSpeed;
   extern volatile float mastCurrentSpeed;
   
-#define TIMESTAMP_VALUE 0.1f
+#define TIMESTAMP_VALUE 0.01f   //Also set in the Timer 1 params
   
   LED_ALL_OFF();
   
@@ -126,8 +128,41 @@ void main(void)
     rxBuf.length = 0;
     LED_DEBUG2_ON;
     
-    MastStartPwm(590, 410);   // PWM to adjust in this function.
+    MastStartPwm(500, 500);
     
+    //le while suivant devait servir a creer une periode de temps
+    //ou des valeurs quasiment nulles seraient enregistrees dans Matlab.
+    //J'ai penser que ce serait une bonne idee parce la constante de temps
+    //etait pas visible.
+    while(n <= 1000)
+    {
+      while(rxBuf.buffer[0] == 0)
+      {
+        while(rxBuf.length == 0)
+        {
+          Uart.GetRxFifoBuffer(UART6, &rxBuf, FALSE);
+//          AssessMastValues();
+          if (oTimerReg)
+          {
+            oTimerReg = 0;
+            // Update mast speed
+            mastSpeed.previousValue = mastSpeed.currentValue;
+            mastSpeed.currentValue  = mastCurrentSpeed;
+
+            timeStamp += TIMESTAMP_VALUE;
+            n++;
+            memcpy(&txBuf.buffer[0], &timeStamp                       , 4);
+            //Fait que changer dans la ligne suivante &mastSpeed.currentValue
+            //par &nonNullDummyValue a fait sauter la drive, sacrament.
+            memcpy(&txBuf.buffer[4], (void *) &nonNullDummyValue , 4);
+            txBuf.length = 8;
+            Uart.PutTxFifoBuffer(UART6, &txBuf);
+          }
+        }
+      }
+    } 
+    MastStartPwm(590, 410); //Change these PWM value
+      
     while(rxBuf.buffer[0] == 0)
     {
       while(rxBuf.length == 0)
