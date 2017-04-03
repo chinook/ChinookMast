@@ -47,12 +47,14 @@ sSkadiCommand_t skadiCommandTable[] =
   ,{"setpos"      , SetPos      , 1 , "\t| Set mast angle [deg].\t\t\t\t| 1 arg : Min = -179.0, Max = 179.0"            }
   ,{"setmode"     , SetMode     , 1 , "\t| Set mast mode of operation.\t\t\t| 1 arg : 1 = Manual, 0 = Auto"             }
   ,{"setparam"    , SetParam    , 2 , "\t| Set K, KI, KP, PWM_MAX, PWM_MIN and ERROR.\t| 2 args : var and val\n"        }
+  ,{"setzero"     , SetZero     , 0 , "\t| Set current pos as zero\t| 0 args.\n"                                        }
   ,{"getwind"     , GetWind     , 0 , "\t| Read the wind current angle [deg].\t\t| No arg needed"                       }
   ,{"getpos"      , GetPos      , 0 , "\t| Read the mast current position [deg].\t\t| 0 arg"                            }
   ,{"getmode"     , GetMode     , 0 , "\t| Get the mast current mode of operation.\t| 0 arg"                            }
   ,{"getspeed"    , GetSpeed    , 0 , "\t| Read the mast current speed [deg/s].\t\t| 0 arg"                             }
   ,{"getparam"    , GetParam    , 0 , "\t| Print K, KI, KP, PWM_MAX, PWM_MIN and ERROR.\t| 0 arg\n"                     }
   ,{"writestatus" , WriteStatus , 0 , "\t| Write STATUS msg to drive.\t\t\t| 0 arg"                                     }
+  ,{"writemem"    , WriteMastInfo, 0, "\t| Write mast info to EEPROM.\t\t\t| 0 arg"                                     }
   ,{"setprint"    , SetPrint    , 1 , "\t| Print or not data from regulation.\t\t| 1 arg : 1 = Print, 0 = Don't print"  }
   ,{"clc"         , ClearScreen , 0 , "\t\t| Clear terminal window.\t\t\t| 0 arg"                                       }
 };
@@ -101,8 +103,8 @@ void InitAdc(void)
 
   // Hardware config. These are exemples.
   //================================================
-  UINT32 configHardware = ADC_VREF_EXT_AVSS      // Vref+ is AVdd and Vref- is AVss
-                        | ADC_SAMPLES_PER_INT_1;  // 1 samples/interrupt (we check 3 channels)
+  UINT32 configHardware = ADC_VREF_AVDD_AVSS      // Vref+ is AVdd and Vref- is AVss
+                        | ADC_SAMPLES_PER_INT_1;  // 1 sample/interrupt 
   //================================================
 
   // Port config.
@@ -173,6 +175,41 @@ void InitSpi(void)
 //===========================
 void InitPwm(void)
 {
+#ifdef USE_POTENTIOMETER
+  // DRIVE B
+  //==========================================================
+  if (USE_DRIVE_B == 1)
+  {
+    // Open PWM2 using Timer3 with 50% duty cycle and 0% offset
+    Pwm.Open(PWM_2);
+//    OpenOC2( OC_ON | OC_TIMER_MODE16 | OC_TIMER2_SRC | OC_CONTINUE_PULSE , ReadPeriod2() / 2, 0);
+    Pwm.SetDutyCycle  (PWM_2, 500);
+    Pwm.SetPulseOffset(PWM_2,   0);
+
+    // Open PWM3 using Timer3 with 50% duty cycle and 50% offset
+    Pwm.Open(PWM_3);
+    Pwm.SetDutyCycle  (PWM_3, 500);
+    Pwm.SetPulseOffset(PWM_3, 500);
+  }
+  //==========================================================
+
+
+  // DRIVE A
+  //==========================================================
+  if (USE_DRIVE_A == 1)
+  {
+    // Open PWM4 using Timer3 with 50% duty cycle and 0% offset
+    Pwm.Open(PWM_4);
+    Pwm.SetDutyCycle  (PWM_4, 500);
+    Pwm.SetPulseOffset(PWM_4,   0);
+
+    // Open PWM5 using Timer3 with 50% duty cycle and 50% offset
+    Pwm.Open(PWM_5);
+    Pwm.SetDutyCycle  (PWM_5, 500);
+    Pwm.SetPulseOffset(PWM_5, 500);
+  }
+  //==========================================================
+#else
   // DRIVE B
   //==========================================================
   if (USE_DRIVE_B == 1)
@@ -205,6 +242,7 @@ void InitPwm(void)
     Pwm.SetPulseOffset(PWM_5, 500);
   }
   //==========================================================
+#endif
 }
 
 
@@ -298,6 +336,8 @@ void InitPorts(void)
 
   Port.D.SetPinsDigitalIn (BIT_8);      // DRVA_IO_CON1
   Port.D.SetPinsDigitalIn (BIT_10);     // DRVA_IO_CON2
+  
+  Port.B.SetPinsAnalogIn(BIT_2);        // ADC2 / MAST POT
 
   LED_STATUS_OFF;
   LED_ERROR_OFF;
@@ -467,6 +507,14 @@ void StartInterrupts(void)
 //  Spi.EnableTxInterrupts(SPI4);   // Enable TX Interrupts for SPI4
 
 
+#ifdef USE_POTENTIOMETER
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+// Enable ADC interrupts
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  Adc.EnableInterrupts();
+  
+  
+#else
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable InputCapture interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -488,8 +536,9 @@ void StartInterrupts(void)
     InputCapture.EnableInterrupt(IC3);
   }
   //====================================
+#endif
 
-
+  
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // Enable CAN interrupts
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -29,6 +29,8 @@ extern volatile sButtonStates_t buttons;
 
 extern volatile UINT32 rxWindAngle;
 
+extern volatile float T;
+
 
 // Used for the average of the wind angle
 //========================================
@@ -62,6 +64,41 @@ volatile BOOL  oManualMode            = 1
               ,oManualMastRight       = 0
               ,oManualMastLeft        = 0
               ;
+
+sPotValues_t potValues = 
+{
+  .nSamples         = 0
+ ,.potSamples       = 
+  {
+    .bufEmpty       = 1
+   ,.bufFull        = 0
+   ,.inIdx          = 0
+   ,.lineBuffer     = {0}
+   ,.maxBufSize     = 256
+   ,.outIdx         = 0
+  }
+ ,.lastAverage      = 0
+ ,.angle            = NULL
+ ,.speed            = NULL
+  
+ ,.potStepSamples   = 
+  {
+    .bufEmpty       = 1
+   ,.bufFull        = 0
+   ,.inIdx          = 0
+   ,.lineBuffer     = {0}
+   ,.maxBufSize     = 256
+   ,.outIdx         = 0
+  }
+ ,.potStepValue     = 0
+ ,.lastBits         = 0
+    
+ ,.zeroInBits       = 0
+    
+ ,.deadZoneDetect   = 500
+    
+ ,.stepZero         = 0
+};
 
 
 //==============================================================================
@@ -251,7 +288,11 @@ void StateInit(void)
   INIT_PORTS;
 //  INIT_WDT;
   INIT_TIMER;
+#ifdef USE_POTENTIOMETER
+  INIT_ADC;
+#else
   INIT_INPUT_CAPTURE;
+#endif
   INIT_UART;
   INIT_SPI;
   INIT_PWM;
@@ -270,14 +311,40 @@ void StateInit(void)
 
   // Get last known position of the mast
   ReadMastPosFromEeprom();
-  if (ABS(mastAngle.currentValue) > 360)  // Error
+  if (AbsFloat(mastAngle.currentValue) > 360)  // Error
   {
     mastAngle.previousValue = 0;
     mastAngle.currentValue  = 0;
   }
+#ifdef USE_POTENTIOMETER
+  if (potValues.lastAverage > ADC_TOTAL_BITS)
+  {
+    potValues.lastAverage = ADC_TOTAL_BITS << 1;
+  }
+  if (potValues.zeroInBits > ADC_TOTAL_BITS)
+  {
+    potValues.zeroInBits = ADC_TOTAL_BITS << 1;
+  }
+  if (potValues.potStepValue > POT_TO_MOTOR_RATIO)
+  {
+    potValues.potStepValue = POT_TO_MOTOR_RATIO << 1;
+  }
+  if (potValues.lastBits > (ADC_BITS_PER_REVOLUTION - 1))
+  {
+    potValues.lastBits = 0;
+  }
+  PotAddFirstSample(&potValues);
+//  potValues.potSamples.lineBuffer.buffer[potValues.potSamples.maxBufSize] = potValues.lastAverage;
+//  potValues.potStepSamples.lineBuffer.buffer[potValues.potStepSamples.maxBufSize] = potValues.potStepValue;
+#endif
 
   // Init registers for the drive
   InitDriver();
+  
+#ifdef USE_POTENTIOMETER
+  potValues.angle = &mastAngle;
+  potValues.speed = &mastSpeed;
+#endif
 }
 
 
@@ -367,19 +434,17 @@ void StateGetMastData(void)
     windAngle.currentValue = tempWind;
   }
 
+#ifdef USE_POTENTIOMETER
+  MastGetSpeed(&potValues, T);
+  mastCurrentSpeed = potValues.speed->currentValue;
+#else
   // Update mast speed
   mastSpeed.previousValue = mastSpeed.currentValue;
   mastSpeed.currentValue  = mastCurrentSpeed;
 
-  if (USE_POTENTIOMETER)
-  {
-    
-  }
-  else
-  {
-    // Get mast position from mast speed
-    TustinZ((void *) &mastSpeed, (void *) &mastAngle);    // Discrete integrator
-  }
+  // Get mast position from mast speed
+  TustinZ((void *) &mastSpeed, (void *) &mastAngle);    // Discrete integrator
+#endif
 
   /*
    * Some kind of modulo
@@ -393,20 +458,40 @@ void StateGetMastData(void)
     mastAngle.currentValue += 360;
   }
 
+#ifdef USE_POTENTIOMETER
+  /*
+   * Check mast limits
+   */
+//  if (AbsFloat(mastSpeed.currentValue) >= BITS_TO_DEG_TIMES_20)
+  if (AbsFloat(mastSpeed.currentValue) >= 3.5f)
+  {
+    if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )        // Mast too far
+    {
+      LED_DEBUG4_TOGGLE;
+      MastManualStop();
+    }
+    else if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
+    {
+      LED_DEBUG3_TOGGLE;
+      MastManualStop();
+    }
+  }
+#else
   /*
    * Check mast limits
    */
   if (mastSpeed.currentValue != 0)
   {
-    if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )        // Mast too far
+    if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )        // Mast too far
     {
       MastManualStop();
     }
-    else if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
+    else if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
     {
       MastManualStop();
     }
   }
+#endif
 }
 
 
@@ -493,7 +578,6 @@ void StateClose(void)
 
 }
 
-
 //===============================================================
 // Name     : StateIdle
 // Purpose  : Wait for power-off
@@ -502,6 +586,7 @@ void StateIdle(void)
 {
   return;
 }
+
 
 
 //===============================================================
@@ -533,6 +618,7 @@ void StateSendData(void)
   //==========================================================
 
   if (iCounterToTwoSec < 10)
+//  if (iCounterToTwoSec < 1)
   {
     iCounterToTwoSec++;
   }
@@ -545,11 +631,18 @@ void StateSendData(void)
     {
       sUartLineBuffer_t buffer;
       buffer.length = sprintf ( buffer.buffer
-                              , "\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
+//                              , "\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
+//                              , "\n\rCurrent pos\t= %f\n\rLast average\t= %d\n\rZero\t\t= %d\n\rStep\t\t= %d\n\rLast adc\t= %d\n\r"
+//                              , "\n\rStep\t\t= %d\n\rLast adc\t= %d\n\r"
+                              , "\n\rCurrent speed\t= %f\n\rCurrent pos\t= %f\n\rStep\t\t= %d\n\rLast adc\t= %d\n\r"
   //                            , "\n\rCurrent speed\t\t= %f\n\rCurrent pos\t\t= %f\n\rCurrent wind\t\t= %f\n\r"
-  //                            , mastSpeed.currentValue
+                              , mastSpeed.currentValue
                               , mastAngle.currentValue
-                              , windAngle.currentValue
+//                              , windAngle.currentValue
+//                              , potValues.lastAverage
+//                              , potValues.zeroInBits
+                              , potValues.potStepValue
+                              , potValues.lastBits
                               );
 
       Uart.PutTxFifoBuffer(UART6, &buffer);
@@ -569,6 +662,7 @@ void StateAcq(void)
   float tempWindAngle   = 0;
   UINT16 tempAdcValue   = 0;
   static BOOL oModeMem  = 0;
+  INT8 err = 0;
 
   if (oModeMem != oManualMode)
   {
@@ -592,18 +686,21 @@ void StateAcq(void)
 
   AssessButtons();
 
-  if (USE_POTENTIOMETER)
+#ifdef USE_POTENTIOMETER
+  if (oAdcReady)
   {
-    if (oAdcReady)
+    oAdcReady = 0;
+    tempAdcValue = Adc.Var.adcReadValues[2];
+    PotAddSample(&potValues, tempAdcValue);
+    if (potValues.nSamples >= N_SAMPLES_TO_AVERAGE)
     {
-      oAdcReady = 0;
-      tempAdcValue = Adc.Var.adcReadValues[2];
+      PotAverage(&potValues);
+      MastUpdateAngle(&potValues);
     }
   }
-  else
-  {
-    AssessMastValues();
-  }
+#else
+  AssessMastValues();
+#endif
 
 //  UINT32 coreTickRate = Timer.Tic(1500, SCALE_US);
   Skadi.GetCmdMsgFifo();

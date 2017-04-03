@@ -38,15 +38,22 @@ volatile BOOL  oCapture1      = 0
               ,oTimerSendData = 0
               ,oTimerChngMode = 0
               ,oEnableMastStopProcedure = 0
+              ,oWaitAfterStop = 0
               ,oFirstCapture1 = 1
               ,oFirstCapture2 = 1
               ,oFirstCapture3 = 1
               ,oFirstCapture4 = 1
               ,oAdcReady      = 0
+              ,oTimerSetZero  = 0
+              ,oSetZeroCounterOccured = 0
               ;
 
-UINT8 iMastStop = 0;
-INT8  mastDir = 0;
+volatile UINT16 setZeroCounter = 0;
+
+volatile UINT8 waitAfterStopCounter = 0;
+
+volatile UINT8 iMastStop = 0;
+volatile float  mastDir = 0;
 
 volatile UINT32 rxWindAngle = 0;  // Received from CAN
 
@@ -86,6 +93,20 @@ void __ISR(_ADC_VECTOR, ADC_INT_PRIORITY) AdcInterruptHandler(void)
 void __ISR(_TIMER_1_VECTOR, T1_INTERRUPT_PRIORITY) Timer1InterruptHandler(void)
 {
   oTimerReg = 1;
+  
+  if (oTimerSetZero)
+  {
+    setZeroCounter++;
+    if (setZeroCounter >= 21)
+    {
+      oSetZeroCounterOccured = 1;
+    }
+  }
+  else
+  {
+    setZeroCounter = 0;
+    oSetZeroCounterOccured = 0;
+  }
 
   // Increment the number of overflows from this timer. Used primarily by Input Capture
   Timer.Var.nOverflows[0]++;
@@ -107,7 +128,7 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
   {
     if (iMastStop == 0)
     {
-      mastDir = SIGN(mastCurrentSpeed);
+      mastDir = SignFloat(mastCurrentSpeed);
     }
 
     if (iMastStop < 16)
@@ -158,34 +179,55 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
     }
     else
     {
-      iMastStop = 0;
-      mastDir   = 0;
+//      if (!oWaitAfterStop)
+//      {
 
-      // DRIVE B
-      //==========================================================
-      if (USE_DRIVE_B == 1)
-      {
-        Pwm.SetDutyCycle(PWM_2, 500);
-        Pwm.SetDutyCycle(PWM_3, 500);
+        // DRIVE B
+        //==========================================================
+        if (USE_DRIVE_B == 1)
+        {
+          Pwm.SetDutyCycle(PWM_2, 500);
+          Pwm.SetDutyCycle(PWM_3, 500);
 
-        DRVB_SLEEP = 0;
-      }
-      //==========================================================
+          DRVB_SLEEP = 0;
+        }
+        //==========================================================
 
-      // DRIVE A
-      //==========================================================
-      if (USE_DRIVE_A == 1)
-      {
-        Pwm.SetDutyCycle(PWM_4, 500);
-        Pwm.SetDutyCycle(PWM_5, 500);
+        // DRIVE A
+        //==========================================================
+        if (USE_DRIVE_A == 1)
+        {
+          Pwm.SetDutyCycle(PWM_4, 500);
+          Pwm.SetDutyCycle(PWM_5, 500);
 
-        DRVA_SLEEP = 0;
-      }
-      //==========================================================
+          DRVA_SLEEP = 0;
+        }
+        //==========================================================
 
-      oEnableMastStopProcedure = 0;
-
-      mastCurrentSpeed = 0;
+//#ifdef USE_POTENTIOMETER
+//        oWaitAfterStop = 1;
+//#else
+        mastCurrentSpeed = 0;
+        oEnableMastStopProcedure = 0;
+        iMastStop = 0;
+        mastDir   = 0;
+//#endif
+//      }
+//      else
+//      {
+//        if (waitAfterStopCounter < 10)
+//        {
+//          waitAfterStopCounter++;
+//        }
+//        else
+//        {
+//          waitAfterStopCounter = 0;
+//          oWaitAfterStop = 0;
+//          oEnableMastStopProcedure = 0;
+//          iMastStop = 0;
+//          mastDir   = 0;
+//        }
+//      }
     }
   }
 
@@ -729,6 +771,7 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 
   if ((CANGetModuleEvent(CAN1) & CAN_RX_EVENT) != 0)
   {
+    LED_CAN_TOGGLE;
 
     CANRxMessageBuffer *message;
 
@@ -752,10 +795,10 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
         buttons.chng.bits.steerWheelSw1     = 1;
       }
 
-      if (buttons.buttons.bits.steerWheelSw3  != switches.bits.sw3 )
+      if (buttons.buttons.bits.steerWheelSw4  != switches.bits.sw4 )
       {
-        buttons.buttons.bits.steerWheelSw3  = switches.bits.sw3;
-        buttons.chng.bits.steerWheelSw3     = 1;
+        buttons.buttons.bits.steerWheelSw4  = switches.bits.sw4;
+        buttons.chng.bits.steerWheelSw4     = 1;
       }
 
       if (buttons.buttons.bits.steerWheelSw10 != switches.bits.sw10)
@@ -764,6 +807,7 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
         buttons.chng.bits.steerWheelSw10    = 1;
       }
 
+      LED_CAN_TOGGLE;
       CANUpdateChannel(CAN1, CAN_CHANNEL1);
       CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
 

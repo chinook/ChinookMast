@@ -22,6 +22,10 @@
 
 #include "..\headers\StateFunctions.h"
 #include "..\headers\CommandFunctions.h"
+#include "..\headers\Potentiometer.h"
+
+// Private functions prototypes
+void SetZeroFromSteeringWheel (void);
 
 
 //==============================================================================
@@ -50,6 +54,8 @@ volatile sButtonStates_t buttons =
 extern volatile float  mastCurrentSpeed       // Actual speed of Mast
                       ;
 
+extern sPotValues_t potValues;
+
 extern volatile sCmdValue_t mastAngle;        // Discrete position of mast
 
 extern volatile BOOL oCapture1
@@ -64,7 +70,11 @@ extern volatile BOOL oCapture1
                     ,oManualFlagChng          // In manual mode, indicates that a change has occured on the buttons
                     ,oManualMastRight
                     ,oManualMastLeft
+                    ,oTimerSetZero
+                    ,oSetZeroCounterOccured
                     ;
+
+extern volatile UINT16 setZeroCounter;
 
 
 //==============================================================================
@@ -76,6 +86,23 @@ extern volatile BOOL oCapture1
  */
 void WriteMastPos2Eeprom (void)
 {
+#ifdef USE_POTENTIOMETER
+  UINT8 dataBuffer[19];
+  dataBuffer[0] = I2c.Var.eepromAddress.byte;
+  dataBuffer[1] = eepromFirstRegister.address.highByte;
+  dataBuffer[2] = eepromFirstRegister.address.lowByte;
+
+  memcpy(&dataBuffer[3 ], (void *) &mastAngle.currentValue    , 4);
+  memcpy(&dataBuffer[7 ], (void *) &potValues.lastAverage     , 4);
+  memcpy(&dataBuffer[11], (void *) &potValues.lastBits        , 2);
+  memcpy(&dataBuffer[13], (void *) &potValues.zeroInBits      , 4);
+  memcpy(&dataBuffer[17], (void *) &potValues.potStepValue    , 2);
+
+  while(I2c.Var.oI2cReadIsRunning[I2C4]);  // Wait for any I2C4 read sequence to end
+  while(I2c.Var.oI2cWriteIsRunning[I2C4]); // Wait for any I2C4 write sequence to end
+
+  I2c.AddDataToFifoWriteQueue(I2C4, &dataBuffer[0], 19, TRUE);
+#else
   UINT8 dataBuffer[7];
   dataBuffer[0] = I2c.Var.eepromAddress.byte;
   dataBuffer[1] = eepromFirstRegister.address.highByte;
@@ -87,6 +114,7 @@ void WriteMastPos2Eeprom (void)
   while(I2c.Var.oI2cWriteIsRunning[I2C4]); // Wait for any I2C4 write sequence to end
 
   I2c.AddDataToFifoWriteQueue(I2C4, &dataBuffer[0], 7, TRUE);
+#endif
 }
 
 /*
@@ -94,6 +122,31 @@ void WriteMastPos2Eeprom (void)
  */
 void ReadMastPosFromEeprom (void)
 {
+#ifdef USE_POTENTIOMETER
+  UINT8 buffer[16];
+  UINT8 slaveAddPlusRegBuf[3];
+
+  slaveAddPlusRegBuf[0] = I2c.Var.eepromAddress.byte;
+  slaveAddPlusRegBuf[1] = eepromFirstRegister.address.highByte;
+  slaveAddPlusRegBuf[2] = eepromFirstRegister.address.lowByte;
+
+  while(I2c.Var.oI2cWriteIsRunning[I2C4]);  // Wait for any I2C4 write sequence to end
+  while(I2c.Var.oI2cReadIsRunning[I2C4]);  // Wait for any I2C4 read sequence to end
+
+  I2c.AddDataToFifoReadQueue(I2C4, &slaveAddPlusRegBuf[0], 3, 16);
+
+  while(I2c.Var.oI2cReadIsRunning[I2C4]); // Wait for the read sequence to end
+
+  I2c.ReadRxFifo(I2C4, &buffer[0], 16);
+
+  memcpy((void *) &mastAngle.currentValue     , &buffer[0] , 4);
+  memcpy((void *) &potValues.lastAverage      , &buffer[4] , 4);
+  memcpy((void *) &potValues.lastBits         , &buffer[8] , 2);
+  memcpy((void *) &potValues.zeroInBits       , &buffer[10], 4);
+  memcpy((void *) &potValues.potStepValue     , &buffer[14], 2);
+
+  mastAngle.previousValue = mastAngle.currentValue;
+#else
   UINT8 mastPos[4];
   UINT8 slaveAddPlusRegBuf[3];
 
@@ -113,6 +166,7 @@ void ReadMastPosFromEeprom (void)
   memcpy((void *) &mastAngle.currentValue, &mastPos[0], 4);
 
   mastAngle.previousValue = mastAngle.currentValue;
+#endif
 }
 
 
@@ -248,7 +302,10 @@ void AssessButtons (void)
       {
         mastAngle.currentValue = 0;
         mastAngle.previousValue = 0;
-        
+#ifdef USE_POTENTIOMETER
+        potValues.zeroInBits = potValues.lastAverage;
+        potValues.potStepValue = POT_TO_MOTOR_RATIO >> 1;
+#endif
         WriteMastPos2Eeprom (); // Write zero to EEPROM
 
         SEND_CALIB_DONE;  // Confirm that the calib is done
@@ -380,8 +437,8 @@ void AssessButtons (void)
         if (buttons.buttons.bits.steerWheelSw10)    // And right switch on steering wheel is pressed
         {
           oCountTimeToChngMode = 1;                 // Start procedure to change manual mode
-          Timer.EnableInterrupt(TIMER_5);
           Timer.Reset(TIMER_5);
+          Timer.EnableInterrupt(TIMER_5);
           oTimerChngMode = 0;
 
           oManualMastLeft  = 0;                     // Stop moving
@@ -402,8 +459,8 @@ void AssessButtons (void)
       {
         if (oCountTimeToChngMode)   // And the procedure ot change mode was occuring
         {
-          oCountTimeToChngMode = 0;
           Timer.DisableInterrupt(TIMER_5);
+          oCountTimeToChngMode = 0;
 
           if (oTimerChngMode)              // If at least one second has passed
           {
@@ -427,19 +484,35 @@ void AssessButtons (void)
     }
     // </editor-fold>
 
-    // <editor-fold defaultstate="collapsed" desc="SW3 on steering wheel">
-    if (buttons.chng.bits.steerWheelSw3)
+    // <editor-fold defaultstate="collapsed" desc="SW4 on steering wheel">
+    if (buttons.chng.bits.steerWheelSw4)
     {
-      buttons.chng.bits.steerWheelSw3 = 0;
+      buttons.chng.bits.steerWheelSw4 = 0;
 
-      if (buttons.buttons.bits.steerWheelSw3)     // If SW1 is pressed
+      if (buttons.buttons.bits.steerWheelSw4)     // If SW1 is pressed
       {
-        mastAngle.currentValue = 0;
-        mastAngle.previousValue = 0;
-
-        WriteMastPos2Eeprom (); // Write zero to EEPROM
-
-        SEND_CALIB_DONE;  // Confirm that the calib is done
+//        mastAngle.currentValue = 0;
+//        mastAngle.previousValue = 0;
+//        
+//#ifdef USE_POTENTIOMETER
+//        potValues.zeroInBits = potValues.lastAverage;
+//        potValues.potStepValue = POT_TO_MOTOR_RATIO >> 1;
+//#endif
+//
+//        WriteMastPos2Eeprom (); // Write zero to EEPROM
+//
+//        SEND_CALIB_DONE;  // Confirm that the calib is done
+        
+//        SetZeroFromSteeringWheel();
+        
+        oTimerSetZero = 1;
+        
+      }
+      else
+      {
+        oTimerSetZero = 0;
+        setZeroCounter = 0;
+        oSetZeroCounterOccured = 0;
       }
     }
     // </editor-fold>
@@ -454,8 +527,8 @@ void AssessButtons (void)
         if (buttons.buttons.bits.steerWheelSw1)     // And left switch on steering wheel is pressed
         {
           oCountTimeToChngMode = 1;                 // Start procedure to change manual mode
-          Timer.EnableInterrupt(TIMER_5);
           Timer.Reset(TIMER_5);
+          Timer.EnableInterrupt(TIMER_5);
           oTimerChngMode = 0;
 
           oManualMastLeft  = 0;                     // Stop moving
@@ -476,8 +549,8 @@ void AssessButtons (void)
       {
         if (oCountTimeToChngMode)   // And the procedure ot change mode was occuring
         {
-          oCountTimeToChngMode = 0;
           Timer.DisableInterrupt(TIMER_5);
+          oCountTimeToChngMode = 0;
 
           if (oTimerChngMode)              // If at least one second has passed
           {
@@ -502,4 +575,72 @@ void AssessButtons (void)
     // </editor-fold>
   }
   // </editor-fold>
+  
+  if (oTimerSetZero && oSetZeroCounterOccured)
+  {
+    oTimerSetZero = 0;
+    setZeroCounter = 0;
+    oSetZeroCounterOccured = 0;
+    SetZeroFromSteeringWheel();
+  }
+}
+
+void SetZeroFromSteeringWheel (void)
+{
+  mastAngle.currentValue = 0;
+  mastAngle.previousValue = 0;
+        
+#ifdef USE_POTENTIOMETER
+  potValues.zeroInBits = potValues.lastAverage;
+  potValues.potStepValue = POT_TO_MOTOR_RATIO >> 1;
+#endif
+
+  WriteMastPos2Eeprom (); // Write zero to EEPROM
+
+  SEND_CALIB_DONE;  // Confirm that the calib is done
+}
+
+
+//==============================================================================
+// Math functions
+//==============================================================================
+
+INT8 SignFloat (float value)
+{
+  return (value >= 0) ? 1 : -1;
+}
+
+INT8 SignInt (INT32 value)
+{
+  return (value >= 0) ? 1 : -1;
+}
+
+float AbsFloat (float value)
+{
+  return (value >= 0) ? value : -value;
+}
+
+INT32 AbsInt (INT32 value)
+{
+  return (value >= 0) ? value : -value;
+}
+
+float MaxFloat (float v1, float v2)
+{
+  return (v1 >= v2) ? v1 : v2;
+}
+
+INT32 MaxInt (INT32 v1, INT32 v2)
+{
+  return (v1 >= v2) ? v1 : v2;
+}
+
+float MinFloat (float v1, float v2)
+{
+  return (v1 <= v2) ? v1 : v2;
+}
+
+INT32 MinInt (INT32 v1, INT32 v2)
+{
+  return (v1 <= v2) ? v1 : v2;
 }

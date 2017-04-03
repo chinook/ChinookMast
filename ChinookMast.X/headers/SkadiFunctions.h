@@ -56,6 +56,14 @@ void SetPrint();
 void LedStatus();
 
 /**************************************************************
+ * Function name  : SetZero
+ * Purpose        : Set the current pos as the zero
+ * Arguments      : Received from Skadi functions
+ * Returns        : None.
+ *************************************************************/
+void SetZero();
+
+/**************************************************************
  * Function name  : LedError
  * Purpose        : Toggle LED_ERROR.
  * Arguments      : None.
@@ -151,6 +159,22 @@ void ClearScreen();
  * Returns        : None.
  *************************************************************/
 void WriteStatus();
+
+/***************NEW********************************************
+ * Function name  : ReadStatus
+ * Purpose        : Read status, send to terminal
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void ReadStatus();
+
+/**************************************************************
+ * Function name  : WriteStatus
+ * Purpose        : Call WriteMastPos2Eeprom
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void WriteMastInfo();
 
 /**************************************************************
  * Function name  : SetParam

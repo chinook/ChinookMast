@@ -22,6 +22,7 @@
 
 #include "..\headers\CommandFunctions.h"
 #include "..\headers\StateFunctions.h"
+#include "..\headers\Potentiometer.h"
 
 
 //==============================================================================
@@ -32,6 +33,8 @@
 //=====================================
 extern volatile UINT32 rxWindAngle;
 //=====================================
+
+extern sPotValues_t potValues;
 
 
 // Used for the average of the wind angle
@@ -180,9 +183,11 @@ void SetPwm (float cmd)
       }
       //==========================================================
 
+#ifndef USE_POTENTIOMETER
       mastCurrentSpeed = 0;
       mastSpeed.previousValue = 0;
       mastSpeed.currentValue = 0;
+#endif
 
       oFirstTimeInMastStop = 0;
 
@@ -242,9 +247,9 @@ void SetPwm (float cmd)
   {
     oFirstTimeInMastStop = 1;
     
-    UINT16 pwm = ABS(cmd) * 500;
+    UINT16 pwm = AbsFloat(cmd) * 500;
 
-    if (SIGN(cmd) == MAST_DIR_LEFT)
+    if (SignFloat(cmd) == MAST_DIR_LEFT)
     {
       // DRIVE B
       //==========================================================
@@ -266,7 +271,7 @@ void SetPwm (float cmd)
       }
       //==========================================================
     }
-    else if (SIGN(cmd) == MAST_DIR_RIGHT)
+    else if (SignFloat(cmd) == MAST_DIR_RIGHT)
     {
       // DRIVE B
       //==========================================================
@@ -314,7 +319,9 @@ void Regulator (void)
   windAngle.previousValue = windAngle.currentValue;
   
 //  memcpy ((void *) &tempWind, (void *) &rxWindAngle, 4);  // Copy contents of UINT32 into float
-
+  //========================//
+  //Wind Angle Update/Processing
+  //========================//
   if (nWindAngleSamples != 0)
   {
     tempWind = meanWindAngle / nWindAngleSamples;
@@ -343,13 +350,23 @@ void Regulator (void)
     windAngle.currentValue = tempWind;
   }
 
-  // Update mast speed
+//========================//
+//Mast Speed Update
+//========================//
+#ifdef USE_POTENTIOMETER
+  MastGetSpeed(&potValues, T);
+  mastCurrentSpeed = potValues.speed->currentValue;
+#else
   mastSpeed.previousValue = mastSpeed.currentValue;
   mastSpeed.currentValue  = mastCurrentSpeed;
 
   // Get mast position from mast speed
   TustinZ((void *) &mastSpeed, (void *) &mastAngle);  // Discrete integrator
+#endif
 
+//========================//
+//Mast Angle Update
+//========================//
   /*
    * Some kind of modulo
    */
@@ -369,18 +386,21 @@ void Regulator (void)
    * limits MAST_MIN and MAST_MAX.
    */
 
+//========================//
+// Error - Signal Processing
+//========================//
   error = windAngle.currentValue - mastAngle.currentValue;
   
-  if (ABS(error) <= ERROR_THRESHOLD)  // Don't need to move the mast
+  if (AbsFloat(error) <= ERROR_THRESHOLD)  // Don't need to move the mast
   {
     cmd = 0;
   }
-  else if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )   // Mast too far
+  else if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )   // Mast too far
   {
     oEmergencyStop = 1;
     cmd = 0;
   }
-  else if ( (SIGN(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) && (mastSpeed.currentValue != 0) )  // Mast too far
+  else if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) && (mastSpeed.currentValue != 0) )  // Mast too far
   {
     oEmergencyStop = 1;
     cmd = 0;
@@ -390,22 +410,38 @@ void Regulator (void)
     oEmergencyStop = 0;
     oFirstTimeInMastStop = 1;
 
-    error -= SIGN(error) * ERROR_THRESHOLD;   // Substract the ERROR_THRESHOLD to reduce the risk of an abrupt stop by the mast
+    error -= SignFloat(error) * ERROR_THRESHOLD;   // Substract the ERROR_THRESHOLD to reduce the risk of an abrupt stop by the mast
 
+//========================//
+// inPI - Signal Processing
+//========================//    
+    
     inPi.previousValue = inPi.currentValue;
     inPi.currentValue  = K * error - mastSpeed.currentValue;
-
+    
+//========================//
+// Integral Computation
+//========================//
+    
     TustinZ((void *) &inPi, (void *) &outPi);
 
+//========================//
+// Process Command Processing
+//========================//
+    
     cmd = inPi.currentValue * KP + outPi.currentValue * KI;
 
-    if      (ABS(cmd) > PWM_MAX_DUTY_CYCLE)
+//========================//
+// PWM Duty Cycle Calculation
+//========================//
+    
+    if      (AbsFloat(cmd) > PWM_MAX_DUTY_CYCLE)
     {
-      cmd = SIGN(cmd) * PWM_MAX_DUTY_CYCLE;
+      cmd = SignFloat(cmd) * PWM_MAX_DUTY_CYCLE;
     }
-    else if (ABS(cmd) < PWM_MIN_DUTY_CYCLE)
+    else if (AbsFloat(cmd) < PWM_MIN_DUTY_CYCLE)
     {
-      cmd = SIGN(cmd) * PWM_MIN_DUTY_CYCLE;
+      cmd = SignFloat(cmd) * PWM_MIN_DUTY_CYCLE;
     }
   }
 
@@ -482,7 +518,7 @@ void AssessMastValues (void)
   //      meanTime = (rx2 + rx4) / 2;
         meanTime = (rx2 + rx4) >> 1;   // Divide by 2
 
-        float mastTime = SIGN(dir) * (float) meanTime * TIMER_SCALE_US;
+        float mastTime = SignInt(dir) * (float) meanTime * TIMER_SCALE_US;
 
         if (mastTime == 0)
         {
@@ -530,7 +566,7 @@ void AssessMastValues (void)
   //      meanTime = (rx1 + rx3) / 2;
         meanTime = (rx1 + rx3) >> 1;   // Divide by 2
 
-        float mastTime = SIGN(dir) * (float) meanTime * TIMER_SCALE_US;
+        float mastTime = SignInt(dir) * (float) meanTime * TIMER_SCALE_US;
 
         if (mastTime == 0)
         {

@@ -44,13 +44,13 @@ struct sChinook Chinook;            // Contains all ChinookLib functions
 //==============================================================================
 // Which drive to use
 //==============================================================================
-#define USE_DRIVE_A         0
-#define USE_DRIVE_B         1
+#define USE_DRIVE_A         1
+#define USE_DRIVE_B         0
 
 //==============================================================================
 // Are we using the potentiometer?
 //==============================================================================
-#define USE_POTENTIOMETER   1
+//#define USE_POTENTIOMETER   1
 
 //==============================================================================
 // Define this at one if you want to send the mast values via UART 
@@ -63,6 +63,7 @@ struct sChinook Chinook;            // Contains all ChinookLib functions
 // State Machine public functions prototypes
 //==============================================================================
 void InitTimer        (void);
+void InitAdc          (void);
 void InitPwm          (void);
 void InitPorts        (void);
 void InitCan          (void);
@@ -79,6 +80,7 @@ void StartInterrupts  (void);
 // Macro definitions
 //==============================================================================
 #define INIT_TIMER          InitTimer()
+#define INIT_ADC            InitAdc()
 #define INIT_PWM            InitPwm()
 #define INIT_PORTS          InitPorts()
 #define INIT_CAN            InitCan()

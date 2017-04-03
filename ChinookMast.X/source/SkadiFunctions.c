@@ -23,6 +23,7 @@
 #include "..\headers\SkadiFunctions.h"
 #include "..\headers\CommandFunctions.h"
 #include "..\headers\StateFunctions.h"
+#include "..\headers\Potentiometer.h"
 
 
 //==============================================================================
@@ -37,6 +38,8 @@ extern volatile sCmdValue_t  mastAngle
                             ,windAngle
                             ;
 
+extern sPotValues_t potValues;
+
 extern volatile float  mastCurrentSpeed
                       ,KP
                       ,KI
@@ -47,6 +50,9 @@ extern volatile float  mastCurrentSpeed
                       ;
 
 extern volatile UINT32 rxWindAngle;
+
+//New - for ReadStatus command
+extern volatile UINT8 driveStatus;
 
 extern volatile BOOL   oManualMode
                       ,oPrintData
@@ -219,9 +225,39 @@ void ClearScreen(sSkadi_t *skadi, sSkadiArgs_t args)
  *************************************************************/
 void WriteStatus(sSkadi_t *skadi, sSkadiArgs_t args)
 {
-  WriteDrive(DRVB, STATUS_Mastw);
+  WriteDrive(DRVA, STATUS_Mastw); //Allow drive selection?
   sUartLineBuffer_t buffer;
   buffer.length = sprintf(buffer.buffer, "STATUS msg written to drive\r\n\n");
+  Uart.PutTxFifoBuffer(UART6, &buffer);
+}
+
+/**************************************************************
+ * Function name  : ReadStatus
+ * Purpose        : Read status, send to terminal
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void ReadStatus(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  
+  ReadDrive(DRVA, STATUS_Mastw); //Allow drive selection?
+  sUartLineBuffer_t buffer;
+  buffer.length = sprintf(buffer.buffer, "Drive STATUS register content is: %c\r\n\n", driveStatus);
+  Uart.PutTxFifoBuffer(UART6, &buffer);
+}
+
+
+/**************************************************************
+ * Function name  : WriteMastInfo
+ * Purpose        : Call WriteMastPos2Eeprom
+ * Arguments      : None.
+ * Returns        : None.
+ *************************************************************/
+void WriteMastInfo(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  WriteMastPos2Eeprom();
+  sUartLineBuffer_t buffer;
+  buffer.length = sprintf(buffer.buffer, "Mast info written to EEPROM\r\n\n");
   Uart.PutTxFifoBuffer(UART6, &buffer);
 }
 
@@ -287,7 +323,9 @@ void SetPos(sSkadi_t *skadi, sSkadiArgs_t args)
 //    mast /= 10.0f;
     mastAngle.currentValue  = mast;
     mastAngle.previousValue = mast;
+#ifndef USE_POTENTIOMETER
     mastCurrentSpeed = 0;
+#endif
     if (mast == 0)
     {
       SEND_CALIB_DONE;
@@ -390,6 +428,33 @@ void SetWind(sSkadi_t *skadi, sSkadiArgs_t args)
     buffer.length = sprintf(buffer.buffer, "Mauvais argument!\r\n\n");
     Uart.PutTxFifoBuffer(UART6, &buffer);
   }
+}
+
+
+/**************************************************************
+ * Function name  : SetZero
+ * Purpose        : Set the current pos as the zero
+ * Arguments      : Received from Skadi functions
+ * Returns        : None.
+ *************************************************************/
+void SetZero(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  sUartLineBuffer_t buffer;
+  
+  mastAngle.currentValue = 0;
+  mastAngle.previousValue = 0;
+  
+#ifdef USE_POTENTIOMETER
+  potValues.zeroInBits = potValues.lastAverage;
+  potValues.potStepValue = POT_TO_MOTOR_RATIO >> 1;
+#endif
+  
+  WriteMastPos2Eeprom (); // Write zero to EEPROM
+
+  SEND_CALIB_DONE;  // Confirm that the calib is done
+  
+  buffer.length = sprintf(buffer.buffer, "Zero set\r\n\n");
+  Uart.PutTxFifoBuffer(UART6, &buffer);
 }
 
 

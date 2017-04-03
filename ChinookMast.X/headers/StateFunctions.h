@@ -54,6 +54,22 @@ void AssessButtons (void);
 // =======================================
 
 
+// Math functions
+// =======================================
+INT8  SignFloat (float value);
+INT8  SignInt   (INT32 value);
+
+float AbsFloat  (float value);
+INT32 AbsInt    (INT32 value);
+
+float MaxFloat (float v1, float v2);
+INT32 MaxInt (INT32 v1, INT32 v2);
+
+float MinFloat (float v1, float v2);
+INT32 MinInt (INT32 v1, INT32 v2);
+// =======================================
+
+
 //==============================================================================
 // Macro definitions
 //==============================================================================
@@ -65,7 +81,7 @@ typedef union
   struct
   {
     UINT8  steerWheelSw1  : 1
-          ,steerWheelSw3  : 1
+          ,steerWheelSw4  : 1
           ,steerWheelSw10 : 1
           ,boardSw1       : 1
           ,boardSw2       : 1
@@ -83,7 +99,7 @@ typedef union
   struct
   {
     UINT8  steerWheelSw1  : 1
-          ,steerWheelSw3  : 1
+          ,steerWheelSw4  : 1
           ,steerWheelSw10 : 1
           ,boardSw1       : 1
           ,boardSw2       : 1
