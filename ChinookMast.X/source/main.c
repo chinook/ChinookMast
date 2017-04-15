@@ -91,14 +91,29 @@ void main(void)
                     ;
   
   float timeStamp = 0;
-  float nonNullDummyValue = 0.001f;
-  int n;
   
-  extern volatile BOOL oTimerReg;   //Timer 1 is used
+  extern volatile BOOL oTimerReg;
   extern volatile sCmdValue_t mastSpeed;
   extern volatile float mastCurrentSpeed;
   
-#define TIMESTAMP_VALUE 0.01f   //Also set in the Timer 1 params
+
+  UINT16  startPWM = 600;
+  UINT16  not_startPWM = 400;
+  
+  #define TIMESTAMP_VALUE 0.1f
+ 
+  BOOL deadZoneCarac = 0;   //Set to 1 to characterize the deadzone limits
+  //The variables below are only used when characterizing the MCC deadzone
+  UINT16 idle = 500;        //PWM reset value
+  UINT16 n = 0;             //Used to increment the
+  UINT16 PWM = 500;         //Deadzone charact. starts at 0%
+  UINT16 notPWM = 500;
+  float pwm2Float = 0;      //Used to send the current PWM value
+                            //PWM of 500 is 0% whereas 750 is (next line)
+                            //(750-500)*100%/500 = 50%
+  
+  
+
   
   LED_ALL_OFF();
   
@@ -128,40 +143,7 @@ void main(void)
     rxBuf.length = 0;
     LED_DEBUG2_ON;
     
-    MastStartPwm(500, 500);
-    
-    //le while suivant devait servir a creer une periode de temps
-    //ou des valeurs quasiment nulles seraient enregistrees dans Matlab.
-    //J'ai penser que ce serait une bonne idee parce la constante de temps
-    //etait pas visible.
-    while(n <= 1000)
-    {
-      while(rxBuf.buffer[0] == 0)
-      {
-        while(rxBuf.length == 0)
-        {
-          Uart.GetRxFifoBuffer(UART6, &rxBuf, FALSE);
-//          AssessMastValues();
-          if (oTimerReg)
-          {
-            oTimerReg = 0;
-            // Update mast speed
-            mastSpeed.previousValue = mastSpeed.currentValue;
-            mastSpeed.currentValue  = mastCurrentSpeed;
-
-            timeStamp += TIMESTAMP_VALUE;
-            n++;
-            memcpy(&txBuf.buffer[0], &timeStamp                       , 4);
-            //Fait que changer dans la ligne suivante &mastSpeed.currentValue
-            //par &nonNullDummyValue a fait sauter la drive, sacrament.
-            memcpy(&txBuf.buffer[4], (void *) &nonNullDummyValue , 4);
-            txBuf.length = 8;
-            Uart.PutTxFifoBuffer(UART6, &txBuf);
-          }
-        }
-      }
-    } 
-    MastStartPwm(590, 410); //Change these PWM value
+    MastStartPwm(not_startPWM, startPWM);   // PWM to adjust in this function.
       
     while(rxBuf.buffer[0] == 0)
     {
@@ -176,11 +158,26 @@ void main(void)
           mastSpeed.previousValue = mastSpeed.currentValue;
           mastSpeed.currentValue  = mastCurrentSpeed;
           
-          timeStamp += TIMESTAMP_VALUE;
-          memcpy(&txBuf.buffer[0], &timeStamp                       , 4);
-          memcpy(&txBuf.buffer[4], (void *) &mastSpeed.currentValue , 4);
-          txBuf.length = 8;
-          Uart.PutTxFifoBuffer(UART6, &txBuf);
+          if(!deadZoneCarac){
+            timeStamp += TIMESTAMP_VALUE;
+            memcpy(&txBuf.buffer[0], &timeStamp                       , 4);
+            memcpy(&txBuf.buffer[4], (void *) &mastSpeed.currentValue , 4);
+            txBuf.length = 8;
+            Uart.PutTxFifoBuffer(UART6, &txBuf);
+          }
+          else{
+            pwm2Float = (float) PWM;
+            memcpy(&txBuf.buffer[0], &pwm2Float                       , 4);
+            memcpy(&txBuf.buffer[4], (void *) &mastSpeed.currentValue , 4);
+            txBuf.length = 8;
+            Uart.PutTxFifoBuffer(UART6, &txBuf);
+            n += 1;
+            if(n <= 300){
+              PWM += n;
+              notPWM -= n;
+              MastStartPwm(notPWM, PWM);
+            }
+          }
         }
       }
       if (rxBuf.buffer[0] != 'N')
@@ -193,6 +190,9 @@ void main(void)
     rxBuf.buffer[0] = 0;
     rxBuf.length = 0;
     timeStamp = 0;
+    n = 0;
+    notPWM = idle;
+    PWM = idle;
     MastManualStop();
     LED_DEBUG2_OFF;
 

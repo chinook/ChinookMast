@@ -51,17 +51,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=source/DRV8711_Para.c source/Interrupts.c source/Setup.c source/SkadiFunctions.c source/main.c source/StateMachine.c source/CommandFunctions.c source/StateFunctions.c source/Potentiometer.c
+SOURCEFILES_QUOTED_IF_SPACED=source/DRV8711_Para.c source/Interrupts.c source/Setup.c source/SkadiFunctions.c source/StateMachine.c source/CommandFunctions.c source/StateFunctions.c source/Potentiometer.c source/main.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/source/DRV8711_Para.o ${OBJECTDIR}/source/Interrupts.o ${OBJECTDIR}/source/Setup.o ${OBJECTDIR}/source/SkadiFunctions.o ${OBJECTDIR}/source/main.o ${OBJECTDIR}/source/StateMachine.o ${OBJECTDIR}/source/CommandFunctions.o ${OBJECTDIR}/source/StateFunctions.o ${OBJECTDIR}/source/Potentiometer.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/source/DRV8711_Para.o.d ${OBJECTDIR}/source/Interrupts.o.d ${OBJECTDIR}/source/Setup.o.d ${OBJECTDIR}/source/SkadiFunctions.o.d ${OBJECTDIR}/source/main.o.d ${OBJECTDIR}/source/StateMachine.o.d ${OBJECTDIR}/source/CommandFunctions.o.d ${OBJECTDIR}/source/StateFunctions.o.d ${OBJECTDIR}/source/Potentiometer.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/source/DRV8711_Para.o ${OBJECTDIR}/source/Interrupts.o ${OBJECTDIR}/source/Setup.o ${OBJECTDIR}/source/SkadiFunctions.o ${OBJECTDIR}/source/StateMachine.o ${OBJECTDIR}/source/CommandFunctions.o ${OBJECTDIR}/source/StateFunctions.o ${OBJECTDIR}/source/Potentiometer.o ${OBJECTDIR}/source/main.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/source/DRV8711_Para.o.d ${OBJECTDIR}/source/Interrupts.o.d ${OBJECTDIR}/source/Setup.o.d ${OBJECTDIR}/source/SkadiFunctions.o.d ${OBJECTDIR}/source/StateMachine.o.d ${OBJECTDIR}/source/CommandFunctions.o.d ${OBJECTDIR}/source/StateFunctions.o.d ${OBJECTDIR}/source/Potentiometer.o.d ${OBJECTDIR}/source/main.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/source/DRV8711_Para.o ${OBJECTDIR}/source/Interrupts.o ${OBJECTDIR}/source/Setup.o ${OBJECTDIR}/source/SkadiFunctions.o ${OBJECTDIR}/source/main.o ${OBJECTDIR}/source/StateMachine.o ${OBJECTDIR}/source/CommandFunctions.o ${OBJECTDIR}/source/StateFunctions.o ${OBJECTDIR}/source/Potentiometer.o
+OBJECTFILES=${OBJECTDIR}/source/DRV8711_Para.o ${OBJECTDIR}/source/Interrupts.o ${OBJECTDIR}/source/Setup.o ${OBJECTDIR}/source/SkadiFunctions.o ${OBJECTDIR}/source/StateMachine.o ${OBJECTDIR}/source/CommandFunctions.o ${OBJECTDIR}/source/StateFunctions.o ${OBJECTDIR}/source/Potentiometer.o ${OBJECTDIR}/source/main.o
 
 # Source Files
-SOURCEFILES=source/DRV8711_Para.c source/Interrupts.c source/Setup.c source/SkadiFunctions.c source/main.c source/StateMachine.c source/CommandFunctions.c source/StateFunctions.c source/Potentiometer.c
+SOURCEFILES=source/DRV8711_Para.c source/Interrupts.c source/Setup.c source/SkadiFunctions.c source/StateMachine.c source/CommandFunctions.c source/StateFunctions.c source/Potentiometer.c source/main.c
 
 
 CFLAGS=
@@ -124,12 +124,6 @@ ${OBJECTDIR}/source/SkadiFunctions.o: source/SkadiFunctions.c  nbproject/Makefil
 	@${RM} ${OBJECTDIR}/source/SkadiFunctions.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/SkadiFunctions.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/SkadiFunctions.o.d" -o ${OBJECTDIR}/source/SkadiFunctions.o source/SkadiFunctions.c      $(COMPARISON_BUILD) 
 	
-${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/source" 
-	@${RM} ${OBJECTDIR}/source/main.o.d 
-	@${RM} ${OBJECTDIR}/source/main.o 
-	@${FIXDEPS} "${OBJECTDIR}/source/main.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/main.o.d" -o ${OBJECTDIR}/source/main.o source/main.c      $(COMPARISON_BUILD) 
-	
 ${OBJECTDIR}/source/StateMachine.o: source/StateMachine.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/StateMachine.o.d 
@@ -153,6 +147,12 @@ ${OBJECTDIR}/source/Potentiometer.o: source/Potentiometer.c  nbproject/Makefile-
 	@${RM} ${OBJECTDIR}/source/Potentiometer.o.d 
 	@${RM} ${OBJECTDIR}/source/Potentiometer.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/Potentiometer.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/Potentiometer.o.d" -o ${OBJECTDIR}/source/Potentiometer.o source/Potentiometer.c      $(COMPARISON_BUILD) 
+	
+${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/source" 
+	@${RM} ${OBJECTDIR}/source/main.o.d 
+	@${RM} ${OBJECTDIR}/source/main.o 
+	@${FIXDEPS} "${OBJECTDIR}/source/main.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE) -g -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -fframe-base-loclist  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/main.o.d" -o ${OBJECTDIR}/source/main.o source/main.c      $(COMPARISON_BUILD) 
 	
 else
 ${OBJECTDIR}/source/DRV8711_Para.o: source/DRV8711_Para.c  nbproject/Makefile-${CND_CONF}.mk
@@ -179,12 +179,6 @@ ${OBJECTDIR}/source/SkadiFunctions.o: source/SkadiFunctions.c  nbproject/Makefil
 	@${RM} ${OBJECTDIR}/source/SkadiFunctions.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/SkadiFunctions.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/SkadiFunctions.o.d" -o ${OBJECTDIR}/source/SkadiFunctions.o source/SkadiFunctions.c      $(COMPARISON_BUILD) 
 	
-${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/source" 
-	@${RM} ${OBJECTDIR}/source/main.o.d 
-	@${RM} ${OBJECTDIR}/source/main.o 
-	@${FIXDEPS} "${OBJECTDIR}/source/main.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/main.o.d" -o ${OBJECTDIR}/source/main.o source/main.c      $(COMPARISON_BUILD) 
-	
 ${OBJECTDIR}/source/StateMachine.o: source/StateMachine.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/StateMachine.o.d 
@@ -208,6 +202,12 @@ ${OBJECTDIR}/source/Potentiometer.o: source/Potentiometer.c  nbproject/Makefile-
 	@${RM} ${OBJECTDIR}/source/Potentiometer.o.d 
 	@${RM} ${OBJECTDIR}/source/Potentiometer.o 
 	@${FIXDEPS} "${OBJECTDIR}/source/Potentiometer.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/Potentiometer.o.d" -o ${OBJECTDIR}/source/Potentiometer.o source/Potentiometer.c      $(COMPARISON_BUILD) 
+	
+${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/source" 
+	@${RM} ${OBJECTDIR}/source/main.o.d 
+	@${RM} ${OBJECTDIR}/source/main.o 
+	@${FIXDEPS} "${OBJECTDIR}/source/main.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/main.o.d" -o ${OBJECTDIR}/source/main.o source/main.c      $(COMPARISON_BUILD) 
 	
 endif
 

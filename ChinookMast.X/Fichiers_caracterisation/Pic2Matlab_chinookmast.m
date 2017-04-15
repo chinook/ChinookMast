@@ -14,10 +14,10 @@ while reply == 'N'
 end
 
 % Create a serial port object.
-port = instrfind('Type', 'serial', 'Port', 'COM4', 'Tag', '');
+port = instrfind('Type', 'serial', 'Port', 'COM3', 'Tag', '');
 
 if isempty(port)
-    port = serial('COM4');
+    port = serial('COM3');
 else
     fclose(port);
     port = port(1)

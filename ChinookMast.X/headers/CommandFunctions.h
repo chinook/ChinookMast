@@ -39,15 +39,16 @@
 
 #ifndef __NEW_MOTOR__
 #define MOTOR_ENCODER_RATIO         49.0f
-#define MAST_MOTOR_RATIO            50.0f
+#define MAST_MOTOR_RATIO            2450.0f
 
+#define MAST_MOTOR_RATIO            50.0f
 #define MOTOR_DEG_PER_PULSE         360.0f/245.0f
 
 #else
 #define MOTOR_ENCODER_RATIO         71.0f
-#define MAST_MOTOR_RATIO            60.0f
+#define MAST_MOTOR_RATIO            4260.0f
 
-#define MOTOR_DEG_PER_PULSE         360.0f/576.0f
+#define MOTOR_DEG_PER_PULSE         360.0f/852.0f
 
 #endif
 
