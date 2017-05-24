@@ -71,19 +71,32 @@ sCmdValue_t  inPi   = {0}
 
 // Regulator parameters
 
-/*
+/* NEW MCC - NO LOAD
+ * 
+ * experimental data after initial caracterization
+ */
+volatile float KP = 0.010f  //Kept old value
+              ,KI = 0.010f  //Kept old value
+              ,K  = 0.470f  //Initial caract
+              ,PWM_MAX_DUTY_CYCLE = 0.600f  //Due to benchtop psu; might otherwise burn mosfets
+              ,PWM_MIN_DUTY_CYCLE = 0.100f  //Otherwise erratic gain
+              ,ERROR_THRESHOLD    = 4.000f  //Kept old value
+              ,T                  = 0.100f    // Same as TIMER_1
+              ;
+
+/* OLD DC MOTOR
  * These are the tested working values WITH the mast attached to the motor
  * shaft, but WITHOUT the blades.
  */
-volatile float KP = 0.010f
-              ,KI = 0.010f
-              ,K  = 0.100f
-              ,PWM_MAX_DUTY_CYCLE = 0.900f
-              ,PWM_MIN_DUTY_CYCLE = 0.030f
-              ,ERROR_THRESHOLD    = 4.000f
-              ,T                  = 0.100f    // Same as TIMER_1
-              ;
-/*
+//volatile float KP = 0.010f
+//              ,KI = 0.010f
+//              ,K  = 0.100f
+//              ,PWM_MAX_DUTY_CYCLE = 0.900f
+//              ,PWM_MIN_DUTY_CYCLE = 0.030f
+//              ,ERROR_THRESHOLD    = 4.000f
+//              ,T                  = 0.100f    // Same as TIMER_1
+//              ;
+/* OLD DC MOTOR
  * These are the tested working values WITHOUT the mast attached to the motor
  * shaft.
  */
