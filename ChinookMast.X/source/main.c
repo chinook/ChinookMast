@@ -97,14 +97,14 @@ void main(void)
   extern volatile float mastCurrentSpeed;
   
 
-  UINT16  startPWM = 600;
+  UINT16  startPWM = 600; // For single PW values
   UINT16  not_startPWM = 400;
   
   #define TIMESTAMP_VALUE 0.1f
  
   BOOL deadZoneCarac = 0;   //Set to 1 to characterize the deadzone limits
   //The variables below are only used when characterizing the MCC deadzone
-  UINT16 idle = 500;        //PWM reset value
+  UINT16 idle = 500;        //PWM reset value... leave at 500
   UINT16 n = 0;             //Used to increment the
   UINT16 PWM = 500;         //Deadzone charact. starts at 0%
   UINT16 notPWM = 500;
@@ -124,14 +124,14 @@ void main(void)
       while(rxBuf.length == 0)
       {
         Uart.GetRxFifoBuffer(UART6, &rxBuf, FALSE);
-        AssessMastValues();
-        if (oTimerReg)
-        {
-          oTimerReg = 0;
-          // Update mast speed
-          mastSpeed.previousValue = mastSpeed.currentValue;
-          mastSpeed.currentValue  = mastCurrentSpeed;
-        }
+//        AssessMastValues();
+//        if (oTimerReg)
+//        {
+//          oTimerReg = 0;
+//          // Update mast speed
+//          mastSpeed.previousValue = mastSpeed.currentValue;
+//          mastSpeed.currentValue  = mastCurrentSpeed;
+//      }
       }
       if (rxBuf.buffer[0] != 'Y')
       {
@@ -143,8 +143,14 @@ void main(void)
     rxBuf.length = 0;
     LED_DEBUG2_ON;
     
-    MastStartPwm(not_startPWM, startPWM);   // PWM to adjust in this function.
-      
+    if(!deadZoneCarac)
+    {
+      MastStartPwm(not_startPWM, startPWM);   // PWM to adjust in this function.
+    }
+    else{
+      MastStartPwm(idle, idle);
+    }
+    
     while(rxBuf.buffer[0] == 0)
     {
       while(rxBuf.length == 0)

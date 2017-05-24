@@ -44,8 +44,8 @@ struct sChinook Chinook;            // Contains all ChinookLib functions
 //==============================================================================
 // Which drive to use
 //==============================================================================
-#define USE_DRIVE_A         0
-#define USE_DRIVE_B         1
+#define USE_DRIVE_A         1
+#define USE_DRIVE_B         0
 
 //==============================================================================
 // Are we using the potentiometer?
