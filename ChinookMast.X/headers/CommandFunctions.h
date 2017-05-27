@@ -44,7 +44,7 @@
 /* The following #define names are quite misleading, make sure to read the comments
    before each and every terms */
 
-//#define __NEW_MOTOR__
+#define __NEW_MOTOR__
 
 #ifndef __NEW_MOTOR__
 /* The following specifications are for the IG42E-49K DC motor.
