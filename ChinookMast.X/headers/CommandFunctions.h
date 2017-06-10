@@ -76,7 +76,7 @@
 // ratio. In other words, it's the rotational degrees done by the output shaft
 // per encoder pulse.
 // Ex: 360/( (encoder pulses per motor shaft turns)*(gearbox ratio)
-#define MOTOR_DEG_PER_PULSE         360.0f/(PULSES_PER_ROTATION*MOTOR_ENCODER_RATIO)
+#define MOTOR_DEG_PER_PULSE         360.0f/245 //(PULSES_PER_ROTATION*MOTOR_ENCODER_RATIO)
 #endif
 
 #define N_DATA_TO_ACQ               300   // Used when debugging with SKADI

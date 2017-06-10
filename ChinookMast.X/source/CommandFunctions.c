@@ -76,12 +76,12 @@ sCmdValue_t  inPi   = {0}
  * experimental data after initial caracterization
  */
 volatile float KP = 0.010f  //Kept old value
-              ,KI = 0.010f  //Kept old value
+              ,KI = 0.0075f  //Kept old value
               ,K  = 0.470f  //Initial caract
-              ,PWM_MAX_DUTY_CYCLE = 0.600f  //Due to benchtop psu; might otherwise burn mosfets
-              ,PWM_MIN_DUTY_CYCLE = 0.100f  //Otherwise erratic gain
-              ,ERROR_THRESHOLD    = 4.000f  //Kept old value
-              ,T                  = 0.100f    // Same as TIMER_1
+              ,PWM_MAX_DUTY_CYCLE = 0.800f  //Due to benchtop psu; might otherwise pull too much current and burn mosfets
+              ,PWM_MIN_DUTY_CYCLE = 0.0350f  //Otherwise erratic gain
+              ,ERROR_THRESHOLD    = 0.100f  //Kept old value
+              ,T                  = 0.100f    // Old Comment: Same as TIMER_1
               ;
 
 /* OLD DC MOTOR
@@ -328,6 +328,7 @@ void Regulator (void)
         ,tempWind
         ;
 
+  Nop();
   // Update wind angle
   windAngle.previousValue = windAngle.currentValue;
   
@@ -386,10 +387,12 @@ void Regulator (void)
   if (mastAngle.currentValue > 180)
   {
     mastAngle.currentValue -= 360;
+    Nop();
   }
   else if (mastAngle.currentValue < -180)
   {
     mastAngle.currentValue += 360;
+    Nop();
   }
 
   /*
@@ -403,6 +406,7 @@ void Regulator (void)
 // Error - Signal Processing
 //========================//
   error = windAngle.currentValue - mastAngle.currentValue;
+  Nop();
   
   if (AbsFloat(error) <= ERROR_THRESHOLD)  // Don't need to move the mast
   {
@@ -412,11 +416,13 @@ void Regulator (void)
   {
     oEmergencyStop = 1;
     cmd = 0;
+    Nop();
   }
   else if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) && (mastSpeed.currentValue != 0) )  // Mast too far
   {
     oEmergencyStop = 1;
     cmd = 0;
+    Nop();
   }
   else
   {
@@ -437,6 +443,7 @@ void Regulator (void)
 //========================//
     
     TustinZ((void *) &inPi, (void *) &outPi);
+    Nop();
 
 //========================//
 // Process Command Processing

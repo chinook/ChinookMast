@@ -6,14 +6,8 @@
         <group>
             <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/headers/Setup.h</file>
             <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/source/CommandFunctions.c</file>
-            <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/headers/StateFunctions.h</file>
-            <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/source/DRV8711_Para.c</file>
-            <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/headers/DRV8711_Para.h</file>
-            <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/source/Interrupts.c</file>
-            <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/source/StateFunctions.c</file>
             <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/headers/CommandFunctions.h</file>
-            <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/source/main.c</file>
-            <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/source/Potentiometer.c</file>
+            <file>file:/C:/Users/Jérôme/Documents/GitHub/ChinookMast/ChinookMast.X/source/StateMachine.c</file>
         </group>
     </open-files>
 </project-private>
