@@ -59,11 +59,14 @@ volatile UINT32 rxWindAngle = 0;  // Received from CAN
 
 extern volatile BOOL  oManualMode
                      ,oCountTimeToChngMode
+                     ,oMastMaxStop 
+                     ,oMastMinStop
                      ;
 
 extern volatile float mastCurrentSpeed;
 
 extern volatile sButtonStates_t buttons;
+sUartLineBuffer_t buffer;
 
 
 //==============================================================================
@@ -126,6 +129,9 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
    */
   if (oEnableMastStopProcedure)
   {
+    buffer.length = sprintf(buffer.buffer, "Stop- Max?%u Min?%u \r\n\n", oMastMaxStop,oMastMinStop);
+    Uart.PutTxFifoBuffer(UART6, &buffer);
+    
     if (iMastStop == 0)
     {
       mastDir = SignFloat(mastCurrentSpeed);

@@ -154,6 +154,7 @@ void SetMode(sSkadi_t *skadi, sSkadiArgs_t args)
   }
   
   Uart.PutTxFifoBuffer(UART6, &buffer);
+  
 }
 
 

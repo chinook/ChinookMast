@@ -60,6 +60,10 @@ volatile sCmdValue_t windAngle          = {0}
                     ,mastAngle          = {0}
                     ,mastSpeed          = {0}
                     ;
+
+volatile BOOL oMastMaxStop   = 0     // The system has detected a limit and stopped the mast
+             ,oMastMinStop   = 0
+             ;
 //=====================================
 
 

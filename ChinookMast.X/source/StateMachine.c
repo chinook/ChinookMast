@@ -24,7 +24,6 @@
 #include "..\headers\StateFunctions.h"
 #include "..\headers\CommandFunctions.h"
 #include "..\headers\Potentiometer.h"
-#include "StateFunctions.c"
 
 extern volatile sButtonStates_t buttons;
 
@@ -58,6 +57,8 @@ extern volatile BOOL oCapture1
                     ,oTimerSendData
                     ,oTimerChngMode
                     ,oAdcReady
+                    ,oMastMaxStop
+                    ,oMastMinStop
                     ;
 
 volatile BOOL  oManualMode            = 1
@@ -65,6 +66,8 @@ volatile BOOL  oManualMode            = 1
               ,oManualFlagChng        = 0
               ,oManualMastRight       = 0
               ,oManualMastLeft        = 0
+//              ,oMastMaxStop           = 0
+//              ,oMastMinStop           = 0
               ;
 
 sPotValues_t potValues = 
@@ -469,16 +472,30 @@ void StateGetMastData(void)
   {
     if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )        // Mast too far
     {
-      if(!oEnableMastStopProcedure)
+      if(!oEnableMastStopProcedure && !oMastMinStop)  // New test to avoid the mast being ManualStop'ed repeatedly
       {
-        LED_DEBUG4_TOGGLE;
-        MastManualStop();
+          LED_DEBUG4_TOGGLE;
+          MastManualStop();
+          oMastMinStop = 1;   // New flag
       }
     }
-    else if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
+    else
     {
-      LED_DEBUG3_TOGGLE;
-      MastManualStop();
+      oMastMinStop = 0;   // Mast isn't at limit anymore
+    }
+    
+    if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
+    {
+      if(!oEnableMastStopProcedure && !oMastMaxStop) // New test to avoid the mast being ManualStop'ed repeatedly
+      {
+        LED_DEBUG3_TOGGLE;
+        MastManualStop();
+        oMastMaxStop = 1; // New flag
+      }
+    }
+    else
+    {
+      oMastMaxStop = 0;   // Mast isn't at limit anymore
     }
   }
 #else
