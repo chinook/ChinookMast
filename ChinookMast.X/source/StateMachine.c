@@ -24,6 +24,7 @@
 #include "..\headers\StateFunctions.h"
 #include "..\headers\CommandFunctions.h"
 #include "..\headers\Potentiometer.h"
+#include "StateFunctions.c"
 
 extern volatile sButtonStates_t buttons;
 
@@ -31,6 +32,7 @@ extern volatile UINT32 rxWindAngle;
 
 extern volatile float T;
 
+extern volatile BOOL oEnableMastStopProcedure;
 
 // Used for the average of the wind angle
 //========================================
@@ -467,8 +469,11 @@ void StateGetMastData(void)
   {
     if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )        // Mast too far
     {
-      LED_DEBUG4_TOGGLE;
-      MastManualStop();
+      if(!oEnableMastStopProcedure)
+      {
+        LED_DEBUG4_TOGGLE;
+        MastManualStop();
+      }
     }
     else if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
     {
