@@ -159,55 +159,55 @@ ${OBJECTDIR}/source/DRV8711_Para.o: source/DRV8711_Para.c  nbproject/Makefile-${
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/DRV8711_Para.o.d 
 	@${RM} ${OBJECTDIR}/source/DRV8711_Para.o 
-	@${FIXDEPS} "${OBJECTDIR}/source/DRV8711_Para.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/DRV8711_Para.o.d" -o ${OBJECTDIR}/source/DRV8711_Para.o source/DRV8711_Para.c      $(COMPARISON_BUILD) 
+	@${FIXDEPS} "${OBJECTDIR}/source/DRV8711_Para.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/DRV8711_Para.o.d" -o ${OBJECTDIR}/source/DRV8711_Para.o source/DRV8711_Para.c      $(COMPARISON_BUILD) 
 	
 ${OBJECTDIR}/source/Interrupts.o: source/Interrupts.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/Interrupts.o.d 
 	@${RM} ${OBJECTDIR}/source/Interrupts.o 
-	@${FIXDEPS} "${OBJECTDIR}/source/Interrupts.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/Interrupts.o.d" -o ${OBJECTDIR}/source/Interrupts.o source/Interrupts.c      $(COMPARISON_BUILD) 
+	@${FIXDEPS} "${OBJECTDIR}/source/Interrupts.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/Interrupts.o.d" -o ${OBJECTDIR}/source/Interrupts.o source/Interrupts.c      $(COMPARISON_BUILD) 
 	
 ${OBJECTDIR}/source/Setup.o: source/Setup.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/Setup.o.d 
 	@${RM} ${OBJECTDIR}/source/Setup.o 
-	@${FIXDEPS} "${OBJECTDIR}/source/Setup.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/Setup.o.d" -o ${OBJECTDIR}/source/Setup.o source/Setup.c      $(COMPARISON_BUILD) 
+	@${FIXDEPS} "${OBJECTDIR}/source/Setup.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/Setup.o.d" -o ${OBJECTDIR}/source/Setup.o source/Setup.c      $(COMPARISON_BUILD) 
 	
 ${OBJECTDIR}/source/SkadiFunctions.o: source/SkadiFunctions.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/SkadiFunctions.o.d 
 	@${RM} ${OBJECTDIR}/source/SkadiFunctions.o 
-	@${FIXDEPS} "${OBJECTDIR}/source/SkadiFunctions.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/SkadiFunctions.o.d" -o ${OBJECTDIR}/source/SkadiFunctions.o source/SkadiFunctions.c      $(COMPARISON_BUILD) 
+	@${FIXDEPS} "${OBJECTDIR}/source/SkadiFunctions.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/SkadiFunctions.o.d" -o ${OBJECTDIR}/source/SkadiFunctions.o source/SkadiFunctions.c      $(COMPARISON_BUILD) 
 	
 ${OBJECTDIR}/source/main.o: source/main.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/main.o.d 
 	@${RM} ${OBJECTDIR}/source/main.o 
-	@${FIXDEPS} "${OBJECTDIR}/source/main.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/main.o.d" -o ${OBJECTDIR}/source/main.o source/main.c      $(COMPARISON_BUILD) 
+	@${FIXDEPS} "${OBJECTDIR}/source/main.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/main.o.d" -o ${OBJECTDIR}/source/main.o source/main.c      $(COMPARISON_BUILD) 
 	
 ${OBJECTDIR}/source/StateMachine.o: source/StateMachine.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/StateMachine.o.d 
 	@${RM} ${OBJECTDIR}/source/StateMachine.o 
-	@${FIXDEPS} "${OBJECTDIR}/source/StateMachine.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/StateMachine.o.d" -o ${OBJECTDIR}/source/StateMachine.o source/StateMachine.c      $(COMPARISON_BUILD) 
+	@${FIXDEPS} "${OBJECTDIR}/source/StateMachine.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/StateMachine.o.d" -o ${OBJECTDIR}/source/StateMachine.o source/StateMachine.c      $(COMPARISON_BUILD) 
 	
 ${OBJECTDIR}/source/CommandFunctions.o: source/CommandFunctions.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/CommandFunctions.o.d 
 	@${RM} ${OBJECTDIR}/source/CommandFunctions.o 
-	@${FIXDEPS} "${OBJECTDIR}/source/CommandFunctions.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/CommandFunctions.o.d" -o ${OBJECTDIR}/source/CommandFunctions.o source/CommandFunctions.c      $(COMPARISON_BUILD) 
+	@${FIXDEPS} "${OBJECTDIR}/source/CommandFunctions.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/CommandFunctions.o.d" -o ${OBJECTDIR}/source/CommandFunctions.o source/CommandFunctions.c      $(COMPARISON_BUILD) 
 	
 ${OBJECTDIR}/source/StateFunctions.o: source/StateFunctions.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/StateFunctions.o.d 
 	@${RM} ${OBJECTDIR}/source/StateFunctions.o 
-	@${FIXDEPS} "${OBJECTDIR}/source/StateFunctions.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/StateFunctions.o.d" -o ${OBJECTDIR}/source/StateFunctions.o source/StateFunctions.c      $(COMPARISON_BUILD) 
+	@${FIXDEPS} "${OBJECTDIR}/source/StateFunctions.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/StateFunctions.o.d" -o ${OBJECTDIR}/source/StateFunctions.o source/StateFunctions.c      $(COMPARISON_BUILD) 
 	
 ${OBJECTDIR}/source/Potentiometer.o: source/Potentiometer.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/source" 
 	@${RM} ${OBJECTDIR}/source/Potentiometer.o.d 
 	@${RM} ${OBJECTDIR}/source/Potentiometer.o 
-	@${FIXDEPS} "${OBJECTDIR}/source/Potentiometer.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/Potentiometer.o.d" -o ${OBJECTDIR}/source/Potentiometer.o source/Potentiometer.c      $(COMPARISON_BUILD) 
+	@${FIXDEPS} "${OBJECTDIR}/source/Potentiometer.o.d" $(SILENT) -rsi ${MP_CC_DIR}../  -c ${MP_CC}  $(MP_EXTRA_CC_PRE)  -g -x c -c -mprocessor=$(MP_PROCESSOR_OPTION)  -MMD -MF "${OBJECTDIR}/source/Potentiometer.o.d" -o ${OBJECTDIR}/source/Potentiometer.o source/Potentiometer.c      $(COMPARISON_BUILD) 
 	
 endif
 
