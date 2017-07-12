@@ -61,8 +61,8 @@ volatile sCmdValue_t windAngle          = {0}
                     ,mastSpeed          = {0}
                     ;
 
-volatile BOOL oMastMaxStop   = 0     // The system has detected a limit and stopped the mast
-             ,oMastMinStop   = 0
+volatile BOOL oMastMaxBlock   = 0     // The system has detected a limit and blocks further rotation from MastManualStop()
+             ,oMastMinBlock   = 0
              ;
 //=====================================
 
@@ -268,6 +268,10 @@ void SetPwm (float cmd)
 
     if (SignFloat(cmd) == MAST_DIR_LEFT)
     {
+      if(!MAST_MAX_OK)
+      {
+        oMastMaxBlock = 0;  // Mast is leaving its max limit, reset blokcing flag
+      }
       // DRIVE B
       //==========================================================
       if (USE_DRIVE_B == 1)
@@ -290,6 +294,10 @@ void SetPwm (float cmd)
     }
     else if (SignFloat(cmd) == MAST_DIR_RIGHT)
     {
+      if(!MAST_MIN_OK)
+      {
+        oMastMinBlock = 0;  // Reset blocking flag
+      }
       // DRIVE B
       //==========================================================
       if (USE_DRIVE_B == 1)

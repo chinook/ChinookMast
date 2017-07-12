@@ -57,8 +57,8 @@ extern volatile BOOL oCapture1
                     ,oTimerSendData
                     ,oTimerChngMode
                     ,oAdcReady
-                    ,oMastMaxStop
-                    ,oMastMinStop
+                    ,oMastMinBlock
+                    ,oMastMaxBlock
                     ;
 
 volatile BOOL  oManualMode            = 1
@@ -66,8 +66,6 @@ volatile BOOL  oManualMode            = 1
               ,oManualFlagChng        = 0
               ,oManualMastRight       = 0
               ,oManualMastLeft        = 0
-//              ,oMastMaxStop           = 0
-//              ,oMastMinStop           = 0
               ;
 
 sPotValues_t potValues = 
@@ -372,10 +370,14 @@ void StateManual(void)
   {
     if (!MAST_MIN_OK)   // Mast too far
     {
-//      MastManualStop();   Do nothing
+      // Do nothing
     }
     else
     {
+      if(!MAST_MAX_OK)
+      {
+        oMastMaxBlock = 0;  // Reset orientation blocking flag (used in MastManualStop())
+      }
       MastManualLeft();
     }
   }
@@ -383,10 +385,14 @@ void StateManual(void)
   {
     if (!MAST_MAX_OK)   // Mast too far
     {
-//      MastManualStop();   Do nothing
+      // Do nothing
     }
     else
     {
+      if(!MAST_MIN_OK)
+      {
+        oMastMinBlock = 0;//Reset orientation blocking flag (used in MastManualStop())
+      }
       MastManualRight();
     }
   }
@@ -470,32 +476,22 @@ void StateGetMastData(void)
 //  if (AbsFloat(mastSpeed.currentValue) >= BITS_TO_DEG_TIMES_20)
   if (AbsFloat(mastSpeed.currentValue) >= 3.5f)
   {
-    if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )        // Mast too far
+    if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )        // Mast too far left
     {
-      if(!oEnableMastStopProcedure && !oMastMinStop)  // New test to avoid the mast being ManualStop'ed repeatedly
+      if(!oEnableMastStopProcedure)
       {
           LED_DEBUG4_TOGGLE;
-          MastManualStop();
-          oMastMinStop = 1;   // New flag
       }
-    }
-    else
-    {
-      oMastMinStop = 0;   // Mast isn't at limit anymore
+      MastManualStop();
     }
     
-    if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
+    if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far right
     {
-      if(!oEnableMastStopProcedure && !oMastMaxStop) // New test to avoid the mast being ManualStop'ed repeatedly
+      if(!oEnableMastStopProcedure)
       {
         LED_DEBUG3_TOGGLE;
-        MastManualStop();
-        oMastMaxStop = 1; // New flag
       }
-    }
-    else
-    {
-      oMastMaxStop = 0;   // Mast isn't at limit anymore
+      MastManualStop();
     }
   }
 #else

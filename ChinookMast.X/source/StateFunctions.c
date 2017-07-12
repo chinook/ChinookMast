@@ -52,6 +52,7 @@ volatile sButtonStates_t buttons =
 };
 
 extern volatile float  mastCurrentSpeed       // Actual speed of Mast
+                      ,mastDir
                       ;
 
 extern sPotValues_t potValues;
@@ -72,6 +73,8 @@ extern volatile BOOL oCapture1
                     ,oManualMastLeft
                     ,oTimerSetZero
                     ,oSetZeroCounterOccured
+                    ,oMastMinBlock
+                    ,oMastMaxBlock
                     ;
 
 extern volatile UINT16 setZeroCounter;
@@ -237,8 +240,43 @@ void MastManualRight (void)
 
 void MastManualStop (void)
 {
-  oEnableMastStopProcedure = 1;     // Start stop procedure using TIMER 2
-  LED_STATUS_TOGGLE;
+  mastDir = SignFloat(mastCurrentSpeed);
+  if(mastDir = MAST_DIR_LEFT)
+  {
+    if(!MAST_MIN_OK && !oMastMinBlock)    
+    {
+      oMastMinBlock = 1;  //Block further mast movement involving the stopping sequence
+      oEnableMastStopProcedure = 1;  // Start stop procedure using TIMER 2
+    }
+    else if(!MAST_MIN_OK && oMastMinBlock)
+    {
+      //Do nothing, Mast has reached Min limit and is already blocked
+    }
+    else    //Mast MIN limit hasn't been reached
+    {
+      oEnableMastStopProcedure = 1;
+    }
+  }
+  else if(mastDir = MAST_DIR_RIGHT)
+  {
+    if(!MAST_MAX_OK && !oMastMaxBlock)    
+    {
+      oMastMaxBlock = 1;
+      oEnableMastStopProcedure = 1;  // Start stop procedure using TIMER 2
+    }
+    else if(!MAST_MAX_OK && oMastMaxBlock)
+    {
+      //Do nothing
+    }
+    else
+    {
+      oEnableMastStopProcedure = 1;
+    }
+  }
+  else
+  {
+    LED_ERROR_ON;
+  }
 
   // DRIVE B
   //==========================================================
