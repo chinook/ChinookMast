@@ -284,8 +284,6 @@ void MastManualStop (void)
     }
     else
     {
-      buffer.length = sprintf(buffer.buffer, "went straight \r\n\n");
-      Uart.PutTxFifoBuffer(UART6, &buffer);
       oEnableMastStopProcedure = 1;
     }
   }
@@ -688,6 +686,9 @@ void SetZeroFromSteeringWheel (void)
   mastAngle.currentValue = 0;
   mastAngle.previousValue = 0;
         
+  oMastMinBlock = 0;
+  oMastMaxBlock = 0;
+  
 #ifdef USE_POTENTIOMETER
   potValues.zeroInBits = potValues.lastAverage;
   potValues.potStepValue = POT_TO_MOTOR_RATIO >> 1;

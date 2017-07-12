@@ -59,6 +59,8 @@ extern volatile UINT32 rxWindAngle;
 extern volatile BOOL   oManualMode
                       ,oPrintData
                       ,oNewWindAngle
+                      ,oMastMinBlock
+                      ,oMastMaxBlock
                       ;
 
 //==============================================================================
@@ -446,6 +448,9 @@ void SetZero(sSkadi_t *skadi, sSkadiArgs_t args)
   
   mastAngle.currentValue = 0;
   mastAngle.previousValue = 0;
+  
+  oMastMinBlock = 0;
+  oMastMaxBlock = 0;
   
 #ifdef USE_POTENTIOMETER
   potValues.zeroInBits = potValues.lastAverage;
