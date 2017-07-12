@@ -33,6 +33,8 @@ extern volatile float T;
 
 extern volatile BOOL oEnableMastStopProcedure;
 
+extern sUartLineBuffer_t buffer;
+
 // Used for the average of the wind angle
 //========================================
 extern volatile UINT32 nWindAngleSamples;
@@ -370,7 +372,7 @@ void StateManual(void)
   {
     if (!MAST_MIN_OK)   // Mast too far
     {
-      // Do nothing
+//      MastManualStop();
     }
     else
     {
@@ -385,7 +387,7 @@ void StateManual(void)
   {
     if (!MAST_MAX_OK)   // Mast too far
     {
-      // Do nothing
+//      MastManualStop();
     }
     else
     {
@@ -481,17 +483,20 @@ void StateGetMastData(void)
       if(!oEnableMastStopProcedure)
       {
           LED_DEBUG4_TOGGLE;
+          MastManualStop();
       }
-      MastManualStop();
     }
     
     if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far right
     {
       if(!oEnableMastStopProcedure)
       {
+        buffer.length = sprintf(buffer.buffer, "GetMastData stop \r\n\n");
+        Uart.PutTxFifoBuffer(UART6, &buffer);
         LED_DEBUG3_TOGGLE;
+        MastManualStop();
       }
-      MastManualStop();
+
     }
   }
 #else

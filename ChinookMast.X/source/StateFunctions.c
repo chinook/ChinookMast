@@ -52,8 +52,9 @@ volatile sButtonStates_t buttons =
 };
 
 extern volatile float  mastCurrentSpeed       // Actual speed of Mast
-                      ,mastDir
                       ;
+
+volatile float mastDirMan;
 
 extern sPotValues_t potValues;
 
@@ -79,6 +80,7 @@ extern volatile BOOL oCapture1
 
 extern volatile UINT16 setZeroCounter;
 
+extern sUartLineBuffer_t buffer;
 
 //==============================================================================
 // EEPROM functions
@@ -240,11 +242,18 @@ void MastManualRight (void)
 
 void MastManualStop (void)
 {
-  mastDir = SignFloat(mastCurrentSpeed);
-  if(mastDir = MAST_DIR_LEFT)
+  mastDirMan = SignFloat(mastCurrentSpeed);
+  buffer.length = sprintf(buffer.buffer, "mastDirMan = %f \r\n\n", mastDirMan);
+  Uart.PutTxFifoBuffer(UART6, &buffer);
+  if(mastDirMan == MAST_DIR_LEFT)
   {
+    buffer.length = sprintf(buffer.buffer, "Mast Left \r\n\n");
+    Uart.PutTxFifoBuffer(UART6, &buffer);
+    
     if(!MAST_MIN_OK && !oMastMinBlock)    
     {
+      buffer.length = sprintf(buffer.buffer, "Man:Set Min Block \r\n\n");
+      Uart.PutTxFifoBuffer(UART6, &buffer);
       oMastMinBlock = 1;  //Block further mast movement involving the stopping sequence
       oEnableMastStopProcedure = 1;  // Start stop procedure using TIMER 2
     }
@@ -257,10 +266,15 @@ void MastManualStop (void)
       oEnableMastStopProcedure = 1;
     }
   }
-  else if(mastDir = MAST_DIR_RIGHT)
+  else if(mastDirMan == MAST_DIR_RIGHT)
   {
-    if(!MAST_MAX_OK && !oMastMaxBlock)    
+    buffer.length = sprintf(buffer.buffer, "Mast Right \r\n\n");
+    Uart.PutTxFifoBuffer(UART6, &buffer);
+    
+    if(!MAST_MAX_OK && !oMastMaxBlock)
     {
+      buffer.length = sprintf(buffer.buffer, "Man:Set Max Block \r\n\n");
+      Uart.PutTxFifoBuffer(UART6, &buffer);
       oMastMaxBlock = 1;
       oEnableMastStopProcedure = 1;  // Start stop procedure using TIMER 2
     }
@@ -270,13 +284,59 @@ void MastManualStop (void)
     }
     else
     {
+      buffer.length = sprintf(buffer.buffer, "went straight \r\n\n");
+      Uart.PutTxFifoBuffer(UART6, &buffer);
       oEnableMastStopProcedure = 1;
     }
   }
-  else
-  {
-    LED_ERROR_ON;
-  }
+  
+  
+//  if(mastDirMan == MAST_DIR_RIGHT)
+//  {
+//    buffer.length = sprintf(buffer.buffer, "Mast Dir Right \r\n\n");
+//    Uart.PutTxFifoBuffer(UART6, &buffer);
+//    
+//    if(!MAST_MAX_OK && !oMastMaxBlock)
+//    {
+//      buffer.length = sprintf(buffer.buffer, "Man:Set Max Block \r\n\n");
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
+//      oMastMaxBlock = 1;
+//      oEnableMastStopProcedure = 1;  // Start stop procedure using TIMER 2
+//    }
+//    else if(!MAST_MAX_OK && oMastMaxBlock)
+//    {
+//      //Do nothing
+//    }
+//    else
+//    {
+//      buffer.length = sprintf(buffer.buffer, "went straight \r\n\n");
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
+//      oEnableMastStopProcedure = 1;
+//    }
+//  }
+//  
+//  if(mastDirMan == MAST_DIR_LEFT)
+//  {
+//    buffer.length = sprintf(buffer.buffer, "Mast Dir Left \r\n\n");
+//    Uart.PutTxFifoBuffer(UART6, &buffer);
+//    
+//    if(!MAST_MIN_OK && !oMastMinBlock)    
+//    {
+//      buffer.length = sprintf(buffer.buffer, "Man:Set Min Block \r\n\n");
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
+//      oMastMinBlock = 1;  //Block further mast movement involving the stopping sequence
+//      oEnableMastStopProcedure = 1;  // Start stop procedure using TIMER 2
+//    }
+//    else if(!MAST_MIN_OK && oMastMinBlock)
+//    {
+//      //Do nothing, Mast has reached Min limit and is already blocked
+//    }
+//    else    //Mast MIN limit hasn't been reached
+//    {
+//      oEnableMastStopProcedure = 1;
+//    }
+//  }
+  mastDirMan = 0;
 
   // DRIVE B
   //==========================================================

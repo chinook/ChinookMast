@@ -41,6 +41,7 @@ extern sPotValues_t potValues;
 //========================================
 volatile UINT32 nWindAngleSamples = 0;
 volatile float  meanWindAngle = 0;
+extern sUartLineBuffer_t buffer;
 //========================================
 
 
@@ -268,10 +269,12 @@ void SetPwm (float cmd)
 
     if (SignFloat(cmd) == MAST_DIR_LEFT)
     {
-      if(!MAST_MAX_OK)
-      {
-        oMastMaxBlock = 0;  // Mast is leaving its max limit, reset blokcing flag
-      }
+//      if(!MAST_MAX_OK)
+//      {
+//        buffer.length = sprintf(buffer.buffer, "Reg:Reset Max Block \r\n\n");
+//        Uart.PutTxFifoBuffer(UART6, &buffer);
+//        oMastMaxBlock = 0;  // Mast is leaving its max limit, reset blokcing flag
+//      }
       // DRIVE B
       //==========================================================
       if (USE_DRIVE_B == 1)
@@ -294,10 +297,12 @@ void SetPwm (float cmd)
     }
     else if (SignFloat(cmd) == MAST_DIR_RIGHT)
     {
-      if(!MAST_MIN_OK)
-      {
-        oMastMinBlock = 0;  // Reset blocking flag
-      }
+//      if(!MAST_MIN_OK)
+//      {
+//        buffer.length = sprintf(buffer.buffer, "Reg:Reset Min Block \r\n\n");
+//        Uart.PutTxFifoBuffer(UART6, &buffer);
+//        oMastMinBlock = 0;  // Reset blocking flag
+//      }
       // DRIVE B
       //==========================================================
       if (USE_DRIVE_B == 1)

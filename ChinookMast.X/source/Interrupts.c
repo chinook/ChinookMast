@@ -66,6 +66,7 @@ extern volatile BOOL  oManualMode
 extern volatile float mastCurrentSpeed;
 
 extern volatile sButtonStates_t buttons;
+
 sUartLineBuffer_t buffer;
 
 
@@ -128,10 +129,7 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
    * automatic mode (if the mast is too far).
    */
   if (oEnableMastStopProcedure)
-  {
-    buffer.length = sprintf(buffer.buffer, "Stop- Max?%u Min?%u \r\n\n", oMastMaxBlock,oMastMinBlock);
-    Uart.PutTxFifoBuffer(UART6, &buffer);
-    
+  {    
     if (iMastStop == 0)
     {
       mastDir = SignFloat(mastCurrentSpeed);
@@ -192,10 +190,9 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
         //==========================================================
         if (USE_DRIVE_B == 1)
         {
+          DRVB_SLEEP = 0;
           Pwm.SetDutyCycle(PWM_2, 500);
           Pwm.SetDutyCycle(PWM_3, 500);
-
-          DRVB_SLEEP = 0;
         }
         //==========================================================
 
@@ -203,10 +200,9 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
         //==========================================================
         if (USE_DRIVE_A == 1)
         {
+          DRVA_SLEEP = 0;          
           Pwm.SetDutyCycle(PWM_4, 500);
           Pwm.SetDutyCycle(PWM_5, 500);
-
-          DRVA_SLEEP = 0;
         }
         //==========================================================
 
@@ -234,6 +230,8 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
 //          mastDir   = 0;
 //        }
 //      }
+      buffer.length = sprintf(buffer.buffer, "Stop- Max?%u Min?%u \r\n\n", oMastMaxBlock,oMastMinBlock);
+      Uart.PutTxFifoBuffer(UART6, &buffer);      
     }
   }
 
