@@ -26,6 +26,7 @@
 
 // Private functions prototypes
 void SetZeroFromSteeringWheel (void);
+void SetZeroFSWheelWAngleRelative (void);
 
 
 //==============================================================================
@@ -186,8 +187,8 @@ void MastManualLeft (void)
   {
     DRVB_SLEEP = 1;
 
-    Pwm.SetDutyCycle(PWM_2, 750);
-    Pwm.SetDutyCycle(PWM_3, 250);
+    Pwm.SetDutyCycle(PWM_2, 650);
+    Pwm.SetDutyCycle(PWM_3, 350);
 
     WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
   }
@@ -200,8 +201,8 @@ void MastManualLeft (void)
   {
     DRVA_SLEEP = 1;
 
-    Pwm.SetDutyCycle(PWM_4, 750);
-    Pwm.SetDutyCycle(PWM_5, 250);
+    Pwm.SetDutyCycle(PWM_4, 650);
+    Pwm.SetDutyCycle(PWM_5, 350);
 
     WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors at the drive
   }
@@ -217,9 +218,39 @@ void MastManualRight (void)
   {
     DRVB_SLEEP = 1;
 
-    Pwm.SetDutyCycle(PWM_2, 250);
-    Pwm.SetDutyCycle(PWM_3, 750);
+    Pwm.SetDutyCycle(PWM_2, 350);
+    Pwm.SetDutyCycle(PWM_3, 650);
 
+    WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
+  }
+  //==========================================================
+
+
+  // DRIVE A
+  //==========================================================
+  if (USE_DRIVE_A == 1)
+  {
+    DRVA_SLEEP = 0;
+
+    Pwm.SetDutyCycle(PWM_4, 350);
+    Pwm.SetDutyCycle(PWM_5, 650);
+
+    WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors at the drive
+  }
+  //==========================================================
+}
+
+void MastStop (void)
+{
+  // DRIVE B
+  //==========================================================
+  if (USE_DRIVE_B == 1)
+  {
+    DRVB_SLEEP = 0;
+
+    Pwm.SetDutyCycle(PWM_2, 500);
+    Pwm.SetDutyCycle(PWM_3, 500);
+    
     WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
   }
   //==========================================================
@@ -231,14 +262,15 @@ void MastManualRight (void)
   {
     DRVA_SLEEP = 1;
 
-    Pwm.SetDutyCycle(PWM_4, 250);
-    Pwm.SetDutyCycle(PWM_5, 750);
+    Pwm.SetDutyCycle(PWM_4, 500);
+    Pwm.SetDutyCycle(PWM_5, 500);
 
+    DRVA_SLEEP = 1;
+    
     WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors at the drive
   }
   //==========================================================
 }
-
 
 void MastManualStop (void)
 {
@@ -677,11 +709,12 @@ void AssessButtons (void)
     oTimerSetZero = 0;
     setZeroCounter = 0;
     oSetZeroCounterOccured = 0;
-    SetZeroFromSteeringWheel();
+//    SetZeroFromSteeringWheel();
+    SetZeroFSWheelWAngleRelative();
   }
 }
 
-void SetZeroFromSteeringWheel (void)
+void SetZeroFromSteeringWheel (void)  // Was used on Chinook6, for absolute mast angle regulation ie when the wind vane was installed on front of car
 {
   mastAngle.currentValue = 0;
   mastAngle.previousValue = 0;
@@ -699,6 +732,10 @@ void SetZeroFromSteeringWheel (void)
   SEND_CALIB_DONE;  // Confirm that the calib is done
 }
 
+void SetZeroFSWheelWAngleRelative (void)  // Used on Chinook7, for relative mast angle reg. since the wind vane is now on the wind turbine itself
+{
+  Nop();
+}
 
 //==============================================================================
 // Math functions

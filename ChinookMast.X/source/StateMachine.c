@@ -524,9 +524,10 @@ void StateGetMastData(void)
 //===============================================================
 void StateReg(void)
 {
-  oTimerReg = 0;
-
-  Regulator();
+//  oTimerReg = 0;
+//
+//  Regulator();
+RelativeWAngleRegulator();
 }
 
 

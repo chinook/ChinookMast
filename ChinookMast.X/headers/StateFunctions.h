@@ -42,7 +42,8 @@ void ReadMastPosFromEeprom (void);
 
 // Mast manual functions
 // =======================================
-void MastManualStop  (void);
+void MastStop        (void);  // Abruptly stops the mast
+void MastManualStop  (void);  // Progressively stops the mast
 void MastManualLeft  (void);
 void MastManualRight (void);
 // =======================================

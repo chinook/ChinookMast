@@ -64,6 +64,7 @@ volatile sCmdValue_t windAngle          = {0}
 
 volatile BOOL oMastMaxBlock   = 0     // The system has detected a limit and blocks further rotation from MastManualStop()
              ,oMastMinBlock   = 0
+             ,oMast
              ;
 //=====================================
 
@@ -87,6 +88,10 @@ volatile float KP = 0.010f  //Kept old value
               ,PWM_MIN_DUTY_CYCLE = 0.0350f  //Otherwise erratic gain
               ,ERROR_THRESHOLD    = 1.000f  //Kept old value
               ,T                  = 0.100f    // Old Comment: Same as TIMER_1
+              ;
+
+volatile float WIND_ANGLE_ZERO = 0.0f
+              ,WIND_ANGLE_ERROR = 1.0f
               ;
 
 /* OLD DC MOTOR
@@ -505,6 +510,45 @@ void Regulator (void)
   SetPwm(cmd);
 }
 
+void RelativeWAngleRegulator(void)
+{
+  float  cmd
+        ,error
+        ,tempWind
+        ;
+  
+  // Compute Wind Angle from sensor
+  if (nWindAngleSamples != 0)
+  {
+    tempWind = meanWindAngle / nWindAngleSamples;
+    meanWindAngle = 0;
+    nWindAngleSamples = 0;
+  }
+  else  // If no new sample was received
+  {
+    tempWind = windAngle.previousValue;   // Keep previous value as current value
+  }
+  
+  // Wind Angle processing
+  if (tempWind != WIND_ANGLE_ZERO)
+  {
+    if ( abs(tempWind) >= WIND_ANGLE_ERROR)
+    {
+      if (tempWind > 0.0f)
+      {
+        MastManualLeft();
+      }
+      else if (tempWind < 0.0f)
+      {
+        MastManualRight();
+      }
+    }
+  }
+  else
+  {
+    MastStop();
+  }
+}
 
 //==============================================================================
 // Input Capture functions

@@ -33,6 +33,12 @@
 #define MAST_DIR_LEFT               -1.0f
 #define MAST_DIR_RIGHT               1.0f
 
+//==============================================================================
+// Relative Wind Angle Macro definitions
+//==============================================================================
+//#define WIND_ANGLE_ZERO              0.0f
+//#define WIND_ANGLE_ERROR             1.0f
+
 
 
 /*------------------------------ DC MOTOR ASSEMBLY ----------------------------
@@ -99,7 +105,8 @@ typedef struct sCmdValue
 //==============================================================================
 void TustinZ    (sCmdValue_t *input, sCmdValue_t *output);
 void SetPwm     (float cmd);
-void Regulator  (void);
+void Regulator  (void);    // Was used on Chinook6, for absolute mast angle regulation ie when the wind vane was installed on front of car
+void RelativeWAngleRegulator(void);     // Used on Chinook7, for relative mast angle reg. since the wind vane is now on the wind turbine itself
 
 // Input capture functions
 // =======================================
