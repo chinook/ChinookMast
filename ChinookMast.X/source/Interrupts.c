@@ -28,6 +28,7 @@
 #include "..\headers\Interrupts.h"
 #include "..\headers\StateFunctions.h"
 #include "..\headers\CommandFunctions.h"
+#include "StateFunctions.c"
 
 volatile BOOL  oCapture1      = 0
               ,oCapture2      = 0
@@ -132,7 +133,15 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
   {    
     if (iMastStop == 0)
     {
-      mastDir = SignFloat(mastCurrentSpeed);
+//      mastDir = SignFloat(mastCurrentSpeed);
+      if (oManualMastLeft)
+      {
+        mastDir = MAST_DIR_LEFT;
+      }
+      else
+      {
+        mastDir = MAST_DIR_RIGHT;
+      }
     }
 
     if (iMastStop < 16)

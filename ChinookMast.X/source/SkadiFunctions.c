@@ -42,6 +42,7 @@ extern volatile sCmdValue_t  mastAngle
 
 extern sPotValues_t potValues;
 
+// Absolute position regulator variables
 extern volatile float  mastCurrentSpeed
                       ,KP
                       ,KI
@@ -50,6 +51,11 @@ extern volatile float  mastCurrentSpeed
                       ,PWM_MIN_DUTY_CYCLE
                       ,ERROR_THRESHOLD
                       ;
+
+// Relative position regulator variables
+extern volatile float WIND_ANGLE_ZERO
+                     ,WIND_ANGLE_ERROR
+                     ;
 
 extern volatile UINT32 rxWindAngle;
 
