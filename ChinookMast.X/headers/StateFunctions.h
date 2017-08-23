@@ -119,6 +119,19 @@ typedef struct sButtonStates
   Chng_t    chng;
 } sButtonStates_t;
 
+typedef struct sSteeringPotStates
+{
+  INT16 value;
+  BOOL  chng;
+} sSteeringPotStates_t;
+
+// Steering wheel potentiometer definitions
+#define   MAST_R_POT_MIN  25u
+#define   MAST_L_POT_MIN   -25u
+#define   MAST_R_POT_MAX  115u
+#define   MAST_L_POT_MAX  -115u
+
+
 
 //==============================================================================
 // Variable declarations

@@ -28,7 +28,6 @@
 #include "..\headers\Interrupts.h"
 #include "..\headers\StateFunctions.h"
 #include "..\headers\CommandFunctions.h"
-#include "StateFunctions.c"
 
 volatile BOOL  oCapture1      = 0
               ,oCapture2      = 0
@@ -62,11 +61,14 @@ extern volatile BOOL  oManualMode
                      ,oCountTimeToChngMode
                      ,oMastMaxBlock 
                      ,oMastMinBlock
+                     ,oManualMastLeft
+                     ,oManualMastRight
                      ;
 
 extern volatile float mastCurrentSpeed;
 
 extern volatile sButtonStates_t buttons;
+extern volatile sSteeringPotStates_t steeringpotentiometer;
 
 sUartLineBuffer_t buffer;
 
@@ -782,6 +784,8 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
   // only this event is enabled in this example but this shows one scheme for
   // handling events
 
+  sUartLineBuffer_t buffer;
+  
   if ((CANGetModuleEvent(CAN1) & CAN_RX_EVENT) != 0)
   {
     LED_CAN_TOGGLE;
@@ -842,6 +846,41 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 
       CANUpdateChannel(CAN1, CAN_CHANNEL2);
       CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+    }
+    
+    /*
+     * CHANNEL 3 = STEERING WHEEL POT ANGLE (DEGREES)
+     */
+    if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL3_EVENT)
+    {
+
+      CANEnableChannelEvent(CAN1, CAN_CHANNEL3, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
+
+      message = CANGetRxMessage(CAN1, CAN_CHANNEL3);
+
+      memcpy((void *) &steeringpotentiometer.value, &message->data[0], 2);
+      buffer.length = sprintf(buffer.buffer, " %d\r\n\n", steeringpotentiometer.value);
+      Uart.PutTxFifoBuffer(UART6, &buffer);
+      
+      steeringpotentiometer.chng = 1;
+
+      CANUpdateChannel(CAN1, CAN_CHANNEL3);
+      CANEnableChannelEvent(CAN1, CAN_CHANNEL3, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+    }
+    
+    if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL4_EVENT)
+    {
+
+      CANEnableChannelEvent(CAN1, CAN_CHANNEL4, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
+
+//      message = CANGetRxMessage(CAN1, CAN_CHANNEL4);
+
+//      memcpy((void *) &steeringpotentiometer.value, &message->data[0], 4);
+
+      oManualMode ^= 1;   // Toggle mode
+      SEND_MODE_TO_STEERING_WHEEL;
+      CANUpdateChannel(CAN1, CAN_CHANNEL4);
+      CANEnableChannelEvent(CAN1, CAN_CHANNEL4, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
     }
   }
 

@@ -72,6 +72,26 @@ extern volatile BOOL   oManualMode
 //==============================================================================
 // Functions
 //==============================================================================
+/**************************************************************
+ * Function name  : SetPWM
+ * Purpose        : Sets the relative regulator pwm.
+ * Arguments      : Integer between 850 and 500
+ * Returns        : None.
+ *************************************************************/
+void SetRelPwm(INT8 pwmValue)
+{
+  sUartLineBuffer_t buffer;
+  if ( (pwmValue < 850) && (pwmValue >500) )
+  {
+    
+  }
+  else
+  {
+    buffer.length = sprintf(buffer.buffer, "valeur hors limite\r\n\n");
+    Uart.PutTxFifoBuffer(UART6, &buffer);
+  }
+}
+
 
 /**************************************************************
  * Function name  : LedDebug

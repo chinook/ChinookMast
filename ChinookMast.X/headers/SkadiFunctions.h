@@ -31,6 +31,14 @@
 //==============================================================================
 
 /**************************************************************
+ * Function name  : SetPWM
+ * Purpose        : Sets the relative regulator pwm.
+ * Arguments      : Integer between 850 and 500
+ * Returns        : None.
+ *************************************************************/
+void SetRelPwm(INT8);
+
+/**************************************************************
  * Function name  : LedDebug
  * Purpose        : Toggle LED_DEBUG.
  * Arguments      : 1.
