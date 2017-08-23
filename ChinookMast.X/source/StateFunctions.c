@@ -711,16 +711,16 @@ void AssessButtons (void)   // Since we dont decode steering messages containing
     oManualFlagChng = 1;
     steeringpotentiometer.chng = 0;
 
-    if (oManualMode && !oEnableMastStopProcedure)
+    if (oManualMode /*&& !oEnableMastStopProcedure*/)
     {
-      if ( (steeringpotentiometer.value > MAST_L_POT_MIN) && (steeringpotentiometer.value < MAST_L_POT_MAX) )
+      if ( (steeringpotentiometer.value < MAST_L_POT_MIN) && (steeringpotentiometer.value > MAST_L_POT_MAX) )
       {
         oManualMastRight = 1;
 //        oManualFlagChng = 1;
         buffer.length = sprintf(buffer.buffer, "Manual R\r\n\n");
         Uart.PutTxFifoBuffer(UART6, &buffer);
       }
-      if ( (steeringpotentiometer.value < MAST_R_POT_MIN) && (steeringpotentiometer.value > MAST_R_POT_MAX) )
+      else if ( (steeringpotentiometer.value > MAST_R_POT_MIN) && (steeringpotentiometer.value < MAST_R_POT_MAX) )
       {
         oManualMastLeft = 1;
 //        oManualFlagChng = 1;

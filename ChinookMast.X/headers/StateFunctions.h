@@ -126,10 +126,10 @@ typedef struct sSteeringPotStates
 } sSteeringPotStates_t;
 
 // Steering wheel potentiometer definitions
-#define   MAST_R_POT_MIN  25u
-#define   MAST_L_POT_MIN   -25u
-#define   MAST_R_POT_MAX  115u
-#define   MAST_L_POT_MAX  -115u
+#define   MAST_R_POT_MIN  25
+#define   MAST_L_POT_MIN   -25
+#define   MAST_R_POT_MAX  115
+#define   MAST_L_POT_MAX  -115
 
 
 
