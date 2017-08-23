@@ -361,46 +361,49 @@ void StateManual(void)
 {
   oManualFlagChng = 0;
 
-  if (!oManualMastLeft && !oManualMastRight)
+//  if (!oManualMastLeft && !oManualMastRight)
+//  {
+////    if (MAST_MIN_OK && MAST_MAX_OK)   // Stop has not been done yet
+////    {
+//////      MastManualStop();
+////      MastStop();
+////    }
+////  }
+////  else if (oManualMastLeft)
+  if (oManualMastLeft)
   {
-    if (MAST_MIN_OK && MAST_MAX_OK)   // Stop has not been done yet
-    {
-      MastManualStop();
-    }
-  }
-  else if (oManualMastLeft)
-  {
-    if (!MAST_MIN_OK)   // Mast too far
-    {
-//      MastManualStop();
-    }
-    else
-    {
-      if(!MAST_MAX_OK)
-      {
-        oMastMaxBlock = 0;  // Reset orientation blocking flag (used in MastManualStop())
-      }
+//    if (!MAST_MIN_OK)   // Mast too far
+//    {
+////      MastManualStop();
+//    }
+//    else
+//    {
+//      if(!MAST_MAX_OK)
+//      {
+//        oMastMaxBlock = 0;  // Reset orientation blocking flag (used in MastManualStop())
+//      }
       MastManualLeft();
     }
-  }
-  else if (oManualMastRight)
+//  }
+  /*else*/ else if (oManualMastRight)
   {
-    if (!MAST_MAX_OK)   // Mast too far
-    {
-//      MastManualStop();
-    }
-    else
-    {
-      if(!MAST_MIN_OK)
-      {
-        oMastMinBlock = 0;//Reset orientation blocking flag (used in MastManualStop())
-      }
+//    if (!MAST_MAX_OK)   // Mast too far
+//    {
+////      MastManualStop();
+//    }
+//    else
+//    {
+//      if(!MAST_MIN_OK)
+//      {
+//        oMastMinBlock = 0;//Reset orientation blocking flag (used in MastManualStop())
+//      }
       MastManualRight();
     }
-  }
+//  }
   else
   {
-    MastManualStop();
+    MastStop();
+//    MastManualStop();   // Too elaborate for last minute development
   }
 }
 

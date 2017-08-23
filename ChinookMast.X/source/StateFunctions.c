@@ -188,8 +188,8 @@ void MastManualLeft (void)
   {
     DRVB_SLEEP = 1;
 
-    Pwm.SetDutyCycle(PWM_2, 650);
-    Pwm.SetDutyCycle(PWM_3, 350);
+    Pwm.SetDutyCycle(PWM_2, 585);
+    Pwm.SetDutyCycle(PWM_3, 415);
 
     WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
   }
@@ -202,8 +202,8 @@ void MastManualLeft (void)
   {
     DRVA_SLEEP = 1;
 
-    Pwm.SetDutyCycle(PWM_4, 650);
-    Pwm.SetDutyCycle(PWM_5, 350);
+    Pwm.SetDutyCycle(PWM_4, 585);
+    Pwm.SetDutyCycle(PWM_5, 415);
 
     WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors at the drive
   }
@@ -219,8 +219,8 @@ void MastManualRight (void)
   {
     DRVB_SLEEP = 1;
 
-    Pwm.SetDutyCycle(PWM_2, 350);
-    Pwm.SetDutyCycle(PWM_3, 650);
+    Pwm.SetDutyCycle(PWM_2, 415);
+    Pwm.SetDutyCycle(PWM_3, 585);
 
     WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
   }
@@ -233,8 +233,8 @@ void MastManualRight (void)
   {
     DRVA_SLEEP = 0;
 
-    Pwm.SetDutyCycle(PWM_4, 350);
-    Pwm.SetDutyCycle(PWM_5, 650);
+    Pwm.SetDutyCycle(PWM_4, 415);
+    Pwm.SetDutyCycle(PWM_5, 585);
 
     WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors at the drive
   }
@@ -261,12 +261,12 @@ void MastStop (void)
   //==========================================================
   if (USE_DRIVE_A == 1)
   {
-    DRVA_SLEEP = 1;
+    DRVA_SLEEP = 0;
 
     Pwm.SetDutyCycle(PWM_4, 500);
     Pwm.SetDutyCycle(PWM_5, 500);
 
-    DRVA_SLEEP = 1;
+//    DRVA_SLEEP = 1;
     
     WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors at the drive
   }
@@ -708,21 +708,22 @@ void AssessButtons (void)   // Since we dont decode steering messages containing
 // <editor-fold defaultstate="collapsed" desc="Potentiometer of steering wheel">
   if (steeringpotentiometer.chng)
   {
+    oManualFlagChng = 1;
     steeringpotentiometer.chng = 0;
 
     if (oManualMode && !oEnableMastStopProcedure)
     {
-      if ( (steeringpotentiometer.value > MAST_R_POT_MIN) && (steeringpotentiometer.value < MAST_R_POT_MAX) )
+      if ( (steeringpotentiometer.value > MAST_L_POT_MIN) && (steeringpotentiometer.value < MAST_L_POT_MAX) )
       {
         oManualMastRight = 1;
-        oManualFlagChng = 1;
+//        oManualFlagChng = 1;
         buffer.length = sprintf(buffer.buffer, "Manual R\r\n\n");
         Uart.PutTxFifoBuffer(UART6, &buffer);
       }
-      if ( (steeringpotentiometer.value < MAST_L_POT_MIN) && (steeringpotentiometer.value > MAST_L_POT_MAX) )
+      if ( (steeringpotentiometer.value < MAST_R_POT_MIN) && (steeringpotentiometer.value > MAST_R_POT_MAX) )
       {
         oManualMastLeft = 1;
-        oManualFlagChng = 1;
+//        oManualFlagChng = 1;
         buffer.length = sprintf(buffer.buffer, "Manual L\r\n\n");
         Uart.PutTxFifoBuffer(UART6, &buffer);
       }
@@ -731,8 +732,10 @@ void AssessButtons (void)   // Since we dont decode steering messages containing
 //        if ( oManualMastLeft || oManualMastRight)
 //        {
 //          oEnableMastStopProcedure = 1;
-        MastStop();
-        buffer.length = sprintf(buffer.buffer, "Stop\r\n\n");
+//          MastStop(); // Mast action is only made in StateManual
+        oManualMastLeft = 0;
+        oManualMastRight = 0;
+        buffer.length = sprintf(buffer.buffer, "oManualMast dropped\r\n\n");
         Uart.PutTxFifoBuffer(UART6, &buffer);
 //        }
       }
