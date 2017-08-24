@@ -535,23 +535,27 @@ void RelativeWAngleRegulator(void)
     meanTurbineRpm = 0;
     nTurbineRpmSamples = 0;
     
+    // Sets the wind angle tolerance
+    
+    windAngleError = WIND_ANGLE_ERROR_LO_WIND;
+    
 //    buffer.length = sprintf(buffer.buffer, "Rpm %f\r\n\n", temp);
 //    Uart.PutTxFifoBuffer(UART6, &buffer);
     
-    if (tempRpm >= TURBINE_HIGH_RPM)
-    {
-      windAngleError = WIND_ANGLE_ERROR_HI_WIND;
-    }
-    else
-    {
-      windAngleError = WIND_ANGLE_ERROR_LO_WIND;
-    }
+//    if (tempRpm >= TURBINE_HIGH_RPM)
+//    {
+//      windAngleError = WIND_ANGLE_ERROR_HI_WIND;
+//    }
+//    else
+//    {
+//      windAngleError = WIND_ANGLE_ERROR_LO_WIND;
+//    }
   }
   // Compute Wind Angle from sensor
-  if (nWindAngleSamples > 0/*WIND_ANGLE_AVG_N*/)
+  if (nWindAngleSamples != 0/*WIND_ANGLE_AVG_N*/)
   {
     // Depending on SensTel's wind direction broadcast frequency, 
-    tempWind = meanWindAngle / WIND_ANGLE_AVG_N; // nWindAngleSamples was used
+    tempWind = meanWindAngle / nWindAngleSamples; // nWindAngleSamples was used
     meanWindAngle = 0;
     nWindAngleSamples = 0;
     
@@ -572,10 +576,12 @@ void RelativeWAngleRegulator(void)
       if (tempWind > 0.0f)
       {
         MastManualLeft();
+//        MastManualRight();
       }
       else if (tempWind < 0.0f)
       {
         MastManualRight();
+//        MastManualLeft();
       }
     }
   }

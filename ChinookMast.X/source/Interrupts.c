@@ -29,6 +29,7 @@
 #include "..\headers\StateFunctions.h"
 #include "..\headers\CommandFunctions.h"
 
+
 volatile BOOL  oCapture1      = 0
               ,oCapture2      = 0
               ,oCapture3      = 0
@@ -900,6 +901,8 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 //      memcpy((void *) &steeringpotentiometer.value, &message->data[0], 4);
 
       oManualMode ^= 1;   // Toggle mode
+//      oManualFlagChng = 1;
+      MastStop();
       SEND_MODE_TO_STEERING_WHEEL;
       CANUpdateChannel(CAN1, CAN_CHANNEL4);
       CANEnableChannelEvent(CAN1, CAN_CHANNEL4, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
