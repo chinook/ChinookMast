@@ -72,6 +72,34 @@ extern volatile BOOL   oManualMode
 //==============================================================================
 // Functions
 //==============================================================================
+
+/**************************************************************
+ * Function name  : SetWindAngleAvgN
+ * Purpose        : Sets the amount of wind angles received before averaging
+ * Arguments      : int8 between 1 and 254
+ * Returns        : None.
+ *************************************************************/
+void SetWindAngleAvgN(sSkadi_t *skadi, sSkadiArgs_t args)
+{
+  extern volatile UINT8 WIND_ANGLE_AVG_N;
+  sUartLineBuffer_t buffer;
+//  UINT8 nAmount = 0;
+  
+  UINT8 nAmount = atoi(args.elements[0]);
+  
+  if( (nAmount < 1) || (nAmount > 254))
+  {
+    buffer.length = sprintf(buffer.buffer, "Value is out of bounds\r\n\n");
+    Uart.PutTxFifoBuffer(UART6, &buffer); 
+  }
+  else
+  {
+    WIND_ANGLE_AVG_N = nAmount;
+    buffer.length = sprintf(buffer.buffer, "Amount of values before averaging = %d\r\n\n", nAmount);
+    Uart.PutTxFifoBuffer(UART6, &buffer);
+  }
+}
+
 /**************************************************************
  * Function name  : SetPWM
  * Purpose        : Sets the relative regulator pwm.

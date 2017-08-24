@@ -34,6 +34,7 @@ volatile BOOL  oCapture1      = 0
               ,oCapture3      = 0
               ,oCapture4      = 0
               ,oNewWindAngle  = 0
+              ,oNewTurbineRpm = 0
               ,oTimerReg      = 0
               ,oTimerSendData = 0
               ,oTimerChngMode = 0
@@ -55,7 +56,9 @@ volatile UINT8 waitAfterStopCounter = 0;
 volatile UINT8 iMastStop = 0;
 volatile float  mastDir = 0;
 
-volatile UINT32 rxWindAngle = 0;  // Received from CAN
+volatile UINT32 rxWindAngle = 0  // Received from CAN
+               ,rxTurbineRpm = 0
+               ;
 
 extern volatile BOOL  oManualMode
                      ,oCountTimeToChngMode
@@ -792,8 +795,45 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 
     CANRxMessageBuffer *message;
 
-    /*
-     * CHANNEL 1 = SWITCHES STATES
+//    /*      // Steering wheel now only send clear commands SID instead of all of buttons states
+//     * CHANNEL 1 = SWITCHES STATES
+//     */
+//    if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL1_EVENT)
+//    {
+//
+//      CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
+//
+//      message = CANGetRxMessage(CAN1, CAN_CHANNEL1);
+//
+//      CanSwitches_t switches;
+//      switches.bytes.low  = message->data[0];
+//      switches.bytes.high = message->data[1];
+//
+//      if (buttons.buttons.bits.steerWheelSw1  != switches.bits.sw1 )
+//      {
+//        buttons.buttons.bits.steerWheelSw1  = switches.bits.sw1;
+//        buttons.chng.bits.steerWheelSw1     = 1;
+//      }
+//
+//      if (buttons.buttons.bits.steerWheelSw4  != switches.bits.sw4 )
+//      {
+//        buttons.buttons.bits.steerWheelSw4  = switches.bits.sw4;
+//        buttons.chng.bits.steerWheelSw4     = 1;
+//      }
+//
+//      if (buttons.buttons.bits.steerWheelSw10 != switches.bits.sw10)
+//      {
+//        buttons.buttons.bits.steerWheelSw10 = switches.bits.sw10;
+//        buttons.chng.bits.steerWheelSw10    = 1;
+//      }
+//
+//      LED_CAN_TOGGLE;
+//      CANUpdateChannel(CAN1, CAN_CHANNEL1);
+//      CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+//
+//    }
+     /*
+     * CHANNEL 1 = TURBINE RPM
      */
     if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL1_EVENT)
     {
@@ -802,32 +842,12 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 
       message = CANGetRxMessage(CAN1, CAN_CHANNEL1);
 
-      CanSwitches_t switches;
-      switches.bytes.low  = message->data[0];
-      switches.bytes.high = message->data[1];
+      memcpy((void *) &rxTurbineRpm, &message->data[0], 4);
+      
+      oNewTurbineRpm = 1;
 
-      if (buttons.buttons.bits.steerWheelSw1  != switches.bits.sw1 )
-      {
-        buttons.buttons.bits.steerWheelSw1  = switches.bits.sw1;
-        buttons.chng.bits.steerWheelSw1     = 1;
-      }
-
-      if (buttons.buttons.bits.steerWheelSw4  != switches.bits.sw4 )
-      {
-        buttons.buttons.bits.steerWheelSw4  = switches.bits.sw4;
-        buttons.chng.bits.steerWheelSw4     = 1;
-      }
-
-      if (buttons.buttons.bits.steerWheelSw10 != switches.bits.sw10)
-      {
-        buttons.buttons.bits.steerWheelSw10 = switches.bits.sw10;
-        buttons.chng.bits.steerWheelSw10    = 1;
-      }
-
-      LED_CAN_TOGGLE;
       CANUpdateChannel(CAN1, CAN_CHANNEL1);
       CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
-
     }
 
     /*
@@ -867,7 +887,9 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
       CANUpdateChannel(CAN1, CAN_CHANNEL3);
       CANEnableChannelEvent(CAN1, CAN_CHANNEL3, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
     }
-    
+    /*
+     * CHANNEL 4 = STEERING WHEEL MODE CHANGE
+     */
     if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL4_EVENT)
     {
 

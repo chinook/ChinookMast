@@ -403,14 +403,14 @@ void InitCan(void)
     LED_ERROR_ON;
   }
 
-  // Switches from steering wheel
-  Can.SetChannel(CAN1, CAN_CHANNEL1, 8, RX);
-  Can.SetChannelMask(CAN1, CAN_CHANNEL1, CAN_FILTER0, VOLANT_SW_MSG, CAN_FILTER_MASK0, 0x7FF);
-
   // Data from telemetry
+  Can.SetChannel(CAN1, CAN_CHANNEL1, 8, RX);
+  Can.SetChannelMask(CAN1, CAN_CHANNEL1, CAN_FILTER0, TURBINE_RPM_ID, CAN_FILTER_MASK0, 0x7FF);
+
   Can.SetChannel(CAN1, CAN_CHANNEL2, 8, RX);
   Can.SetChannelMask(CAN1, CAN_CHANNEL2, CAN_FILTER1, WIND_DIRECTION_ID, CAN_FILTER_MASK0, 0x7FF);
 
+  // Data from steering wheel
   Can.SetChannel(CAN1, CAN_CHANNEL3, 8, RX);
   Can.SetChannelMask(CAN1, CAN_CHANNEL3, CAN_FILTER2, VOLANT_MAST_DIR, CAN_FILTER_MASK0, 0x7FF);
   

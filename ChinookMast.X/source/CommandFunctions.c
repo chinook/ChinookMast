@@ -44,8 +44,13 @@ volatile float  meanWindAngle = 0;
 extern sUartLineBuffer_t buffer;
 //========================================
 
+// Used for the average of the wind angle
+//========================================
+volatile UINT32 nTurbineRpmSamples = 0;
+volatile float meanTurbineRpm = 0;
+//========================================
 
-// Used when acquiring data from regulator
+// Used when acquiring data from absolute regulator
 //=========================================
 sCmdData_t    data        = {0};
 volatile BOOL oPrintData  =  0;
@@ -90,9 +95,15 @@ volatile float KP = 0.010f  //Kept old value
               ,T                  = 0.100f    // Old Comment: Same as TIMER_1
               ;
 
+// Relative mast regulator's variables
 volatile float WIND_ANGLE_ZERO = 0.0f
-              ,WIND_ANGLE_ERROR = 1.0f
+              ,WIND_ANGLE_ERROR_LO_WIND = 12.0f
+              ,WIND_ANGLE_ERROR_HI_WIND = 5.0f
+              ,TURBINE_HIGH_RPM = 200.0f
               ;
+volatile UINT32 WIND_ANGLE_AVG_N = 0;  // Make a low RPM wind angle avg ang a high rpm one
+
+
 
 /* OLD DC MOTOR
  * These are the tested working values WITH the mast attached to the motor
@@ -512,17 +523,41 @@ void Regulator (void)
 
 void RelativeWAngleRegulator(void)
 {
-  float  cmd
-        ,error
-        ,tempWind
+  float tempWind
+        ,tempRpm
+        ,windAngleError
         ;
+//  sUartLineBuffer_t buffer;
   
-  // Compute Wind Angle from sensor
-  if (nWindAngleSamples != 0)
+  if (nTurbineRpmSamples > 0)
   {
-    tempWind = meanWindAngle / nWindAngleSamples;
+    tempRpm = meanTurbineRpm / nTurbineRpmSamples;
+    meanTurbineRpm = 0;
+    nTurbineRpmSamples = 0;
+    
+//    buffer.length = sprintf(buffer.buffer, "Rpm %f\r\n\n", temp);
+//    Uart.PutTxFifoBuffer(UART6, &buffer);
+    
+    if (tempRpm >= TURBINE_HIGH_RPM)
+    {
+      windAngleError = WIND_ANGLE_ERROR_HI_WIND;
+    }
+    else
+    {
+      windAngleError = WIND_ANGLE_ERROR_LO_WIND;
+    }
+  }
+  // Compute Wind Angle from sensor
+  if (nWindAngleSamples > 0/*WIND_ANGLE_AVG_N*/)
+  {
+    // Depending on SensTel's wind direction broadcast frequency, 
+    tempWind = meanWindAngle / WIND_ANGLE_AVG_N; // nWindAngleSamples was used
     meanWindAngle = 0;
     nWindAngleSamples = 0;
+    
+//    buffer.length = sprintf(buffer.buffer, "Ang %f\r\n\n", tempWind);
+//    Uart.PutTxFifoBuffer(UART6, &buffer);
+    
   }
   else  // If no new sample was received
   {
@@ -532,7 +567,7 @@ void RelativeWAngleRegulator(void)
   // Wind Angle processing
   if (tempWind != WIND_ANGLE_ZERO)
   {
-    if ( abs(tempWind) >= WIND_ANGLE_ERROR)
+    if ( abs(tempWind) >= windAngleError)
     {
       if (tempWind > 0.0f)
       {

@@ -27,7 +27,9 @@
 
 extern volatile sButtonStates_t buttons;
 
-extern volatile UINT32 rxWindAngle;
+extern volatile UINT32 rxWindAngle
+                       ,rxTurbineRpm
+                       ;
 
 extern volatile float T;
 
@@ -39,6 +41,12 @@ extern sUartLineBuffer_t buffer;
 //========================================
 extern volatile UINT32 nWindAngleSamples;
 extern volatile float  meanWindAngle;
+//========================================
+
+// Used for the average of the turbine rpm
+//========================================
+extern volatile UINT32 nTurbineRpmSamples;
+extern volatile float  meanTurbineRpm;
 //========================================
 
 extern volatile sCmdValue_t windAngle
@@ -55,6 +63,7 @@ extern volatile BOOL oCapture1
                     ,oCapture3
                     ,oCapture4
                     ,oNewWindAngle
+                    ,oNewTurbineRpm
                     ,oTimerReg
                     ,oTimerSendData
                     ,oTimerChngMode
@@ -687,6 +696,7 @@ void StateSendData(void)
 void StateAcq(void)
 {
   float tempWindAngle   = 0;
+  float tempTurbineRpm  = 0;
   UINT16 tempAdcValue   = 0;
   static BOOL oModeMem  = 0;
   INT8 err = 0;
@@ -709,6 +719,13 @@ void StateAcq(void)
     nWindAngleSamples++;
     memcpy ((void *) &tempWindAngle, (void *) &rxWindAngle, 4);  // Copy contents of UINT32 into float
     meanWindAngle += tempWindAngle;
+  }
+  
+  if (oNewTurbineRpm)
+  {
+    nTurbineRpmSamples++;
+    memcpy ((void *) &tempTurbineRpm, (void *) &rxTurbineRpm, 4);  // Copy contents of UINT32 into float
+    meanTurbineRpm += tempTurbineRpm;
   }
 
   AssessButtons();

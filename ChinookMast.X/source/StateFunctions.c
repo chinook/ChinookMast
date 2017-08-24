@@ -717,15 +717,15 @@ void AssessButtons (void)   // Since we dont decode steering messages containing
       {
         oManualMastRight = 1;
 //        oManualFlagChng = 1;
-        buffer.length = sprintf(buffer.buffer, "Manual R\r\n\n");
-        Uart.PutTxFifoBuffer(UART6, &buffer);
+//        buffer.length = sprintf(buffer.buffer, "Manual R\r\n\n");
+//        Uart.PutTxFifoBuffer(UART6, &buffer);
       }
       else if ( (steeringpotentiometer.value > MAST_R_POT_MIN) && (steeringpotentiometer.value < MAST_R_POT_MAX) )
       {
         oManualMastLeft = 1;
 //        oManualFlagChng = 1;
-        buffer.length = sprintf(buffer.buffer, "Manual L\r\n\n");
-        Uart.PutTxFifoBuffer(UART6, &buffer);
+//        buffer.length = sprintf(buffer.buffer, "Manual L\r\n\n");
+//        Uart.PutTxFifoBuffer(UART6, &buffer);
       }
       else
       {
@@ -735,8 +735,8 @@ void AssessButtons (void)   // Since we dont decode steering messages containing
 //          MastStop(); // Mast action is only made in StateManual
         oManualMastLeft = 0;
         oManualMastRight = 0;
-        buffer.length = sprintf(buffer.buffer, "oManualMast dropped\r\n\n");
-        Uart.PutTxFifoBuffer(UART6, &buffer);
+//        buffer.length = sprintf(buffer.buffer, "oManualMast dropped\r\n\n");
+//        Uart.PutTxFifoBuffer(UART6, &buffer);
 //        }
       }
     }
