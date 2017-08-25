@@ -100,6 +100,7 @@ volatile float WIND_ANGLE_ZERO = 0.0f
               ,WIND_ANGLE_ERROR_LO_WIND = 12.0f
               ,WIND_ANGLE_ERROR_HI_WIND = 5.0f
               ,TURBINE_HIGH_RPM = 200.0f
+              ,tempRpm
               ;
 volatile UINT32 WIND_ANGLE_AVG_N = 20000;  // Make a low RPM wind angle avg ang a high rpm one
 
@@ -524,7 +525,7 @@ void Regulator (void)
 void RelativeWAngleRegulator(void)
 {
   float tempWind
-        ,tempRpm
+//        ,tempRpm
         ,windAngleError
         ;
 //  sUartLineBuffer_t buffer;

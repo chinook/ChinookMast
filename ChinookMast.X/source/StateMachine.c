@@ -367,7 +367,11 @@ void StateInit(void)
 //===============================================================
 void StateManual(void)
 {
+  sUartLineBuffer_t buffer;
   oManualFlagChng = 0;
+  MastManualLeft();
+  buffer.length = sprintf(buffer.buffer, "Manual in\r\n\n");
+  Uart.PutTxFifoBuffer(UART6, &buffer);
 
 //  if (!oManualMastLeft && !oManualMastRight)
 //  {
@@ -390,6 +394,8 @@ void StateManual(void)
 //      {
 //        oMastMaxBlock = 0;  // Reset orientation blocking flag (used in MastManualStop())
 //      }
+      buffer.length = sprintf(buffer.buffer, "Left in\r\n\n");
+      Uart.PutTxFifoBuffer(UART6, &buffer);
       MastManualLeft();
     }
 //  }
@@ -405,6 +411,8 @@ void StateManual(void)
 //      {
 //        oMastMinBlock = 0;//Reset orientation blocking flag (used in MastManualStop())
 //      }
+      buffer.length = sprintf(buffer.buffer, "Right in\r\n\n");
+      Uart.PutTxFifoBuffer(UART6, &buffer);
       MastManualRight();
     }
 //  }
