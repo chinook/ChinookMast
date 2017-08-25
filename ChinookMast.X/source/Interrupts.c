@@ -57,9 +57,8 @@ volatile UINT8 waitAfterStopCounter = 0;
 volatile UINT8 iMastStop = 0;
 volatile float  mastDir = 0;
 
-volatile UINT32 rxWindAngle = 0  // Received from CAN
-               ,rxTurbineRpm = 0
-               ;
+volatile UINT32 rxWindAngle = 0;  // Received from CAN
+volatile float rxTurbineRpm = 0;
 
 extern volatile BOOL  oManualMode
                      ,oCountTimeToChngMode
@@ -844,11 +843,13 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
       message = CANGetRxMessage(CAN1, CAN_CHANNEL1);
 
       memcpy((void *) &rxTurbineRpm, &message->data[0], 4);
-      
+//                  memcpy((void *) &CAN_WindTurbRPM, &message->data[0], 4);
       oNewTurbineRpm = 1;
 
       CANUpdateChannel(CAN1, CAN_CHANNEL1);
       CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+//      buffer.length = sprintf(buffer.buffer, "Rpm %f\r\n\n", rxTurbineRpm);
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
     }
 
     /*
@@ -867,6 +868,8 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 
       CANUpdateChannel(CAN1, CAN_CHANNEL2);
       CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+//      buffer.length = sprintf(buffer.buffer, "Ang %f\r\n\n", rxWindAngle);
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
     }
     
     /*
@@ -880,8 +883,8 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
       message = CANGetRxMessage(CAN1, CAN_CHANNEL3);
 
       memcpy((void *) &steeringpotentiometer.value, &message->data[0], 2);
-      buffer.length = sprintf(buffer.buffer, " %d\r\n\n", steeringpotentiometer.value);
-      Uart.PutTxFifoBuffer(UART6, &buffer);
+//      buffer.length = sprintf(buffer.buffer, " %d\r\n\n", steeringpotentiometer.value);
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
       
       steeringpotentiometer.chng = 1;
 

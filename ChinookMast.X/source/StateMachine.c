@@ -27,9 +27,8 @@
 
 extern volatile sButtonStates_t buttons;
 
-extern volatile UINT32 rxWindAngle
-                       ,rxTurbineRpm
-                       ;
+extern volatile UINT32 rxWindAngle;
+extern volatile float  rxTurbineRpm;
 
 extern volatile float T;
 

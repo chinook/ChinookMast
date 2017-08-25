@@ -35,7 +35,7 @@ extern volatile UINT32 rxWindAngle;
 //=====================================
 
 extern sPotValues_t potValues;
-
+float tempFuck = 0;
 
 // Used for the average of the wind angle
 //========================================
@@ -101,7 +101,7 @@ volatile float WIND_ANGLE_ZERO = 0.0f
               ,WIND_ANGLE_ERROR_HI_WIND = 5.0f
               ,TURBINE_HIGH_RPM = 200.0f
               ;
-volatile UINT32 WIND_ANGLE_AVG_N = 0;  // Make a low RPM wind angle avg ang a high rpm one
+volatile UINT32 WIND_ANGLE_AVG_N = 20000;  // Make a low RPM wind angle avg ang a high rpm one
 
 
 
@@ -539,7 +539,7 @@ void RelativeWAngleRegulator(void)
     
     windAngleError = WIND_ANGLE_ERROR_LO_WIND;
     
-//    buffer.length = sprintf(buffer.buffer, "Rpm %f\r\n\n", temp);
+//    buffer.length = sprintf(buffer.buffer, "Rpm %f\r\n\n", tempRpm);
 //    Uart.PutTxFifoBuffer(UART6, &buffer);
     
 //    if (tempRpm >= TURBINE_HIGH_RPM)
@@ -552,45 +552,59 @@ void RelativeWAngleRegulator(void)
 //    }
   }
   // Compute Wind Angle from sensor
-  if (nWindAngleSamples != 0/*WIND_ANGLE_AVG_N*/)
+  if (nWindAngleSamples >= WIND_ANGLE_AVG_N)
   {
     // Depending on SensTel's wind direction broadcast frequency, 
     tempWind = meanWindAngle / nWindAngleSamples; // nWindAngleSamples was used
     meanWindAngle = 0;
     nWindAngleSamples = 0;
     
-//    buffer.length = sprintf(buffer.buffer, "Ang %f\r\n\n", tempWind);
-//    Uart.PutTxFifoBuffer(UART6, &buffer);
+    buffer.length = sprintf(buffer.buffer, "Ang %f\r\n\n", tempWind);
+    Uart.PutTxFifoBuffer(UART6, &buffer);
     
-  }
-  else  // If no new sample was received
-  {
-    tempWind = windAngle.previousValue;   // Keep previous value as current value
-  }
+    tempFuck = (tempWind >= WIND_ANGLE_ERROR_LO_WIND);
+//        
+    buffer.length = sprintf(buffer.buffer, "test =  %f\r\n\n", tempFuck);
+    Uart.PutTxFifoBuffer(UART6, &buffer);
+//  }
+//  else  // If no new sample was received
+//  {
+//    tempWind = windAngle.previousValue;   // Keep previous value as current value
+//  }
   
   // Wind Angle processing
-  if (tempWind != WIND_ANGLE_ZERO)
-  {
-    if ( abs(tempWind) >= windAngleError)
-    {
-      if (tempWind > 0.0f)
-      {
-        MastManualLeft();
-//        MastManualRight();
-      }
-      else if (tempWind < 0.0f)
-      {
-        MastManualRight();
-//        MastManualLeft();
-      }
+//  if (tempRpm >= TURBINE_HIGH_RPM)
+//  {
+//    if (tempWind != WIND_ANGLE_ZERO)
+//    {
+//      if ( abs(tempWind) >= WIND_ANGLE_ERROR_LO_WIND/*windAngleError*/)
+//      {
+  
+
+  
+        if ( (tempWind >= WIND_ANGLE_ERROR_LO_WIND) )
+        {
+          MastManualLeft();
+          buffer.length = sprintf(buffer.buffer, "Mast L\r\n\n");
+          Uart.PutTxFifoBuffer(UART6, &buffer);
+        }
+        else if (tempWind <= -(WIND_ANGLE_ERROR_LO_WIND) )
+        {
+          MastManualRight();
+          buffer.length = sprintf(buffer.buffer, "Mast R\r\n\n");
+          Uart.PutTxFifoBuffer(UART6, &buffer);
+  //        MastManualLeft();
+        }
+//      }
+//    }
+        else
+        {
+        MastStop();
+        buffer.length = sprintf(buffer.buffer, "Mastop\r\n\n");
+        Uart.PutTxFifoBuffer(UART6, &buffer);
     }
   }
-  else
-  {
-    MastStop();
-  }
 }
-
 //==============================================================================
 // Input Capture functions
 //==============================================================================
