@@ -20,9 +20,9 @@
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#include "CommandFunctions.h"
-#include "StateFunctions.h"
-#include "Potentiometer.h"
+#include "..\headers\CommandFunctions.h"
+#include "..\headers\StateFunctions.h"
+#include "..\headers\Potentiometer.h"
 
 
 //==============================================================================
@@ -35,22 +35,16 @@ extern volatile UINT32 rxWindAngle;
 //=====================================
 
 extern sPotValues_t potValues;
-float overDeadBand = 0;
+
 
 // Used for the average of the wind angle
 //========================================
 volatile UINT32 nWindAngleSamples = 0;
 volatile float  meanWindAngle = 0;
-extern sUartLineBuffer_t buffer;
 //========================================
 
-// Used for the average of the wind angle
-//========================================
-volatile UINT32 nTurbineRpmSamples = 0;
-volatile float meanTurbineRpm = 0;
-//========================================
 
-// Used when acquiring data from absolute regulator
+// Used when acquiring data from regulator
 //=========================================
 sCmdData_t    data        = {0};
 volatile BOOL oPrintData  =  0;
@@ -66,11 +60,6 @@ volatile sCmdValue_t windAngle          = {0}
                     ,mastAngle          = {0}
                     ,mastSpeed          = {0}
                     ;
-
-volatile BOOL oMastMaxBlock   = 0     // The system has detected a limit and blocks further rotation from MastManualStop()
-             ,oMastMinBlock   = 0
-             ,oMast
-             ;
 //=====================================
 
 
@@ -87,24 +76,13 @@ sCmdValue_t  inPi   = {0}
  * experimental data after initial caracterization
  */
 volatile float KP = 0.010f  //Kept old value
-              ,KI = 0.01f  //Kept old value
-              ,K  = 0.1f  //Initial caract
+              ,KI = 0.0075f  //Kept old value
+              ,K  = 0.470f  //Initial caract
               ,PWM_MAX_DUTY_CYCLE = 0.800f  //Due to benchtop psu; might otherwise pull too much current and burn mosfets
               ,PWM_MIN_DUTY_CYCLE = 0.0350f  //Otherwise erratic gain
-              ,ERROR_THRESHOLD    = 1.000f  //Kept old value
+              ,ERROR_THRESHOLD    = 0.100f  //Kept old value
               ,T                  = 0.100f    // Old Comment: Same as TIMER_1
               ;
-
-// Relative mast regulator's variables
-volatile float WIND_ANGLE_ZERO = 0.0f
-              ,WIND_ANGLE_ERROR_LO_WIND = 12.0f
-              ,WIND_ANGLE_ERROR_HI_WIND = 5.0f
-              ,TURBINE_HIGH_RPM = 200.0f
-              ,tempRpm
-              ;
-volatile UINT32 WIND_ANGLE_AVG_N = 20000;  // Make a low RPM wind angle avg ang a high rpm one
-
-
 
 /* OLD DC MOTOR
  * These are the tested working values WITH the mast attached to the motor
@@ -236,7 +214,7 @@ void SetPwm (float cmd)
       //==========================================================
       if (USE_DRIVE_B == 1)
       {
-        WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors
+        //WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors
       }
       //==========================================================
 
@@ -244,7 +222,7 @@ void SetPwm (float cmd)
       //==========================================================
       if (USE_DRIVE_A == 1)
       {
-        WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors
+        //WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors
       }
       //==========================================================
       
@@ -286,12 +264,6 @@ void SetPwm (float cmd)
 
     if (SignFloat(cmd) == MAST_DIR_LEFT)
     {
-//      if(!MAST_MAX_OK)
-//      {
-//        buffer.length = sprintf(buffer.buffer, "Reg:Reset Max Block \r\n\n");
-//        Uart.PutTxFifoBuffer(UART6, &buffer);
-//        oMastMaxBlock = 0;  // Mast is leaving its max limit, reset blokcing flag
-//      }
       // DRIVE B
       //==========================================================
       if (USE_DRIVE_B == 1)
@@ -314,12 +286,6 @@ void SetPwm (float cmd)
     }
     else if (SignFloat(cmd) == MAST_DIR_RIGHT)
     {
-//      if(!MAST_MIN_OK)
-//      {
-//        buffer.length = sprintf(buffer.buffer, "Reg:Reset Min Block \r\n\n");
-//        Uart.PutTxFifoBuffer(UART6, &buffer);
-//        oMastMinBlock = 0;  // Reset blocking flag
-//      }
       // DRIVE B
       //==========================================================
       if (USE_DRIVE_B == 1)
@@ -448,15 +414,15 @@ void Regulator (void)
   }
   else if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )   // Mast too far
   {
+    Nop();
     oEmergencyStop = 1;
     cmd = 0;
-    Nop();
   }
   else if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) && (mastSpeed.currentValue != 0) )  // Mast too far
   {
+    Nop();
     oEmergencyStop = 1;
     cmd = 0;
-    Nop();
   }
   else
   {
@@ -522,57 +488,7 @@ void Regulator (void)
   SetPwm(cmd);
 }
 
-void RelativeWAngleRegulator(void)
-{
-  float tempWind, windAngleError;
-  
-  if (nTurbineRpmSamples > 0)
-  {
-    tempRpm = meanTurbineRpm / nTurbineRpmSamples;
-    meanTurbineRpm = 0;
-    nTurbineRpmSamples = 0;
-    
-    // Sets the wind angle tolerance
-    windAngleError = WIND_ANGLE_ERROR_LO_WIND;
-  }
-  
-  // Compute Wind Angle from sensor
-  if (nWindAngleSamples >= WIND_ANGLE_AVG_N)
-  {
-    // Depending on SensTel's wind direction broadcast frequency, 
-    tempWind = meanWindAngle / nWindAngleSamples; // nWindAngleSamples was used
-    meanWindAngle = 0;
-    nWindAngleSamples = 0;
-    
-    buffer.length = sprintf(buffer.buffer, "Ang %f\r\n\n", tempWind);
-    Uart.PutTxFifoBuffer(UART6, &buffer);
-    
-    overDeadBand = (tempWind >= WIND_ANGLE_ERROR_LO_WIND);
-//        
-    buffer.length = sprintf(buffer.buffer, "test =  %f\r\n\n", overDeadBand);
-    Uart.PutTxFifoBuffer(UART6, &buffer);
-  
-	if ( (tempWind >= WIND_ANGLE_ERROR_LO_WIND) )
-	{
-	  MastManualRight();
-//      MastManualLeft();
-	  buffer.length = sprintf(buffer.buffer, "Mast L\r\n\n");
-	  Uart.PutTxFifoBuffer(UART6, &buffer);
-	}
-	else if (tempWind <= -(WIND_ANGLE_ERROR_LO_WIND) )
-	{
-	  MastManualLeft();
-//      MastManualRight();
-	  buffer.length = sprintf(buffer.buffer, "Mast R\r\n\n");
-	  Uart.PutTxFifoBuffer(UART6, &buffer);
-	}
-	else{
-	  MastStop();
-	  buffer.length = sprintf(buffer.buffer, "Mastop\r\n\n");
-	  Uart.PutTxFifoBuffer(UART6, &buffer);
-    }
-  }
-}
+
 //==============================================================================
 // Input Capture functions
 //==============================================================================
@@ -630,7 +546,7 @@ void AssessMastValues (void)
         }
         else
         {
-            mastCurrentSpeed = MOTOR_DEG_PER_PULSE / (mastTime * MAST_MOTOR_RATIO);
+          mastCurrentSpeed = MOTOR_DEG_PER_PULSE / (mastTime * MAST_MOTOR_RATIO);
         }
       }
       else

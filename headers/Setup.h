@@ -33,7 +33,7 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%
 // ChinookLib files
 //%%%%%%%%%%%%%%%%%%%%%%%%%
-#include "ChinookLib.h"
+#include "..\..\..\ChinookLib\ChinookLib.X\headers\ChinookLib.h"
 
 //==============================================================================
 // ChinookLib functions
@@ -45,7 +45,6 @@ struct sChinook Chinook;            // Contains all ChinookLib functions
 // Which drive to use
 //==============================================================================
 #define USE_DRIVE_A         0
-
 #define USE_DRIVE_B         1
 
 //==============================================================================

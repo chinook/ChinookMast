@@ -96,7 +96,6 @@ void (*pStateMast)(void);       // State pointer, used to navigate between state
 #define ACQ_2_MANUAL           MANUAL_MODE && MANUAL_FLAG_CHANGE
 #define ACQ_2_DISCONNECT       DISCONNECT_OK
 #define ACQ_2_REG             !MANUAL_MODE && REG_TIMER_OK
-//#define ACQ_2_REG !MANUAL_MODE
 #define ACQ_2_GET_MAST_DATA    MANUAL_MODE && REG_TIMER_OK
 #define ACQ_2_SEND_DATA        SEND_DATA_TIMER_OK
 

@@ -20,11 +20,11 @@
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#include "SkadiFunctions.h"
-#include "CommandFunctions.h"
-#include "StateFunctions.h"
-#include "Potentiometer.h"
-#include "DRV8711_Para.h"
+#include "..\headers\SkadiFunctions.h"
+#include "..\headers\CommandFunctions.h"
+#include "..\headers\StateFunctions.h"
+#include "..\headers\Potentiometer.h"
+#include "..\headers\DRV8711_Para.h"
 
 
 
@@ -42,7 +42,6 @@ extern volatile sCmdValue_t  mastAngle
 
 extern sPotValues_t potValues;
 
-// Absolute position regulator variables
 extern volatile float  mastCurrentSpeed
                       ,KP
                       ,KI
@@ -52,11 +51,6 @@ extern volatile float  mastCurrentSpeed
                       ,ERROR_THRESHOLD
                       ;
 
-// Relative position regulator variables
-extern volatile float WIND_ANGLE_ZERO
-                     ,WIND_ANGLE_ERROR
-                     ;
-
 extern volatile UINT32 rxWindAngle;
 
 //New - for ReadStatus command
@@ -65,61 +59,11 @@ extern volatile UINT32 rxWindAngle;
 extern volatile BOOL   oManualMode
                       ,oPrintData
                       ,oNewWindAngle
-                      ,oMastMinBlock
-                      ,oMastMaxBlock
                       ;
 
 //==============================================================================
 // Functions
 //==============================================================================
-
-/**************************************************************
- * Function name  : SetWindAngleAvgN
- * Purpose        : Sets the amount of wind angles received before averaging
- * Arguments      : int8 between 1 and 254
- * Returns        : None.
- *************************************************************/
-void SetWindAngleAvgN(sSkadi_t *skadi, sSkadiArgs_t args)
-{
-  extern volatile UINT8 WIND_ANGLE_AVG_N;
-  sUartLineBuffer_t buffer;
-//  UINT8 nAmount = 0;
-  
-  UINT8 nAmount = atoi(args.elements[0]);
-  
-  if( (nAmount < 1) || (nAmount > 254))
-  {
-    buffer.length = sprintf(buffer.buffer, "Value is out of bounds\r\n\n");
-    Uart.PutTxFifoBuffer(UART6, &buffer); 
-  }
-  else
-  {
-    WIND_ANGLE_AVG_N = nAmount;
-    buffer.length = sprintf(buffer.buffer, "Amount of values before averaging = %d\r\n\n", nAmount);
-    Uart.PutTxFifoBuffer(UART6, &buffer);
-  }
-}
-
-/**************************************************************
- * Function name  : SetPWM
- * Purpose        : Sets the relative regulator pwm.
- * Arguments      : Integer between 850 and 500
- * Returns        : None.
- *************************************************************/
-void SetRelPwm(INT8 pwmValue)
-{
-  sUartLineBuffer_t buffer;
-  if ( (pwmValue < 850) && (pwmValue >500) )
-  {
-    
-  }
-  else
-  {
-    buffer.length = sprintf(buffer.buffer, "valeur hors limite\r\n\n");
-    Uart.PutTxFifoBuffer(UART6, &buffer);
-  }
-}
-
 
 /**************************************************************
  * Function name  : LedDebug
@@ -210,7 +154,6 @@ void SetMode(sSkadi_t *skadi, sSkadiArgs_t args)
   }
   
   Uart.PutTxFifoBuffer(UART6, &buffer);
-  
 }
 
 
@@ -502,9 +445,6 @@ void SetZero(sSkadi_t *skadi, sSkadiArgs_t args)
   
   mastAngle.currentValue = 0;
   mastAngle.previousValue = 0;
-  
-  oMastMinBlock = 0;
-  oMastMaxBlock = 0;
   
 #ifdef USE_POTENTIOMETER
   potValues.zeroInBits = potValues.lastAverage;

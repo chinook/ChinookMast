@@ -18,34 +18,24 @@
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#include "StateMachine.h"
-#include "DRV8711_Para.h"
-#include "Interrupts.h"
-#include "StateFunctions.h"
-#include "CommandFunctions.h"
-#include "Potentiometer.h"
+#include "..\headers\StateMachine.h"
+#include "..\headers\DRV8711_Para.h"
+#include "..\headers\Interrupts.h"
+#include "..\headers\StateFunctions.h"
+#include "..\headers\CommandFunctions.h"
+#include "..\headers\Potentiometer.h"
 
 extern volatile sButtonStates_t buttons;
 
 extern volatile UINT32 rxWindAngle;
-extern volatile float  rxTurbineRpm;
 
 extern volatile float T;
 
-extern volatile BOOL oEnableMastStopProcedure;
-
-extern sUartLineBuffer_t buffer;
 
 // Used for the average of the wind angle
 //========================================
 extern volatile UINT32 nWindAngleSamples;
 extern volatile float  meanWindAngle;
-//========================================
-
-// Used for the average of the turbine rpm
-//========================================
-extern volatile UINT32 nTurbineRpmSamples;
-extern volatile float  meanTurbineRpm;
 //========================================
 
 extern volatile sCmdValue_t windAngle
@@ -62,13 +52,10 @@ extern volatile BOOL oCapture1
                     ,oCapture3
                     ,oCapture4
                     ,oNewWindAngle
-                    ,oNewTurbineRpm
                     ,oTimerReg
                     ,oTimerSendData
                     ,oTimerChngMode
                     ,oAdcReady
-                    ,oMastMinBlock
-                    ,oMastMaxBlock
                     ;
 
 volatile BOOL  oManualMode            = 1
@@ -261,7 +248,7 @@ void StateScheduler(void)
       pStateMast = &StateClose;    // Stay in current state
     }
   }
-  
+
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   // Current state = StateIdle
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -367,59 +354,55 @@ void StateInit(void)
 //===============================================================
 void StateManual(void)
 {
-  sUartLineBuffer_t buffer;
+  Nop();
+  sUartLineBuffer_t bufferManual;
+  
   oManualFlagChng = 0;
-  MastManualLeft();
-  buffer.length = sprintf(buffer.buffer, "Manual in\r\n\n");
-  Uart.PutTxFifoBuffer(UART6, &buffer);
-
-//  if (!oManualMastLeft && !oManualMastRight)
-//  {
-////    if (MAST_MIN_OK && MAST_MAX_OK)   // Stop has not been done yet
-////    {
-//////      MastManualStop();
-////      MastStop();
-////    }
-////  }
-////  else if (oManualMastLeft)
-  if (oManualMastLeft)
+  
+  if (!oManualMastLeft && !oManualMastRight)
   {
-//    if (!MAST_MIN_OK)   // Mast too far
-//    {
-////      MastManualStop();
-//    }
-//    else
-//    {
-//      if(!MAST_MAX_OK)
-//      {
-//        oMastMaxBlock = 0;  // Reset orientation blocking flag (used in MastManualStop())
-//      }
-      buffer.length = sprintf(buffer.buffer, "Left in\r\n\n");
-      Uart.PutTxFifoBuffer(UART6, &buffer);
+    if (MAST_MIN_OK && MAST_MAX_OK)   // Stop has not been done yet
+    {
+      Nop();
+      MastManualStop();
+    }
+  }
+  else if (oManualMastLeft)
+  {
+    if (!MAST_MIN_OK)   // Mast too far
+    {
+      LED_DEBUG4_OFF;
+      Nop();
+      bufferManual.length = sprintf(bufferManual.buffer, "State - Manual: Mast too far min\r\n\n");
+      Uart.PutTxFifoBuffer(UART6, &bufferManual);
+      
+//      MastManualStop();   //Only Reverses motor direction
+    }
+    else
+    {
       MastManualLeft();
     }
-//  }
-  /*else*/ else if (oManualMastRight)
+  }
+  else if (oManualMastRight)
   {
-//    if (!MAST_MAX_OK)   // Mast too far
-//    {
-////      MastManualStop();
-//    }
-//    else
-//    {
-//      if(!MAST_MIN_OK)
-//      {
-//        oMastMinBlock = 0;//Reset orientation blocking flag (used in MastManualStop())
-//      }
-      buffer.length = sprintf(buffer.buffer, "Right in\r\n\n");
-      Uart.PutTxFifoBuffer(UART6, &buffer);
+    if (!MAST_MAX_OK)   // Mast too far
+    {
+      LED_DEBUG3_OFF;
+      Nop();
+      bufferManual.length = sprintf(bufferManual.buffer, "State - Manual: Mast too far max\r\n\n");
+      Uart.PutTxFifoBuffer(UART6, &bufferManual);
+//      MastManualStop();
+    }
+    else
+    {
       MastManualRight();
     }
-//  }
+  }
   else
   {
-    MastStop();
-//    MastManualStop();   // Too elaborate for last minute development
+    bufferManual.length = sprintf(bufferManual.buffer, "State - Manual: Default Condition Met\r\n\n");
+    Uart.PutTxFifoBuffer(UART6, &bufferManual); //Never gets into this
+//    MastManualStop();
   }
 }
 
@@ -497,25 +480,15 @@ void StateGetMastData(void)
 //  if (AbsFloat(mastSpeed.currentValue) >= BITS_TO_DEG_TIMES_20)
   if (AbsFloat(mastSpeed.currentValue) >= 3.5f)
   {
-    if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )        // Mast too far left
+    if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_LEFT) && (!MAST_MIN_OK) )        // Mast too far
     {
-      if(!oEnableMastStopProcedure)
-      {
-          LED_DEBUG4_TOGGLE;
-          MastManualStop();
-      }
+      LED_DEBUG4_ON;
+      MastManualStop();
     }
-    
-    if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far right
+    else if ( (SignFloat(mastSpeed.currentValue) == MAST_DIR_RIGHT) && (!MAST_MAX_OK) )  // Mast too far
     {
-      if(!oEnableMastStopProcedure)
-      {
-        buffer.length = sprintf(buffer.buffer, "GetMastData stop \r\n\n");
-        Uart.PutTxFifoBuffer(UART6, &buffer);
-        LED_DEBUG3_TOGGLE;
-        MastManualStop();
-      }
-
+      LED_DEBUG3_ON;
+      MastManualStop();
     }
   }
 #else
@@ -543,12 +516,9 @@ void StateGetMastData(void)
 //===============================================================
 void StateReg(void)
 {
-  // DO NOT TEST REGULATOR ALONE. SERIOUSLY, SCARY SHIT.
-  //oTimerReg = 0;
-  //Regulator();
-    
-    
-    RelativeWAngleRegulator();
+  oTimerReg = 0;
+
+  Regulator();
 }
 
 
@@ -670,7 +640,6 @@ void StateSendData(void)
   else
   {
     iCounterToTwoSec = 0;
-    LED_DEBUG3_TOGGLE;
 
     if (SEND_DATA_TO_UART)
     {
@@ -705,7 +674,6 @@ void StateSendData(void)
 void StateAcq(void)
 {
   float tempWindAngle   = 0;
-  float tempTurbineRpm  = 0;
   UINT16 tempAdcValue   = 0;
   static BOOL oModeMem  = 0;
   INT8 err = 0;
@@ -714,11 +682,11 @@ void StateAcq(void)
   {
     if (oManualMode)
     {
-      LED_DEBUG0_ON;
+//      LED_DEBUG0_ON;
     }
     else
     {
-      LED_DEBUG0_OFF;
+//      LED_DEBUG0_OFF;
     }
     oModeMem = oManualMode;
   }
@@ -728,13 +696,6 @@ void StateAcq(void)
     nWindAngleSamples++;
     memcpy ((void *) &tempWindAngle, (void *) &rxWindAngle, 4);  // Copy contents of UINT32 into float
     meanWindAngle += tempWindAngle;
-  }
-  
-  if (oNewTurbineRpm)
-  {
-    nTurbineRpmSamples++;
-    memcpy ((void *) &tempTurbineRpm, (void *) &rxTurbineRpm, 4);  // Copy contents of UINT32 into float
-    meanTurbineRpm += tempTurbineRpm;
   }
 
   AssessButtons();

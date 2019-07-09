@@ -25,15 +25,17 @@
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#include "..\headers\Interrupts.h"
-#include "..\headers\StateFunctions.h"
-#include "..\headers\CommandFunctions.h"
+#include "Interrupts.h"
+#include "StateFunctions.h"
+#include "CommandFunctions.h"
+
 
 volatile BOOL  oCapture1      = 0
               ,oCapture2      = 0
               ,oCapture3      = 0
               ,oCapture4      = 0
               ,oNewWindAngle  = 0
+              ,oNewTurbineRpm = 0
               ,oTimerReg      = 0
               ,oTimerSendData = 0
               ,oTimerChngMode = 0
@@ -56,14 +58,22 @@ volatile UINT8 iMastStop = 0;
 volatile float  mastDir = 0;
 
 volatile UINT32 rxWindAngle = 0;  // Received from CAN
+volatile float rxTurbineRpm = 0;
 
 extern volatile BOOL  oManualMode
                      ,oCountTimeToChngMode
+                     ,oMastMaxBlock 
+                     ,oMastMinBlock
+                     ,oManualMastLeft
+                     ,oManualMastRight
                      ;
 
 extern volatile float mastCurrentSpeed;
 
 extern volatile sButtonStates_t buttons;
+extern volatile sSteeringPotStates_t steeringpotentiometer;
+
+sUartLineBuffer_t buffer;
 
 
 //==============================================================================
@@ -125,10 +135,18 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
    * automatic mode (if the mast is too far).
    */
   if (oEnableMastStopProcedure)
-  {
+  {    
     if (iMastStop == 0)
     {
-      mastDir = SignFloat(mastCurrentSpeed);
+//      mastDir = SignFloat(mastCurrentSpeed);
+      if (oManualMastLeft)
+      {
+        mastDir = MAST_DIR_LEFT;
+      }
+      else
+      {
+        mastDir = MAST_DIR_RIGHT;
+      }
     }
 
     if (iMastStop < 16)
@@ -186,10 +204,9 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
         //==========================================================
         if (USE_DRIVE_B == 1)
         {
+          DRVB_SLEEP = 0;
           Pwm.SetDutyCycle(PWM_2, 500);
           Pwm.SetDutyCycle(PWM_3, 500);
-
-          DRVB_SLEEP = 0;
         }
         //==========================================================
 
@@ -197,20 +214,19 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
         //==========================================================
         if (USE_DRIVE_A == 1)
         {
+          DRVA_SLEEP = 0;          
           Pwm.SetDutyCycle(PWM_4, 500);
           Pwm.SetDutyCycle(PWM_5, 500);
-
-          DRVA_SLEEP = 0;
         }
         //==========================================================
 
 //#ifdef USE_POTENTIOMETER
 //        oWaitAfterStop = 1;
 //#else
-        mastCurrentSpeed = 0;
-        oEnableMastStopProcedure = 0;
-        iMastStop = 0;
-        mastDir   = 0;
+        //mastCurrentSpeed = 0;
+        //oEnableMastStopProcedure = 0;
+        //iMastStop = 0;
+        //mastDir   = 0;
 //#endif
 //      }
 //      else
@@ -228,6 +244,8 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
 //          mastDir   = 0;
 //        }
 //      }
+      buffer.length = sprintf(buffer.buffer, "Stop- Max?%u Min?%u \r\n\n", oMastMaxBlock,oMastMinBlock);
+      Uart.PutTxFifoBuffer(UART6, &buffer);      
     }
   }
 
@@ -307,6 +325,7 @@ void __ISR(_UART_6_VECTOR, U6_INTERRUPT_PRIORITY) Uart6InterruptHandler(void)
     {
       if ( UARTTransmitterIsReady(UART6) && !Uart.Var.uartTxFifo[UART6].bufEmpty )  // If TX buffer is ready to receive data and the user's TX buffer is not empty
       {
+//        LED_DEBUG4_TOGGLE;
         if (Uart.Var.uartTxFifo[UART6].lineBuffer.length < 8)     // Write max 8 bytes/interrupt
         {
           iMax = Uart.Var.uartTxFifo[UART6].lineBuffer.length;
@@ -354,7 +373,6 @@ void __ISR(_UART_6_VECTOR, U6_INTERRUPT_PRIORITY) Uart6InterruptHandler(void)
         }
         i++;
       } // end while
-
       if (!Uart.Var.uartRxFifo[UART6].bufEmpty)                   // If there is data in the user's RX buffer
       {
         Uart.Var.oIsRxDataAvailable[UART6] = 1;                   // Set according flag
@@ -769,48 +787,69 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
   // only this event is enabled in this example but this shows one scheme for
   // handling events
 
+  sUartLineBuffer_t buffer;
+  
   if ((CANGetModuleEvent(CAN1) & CAN_RX_EVENT) != 0)
   {
     LED_CAN_TOGGLE;
 
     CANRxMessageBuffer *message;
 
-    /*
-     * CHANNEL 1 = SWITCHES STATES
+//    /*      // Steering wheel now only send clear commands SID instead of all of buttons states
+//     * CHANNEL 1 = SWITCHES STATES
+//     */
+//    if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL1_EVENT)
+//    {
+//
+//      CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
+//
+//      message = CANGetRxMessage(CAN1, CAN_CHANNEL1);
+//
+//      CanSwitches_t switches;
+//      switches.bytes.low  = message->data[0];
+//      switches.bytes.high = message->data[1];
+//
+//      if (buttons.buttons.bits.steerWheelSw1  != switches.bits.sw1 )
+//      {
+//        buttons.buttons.bits.steerWheelSw1  = switches.bits.sw1;
+//        buttons.chng.bits.steerWheelSw1     = 1;
+//      }
+//
+//      if (buttons.buttons.bits.steerWheelSw4  != switches.bits.sw4 )
+//      {
+//        buttons.buttons.bits.steerWheelSw4  = switches.bits.sw4;
+//        buttons.chng.bits.steerWheelSw4     = 1;
+//      }
+//
+//      if (buttons.buttons.bits.steerWheelSw10 != switches.bits.sw10)
+//      {
+//        buttons.buttons.bits.steerWheelSw10 = switches.bits.sw10;
+//        buttons.chng.bits.steerWheelSw10    = 1;
+//      }
+//
+//      LED_CAN_TOGGLE;
+//      CANUpdateChannel(CAN1, CAN_CHANNEL1);
+//      CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+//
+//    }
+     /*
+     * CHANNEL 1 = TURBINE RPM
      */
     if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL1_EVENT)
     {
 
       CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
-
+      
       message = CANGetRxMessage(CAN1, CAN_CHANNEL1);
+      
+      memcpy((void *) &rxTurbineRpm, &message->data[0], 4);
+//                  memcpy((void *) &CAN_WindTurbRPM, &message->data[0], 4);
+      oNewTurbineRpm = 1;
 
-      CanSwitches_t switches;
-      switches.bytes.low  = message->data[0];
-      switches.bytes.high = message->data[1];
-
-      if (buttons.buttons.bits.steerWheelSw1  != switches.bits.sw1 )
-      {
-        buttons.buttons.bits.steerWheelSw1  = switches.bits.sw1;
-        buttons.chng.bits.steerWheelSw1     = 1;
-      }
-
-      if (buttons.buttons.bits.steerWheelSw4  != switches.bits.sw4 )
-      {
-        buttons.buttons.bits.steerWheelSw4  = switches.bits.sw4;
-        buttons.chng.bits.steerWheelSw4     = 1;
-      }
-
-      if (buttons.buttons.bits.steerWheelSw10 != switches.bits.sw10)
-      {
-        buttons.buttons.bits.steerWheelSw10 = switches.bits.sw10;
-        buttons.chng.bits.steerWheelSw10    = 1;
-      }
-
-      LED_CAN_TOGGLE;
       CANUpdateChannel(CAN1, CAN_CHANNEL1);
       CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
-
+//      buffer.length = sprintf(buffer.buffer, "Rpm %f\r\n\n", rxTurbineRpm);
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
     }
 
     /*
@@ -818,17 +857,121 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
      */
     if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL2_EVENT)
     {
-
+      
       CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
-
+      
       message = CANGetRxMessage(CAN1, CAN_CHANNEL2);
 
+      //float rxWindAngleFloat;
       memcpy((void *) &rxWindAngle, &message->data[0], 4);
+      //rxWindAngle = (UINT32)rxWindAngleFloat;
       
       oNewWindAngle = 1;
 
       CANUpdateChannel(CAN1, CAN_CHANNEL2);
       CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+//      buffer.length = sprintf(buffer.buffer, "Ang %f\r\n\n", rxWindAngle);
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
+    }
+    
+    /*
+     * CHANNEL 3 = STEERING WHEEL POT ANGLE (DEGREES)
+     */
+    if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL3_EVENT)
+    {
+        
+      CANEnableChannelEvent(CAN1, CAN_CHANNEL3, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
+
+      message = CANGetRxMessage(CAN1, CAN_CHANNEL3);
+
+      //memcpy((void *) &steeringpotentiometer.value, &message->data[0], 2);
+      float temp;
+      memcpy((void *) &temp, &message->data[0], 4);
+      //steeringpotentiometer.value = (INT16)(temp);
+//      buffer.length = sprintf(buffer.buffer, " %d\r\n\n", steeringpotentiometer.value);
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
+      
+      //steeringpotentiometer.chng = 1;
+      
+      //if(oManualMode)
+      //{
+      if(temp > 0)
+          MastManualRight();
+      else if(temp < 0)
+          MastManualLeft();
+      else
+          MastStop();
+      //}
+
+      CANUpdateChannel(CAN1, CAN_CHANNEL3);
+      CANEnableChannelEvent(CAN1, CAN_CHANNEL3, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+    }
+    /*
+     * CHANNEL 4 = STEERING WHEEL MODE CHANGE
+     */
+    if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL4_EVENT)
+    {
+
+      CANEnableChannelEvent(CAN1, CAN_CHANNEL4, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
+
+//      message = CANGetRxMessage(CAN1, CAN_CHANNEL4);
+
+//      memcpy((void *) &steeringpotentiometer.value, &message->data[0], 4);
+
+      oManualMode ^= 1;   // Toggle mode
+//      oManualFlagChng = 1;
+      MastStop();
+      SEND_MODE_TO_STEERING_WHEEL;
+      CANUpdateChannel(CAN1, CAN_CHANNEL4);
+      CANEnableChannelEvent(CAN1, CAN_CHANNEL4, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
+    }
+    
+    
+    if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL5_EVENT)
+    {
+
+      CANEnableChannelEvent(CAN1, CAN_CHANNEL5, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
+
+      message = CANGetRxMessage(CAN1, CAN_CHANNEL5);
+
+//      memcpy((void *) &steeringpotentiometer.value, &message->data[0], 4);
+      float temp;
+      memcpy((void *) &temp, &message->data[0], 4);
+      //steeringpotentiometer.value = (INT16)(temp);
+//      buffer.length = sprintf(buffer.buffer, " %d\r\n\n", steeringpotentiometer.value);
+//      Uart.PutTxFifoBuffer(UART6, &buffer);
+      
+      //steeringpotentiometer.chng = 1;
+      
+      static int movement = 0;
+      
+      if(!oManualMode)
+      {
+        if(temp > 0)
+        {
+          movement = 1;
+          MastManualRight();
+        }
+        else if(temp < 0)
+        {
+          movement = 1;
+          MastManualLeft();
+        }
+        //else
+        //{
+        //    MastStop();
+        //}
+        //else if(movement)
+        //{
+            movement = 0;
+            MastStop();
+        //}
+      }
+      
+      //oCmdAutoMast = 1;
+      
+      CANUpdateChannel(CAN1, CAN_CHANNEL5);
+      CANEnableChannelEvent(CAN1, CAN_CHANNEL5, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
     }
   }
 

@@ -22,15 +22,15 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-#include "Setup.h"
-#include "Potentiometer.h"
-#include "Interrupts.h"
-#include "StateMachine.h"
-#include "HardwareProfile.h"
-#include "DRV8711_Para.h"
-#include "SkadiFunctions.h"
-#include "CommandFunctions.h"
-#include "StateFunctions.h"
+#include "..\headers\Setup.h"
+#include "..\headers\Potentiometer.h"
+#include "..\headers\Interrupts.h"
+#include "..\headers\StateMachine.h"
+#include "..\headers\HardwareProfile.h"
+#include "..\headers\DRV8711_Para.h"
+#include "..\headers\SkadiFunctions.h"
+#include "..\headers\CommandFunctions.h"
+#include "..\headers\StateFunctions.h"
 
 
 //==============================================================================

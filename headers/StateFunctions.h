@@ -42,8 +42,7 @@ void ReadMastPosFromEeprom (void);
 
 // Mast manual functions
 // =======================================
-void MastStop        (void);  // Abruptly stops the mast
-void MastManualStop  (void);  // Progressively stops the mast
+void MastManualStop  (void);
 void MastManualLeft  (void);
 void MastManualRight (void);
 // =======================================
@@ -118,19 +117,6 @@ typedef struct sButtonStates
   Buttons_t buttons;
   Chng_t    chng;
 } sButtonStates_t;
-
-typedef struct sSteeringPotStates
-{
-  INT16 value;
-  BOOL  chng;
-} sSteeringPotStates_t;
-
-// Steering wheel potentiometer definitions
-#define   MAST_R_POT_MIN  25
-#define   MAST_L_POT_MIN   -25
-#define   MAST_R_POT_MAX  115
-#define   MAST_L_POT_MAX  -115
-
 
 
 //==============================================================================

@@ -20,13 +20,20 @@
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#include "StateFunctions.h"
-#include "CommandFunctions.h"
-#include "Potentiometer.h"
+#include "..\headers\StateFunctions.h"
+#include "..\headers\CommandFunctions.h"
+#include "..\headers\Potentiometer.h"
+
+
+void PRINTF(const char * message)
+{
+	sUartLineBuffer_t buffer;
+	buffer.length = sprintf(buffer.buffer, message);	
+	Uart.PutTxFifoBuffer(UART6, &buffer);
+}
 
 // Private functions prototypes
 void SetZeroFromSteeringWheel (void);
-void SetZeroFSWheelWAngleRelative (void);
 
 
 //==============================================================================
@@ -55,10 +62,7 @@ volatile sButtonStates_t buttons =
 extern volatile float  mastCurrentSpeed       // Actual speed of Mast
                       ;
 
-volatile float mastDirMan;
-
 extern sPotValues_t potValues;
-sSteeringPotStates_t steeringpotentiometer;
 
 extern volatile sCmdValue_t mastAngle;        // Discrete position of mast
 
@@ -76,13 +80,10 @@ extern volatile BOOL oCapture1
                     ,oManualMastLeft
                     ,oTimerSetZero
                     ,oSetZeroCounterOccured
-                    ,oMastMinBlock
-                    ,oMastMaxBlock
                     ;
 
 extern volatile UINT16 setZeroCounter;
 
-extern sUartLineBuffer_t buffer;
 
 //==============================================================================
 // EEPROM functions
@@ -188,8 +189,11 @@ void MastManualLeft (void)
   {
     DRVB_SLEEP = 1;
 
-    Pwm.SetDutyCycle(PWM_2, 585);
-    Pwm.SetDutyCycle(PWM_3, 415);
+//    Pwm.SetDutyCycle(PWM_2, 600);
+//    Pwm.SetDutyCycle(PWM_3, 400);
+    
+    Pwm.SetDutyCycle(PWM_2, 750);
+    Pwm.SetDutyCycle(PWM_3, 250);
 
     WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
   }
@@ -202,8 +206,11 @@ void MastManualLeft (void)
   {
     DRVA_SLEEP = 1;
 
-    Pwm.SetDutyCycle(PWM_4, 585);
-    Pwm.SetDutyCycle(PWM_5, 415);
+//    Pwm.SetDutyCycle(PWM_4, 600);
+//    Pwm.SetDutyCycle(PWM_5, 400);
+//    
+    Pwm.SetDutyCycle(PWM_4, 750);
+    Pwm.SetDutyCycle(PWM_5, 250);
 
     WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors at the drive
   }
@@ -218,9 +225,12 @@ void MastManualRight (void)
   if (USE_DRIVE_B == 1)
   {
     DRVB_SLEEP = 1;
-
-    Pwm.SetDutyCycle(PWM_2, 415);
-    Pwm.SetDutyCycle(PWM_3, 585);
+    
+//    Pwm.SetDutyCycle(PWM_2, 400);
+//    Pwm.SetDutyCycle(PWM_3, 600);
+//    
+    Pwm.SetDutyCycle(PWM_2, 250);
+    Pwm.SetDutyCycle(PWM_3, 750);
 
     WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
   }
@@ -231,149 +241,36 @@ void MastManualRight (void)
   //==========================================================
   if (USE_DRIVE_A == 1)
   {
-    DRVA_SLEEP = 0;
+    DRVA_SLEEP = 1;
 
-    Pwm.SetDutyCycle(PWM_4, 415);
-    Pwm.SetDutyCycle(PWM_5, 585);
+//    Pwm.SetDutyCycle(PWM_4, 400);
+//    Pwm.SetDutyCycle(PWM_5, 600);
+    
+    Pwm.SetDutyCycle(PWM_4, 250);
+    Pwm.SetDutyCycle(PWM_5, 750);
 
     WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors at the drive
   }
   //==========================================================
 }
 
-void MastStop (void)
-{
-  // DRIVE B
-  //==========================================================
-  if (USE_DRIVE_B == 1)
-  {
-    DRVB_SLEEP = 0;
-
-    Pwm.SetDutyCycle(PWM_2, 500);
-    Pwm.SetDutyCycle(PWM_3, 500);
-    
-    WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
-  }
-  //==========================================================
-
-
-  // DRIVE A
-  //==========================================================
-  if (USE_DRIVE_A == 1)
-  {
-    DRVA_SLEEP = 0;
-
-    Pwm.SetDutyCycle(PWM_4, 500);
-    Pwm.SetDutyCycle(PWM_5, 500);
-
-//    DRVA_SLEEP = 1;
-    
-    WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors at the drive
-  }
-  //==========================================================
-}
 
 void MastManualStop (void)
 {
-  mastDirMan = SignFloat(mastCurrentSpeed);
-  buffer.length = sprintf(buffer.buffer, "mastDirMan = %f \r\n\n", mastDirMan);
-  Uart.PutTxFifoBuffer(UART6, &buffer);
-  if(mastDirMan == MAST_DIR_LEFT)
-  {
-    buffer.length = sprintf(buffer.buffer, "Mast Left \r\n\n");
-    Uart.PutTxFifoBuffer(UART6, &buffer);
-    
-    if(!MAST_MIN_OK && !oMastMinBlock)    
-    {
-      buffer.length = sprintf(buffer.buffer, "Man:Set Min Block \r\n\n");
-      Uart.PutTxFifoBuffer(UART6, &buffer);
-      oMastMinBlock = 1;  //Block further mast movement involving the stopping sequence
-      oEnableMastStopProcedure = 1;  // Start stop procedure using TIMER 2
-    }
-    else if(!MAST_MIN_OK && oMastMinBlock)
-    {
-      //Do nothing, Mast has reached Min limit and is already blocked
-    }
-    else    //Mast MIN limit hasn't been reached
-    {
-      oEnableMastStopProcedure = 1;
-    }
-  }
-  else if(mastDirMan == MAST_DIR_RIGHT)
-  {
-    buffer.length = sprintf(buffer.buffer, "Mast Right \r\n\n");
-    Uart.PutTxFifoBuffer(UART6, &buffer);
-    
-    if(!MAST_MAX_OK && !oMastMaxBlock)
-    {
-      buffer.length = sprintf(buffer.buffer, "Man:Set Max Block \r\n\n");
-      Uart.PutTxFifoBuffer(UART6, &buffer);
-      oMastMaxBlock = 1;
-      oEnableMastStopProcedure = 1;  // Start stop procedure using TIMER 2
-    }
-    else if(!MAST_MAX_OK && oMastMaxBlock)
-    {
-      //Do nothing
-    }
-    else
-    {
-      oEnableMastStopProcedure = 1;
-    }
-  }
-  
-  
-//  if(mastDirMan == MAST_DIR_RIGHT)
-//  {
-//    buffer.length = sprintf(buffer.buffer, "Mast Dir Right \r\n\n");
-//    Uart.PutTxFifoBuffer(UART6, &buffer);
-//    
-//    if(!MAST_MAX_OK && !oMastMaxBlock)
-//    {
-//      buffer.length = sprintf(buffer.buffer, "Man:Set Max Block \r\n\n");
-//      Uart.PutTxFifoBuffer(UART6, &buffer);
-//      oMastMaxBlock = 1;
-//      oEnableMastStopProcedure = 1;  // Start stop procedure using TIMER 2
-//    }
-//    else if(!MAST_MAX_OK && oMastMaxBlock)
-//    {
-//      //Do nothing
-//    }
-//    else
-//    {
-//      buffer.length = sprintf(buffer.buffer, "went straight \r\n\n");
-//      Uart.PutTxFifoBuffer(UART6, &buffer);
-//      oEnableMastStopProcedure = 1;
-//    }
-//  }
-//  
-//  if(mastDirMan == MAST_DIR_LEFT)
-//  {
-//    buffer.length = sprintf(buffer.buffer, "Mast Dir Left \r\n\n");
-//    Uart.PutTxFifoBuffer(UART6, &buffer);
-//    
-//    if(!MAST_MIN_OK && !oMastMinBlock)    
-//    {
-//      buffer.length = sprintf(buffer.buffer, "Man:Set Min Block \r\n\n");
-//      Uart.PutTxFifoBuffer(UART6, &buffer);
-//      oMastMinBlock = 1;  //Block further mast movement involving the stopping sequence
-//      oEnableMastStopProcedure = 1;  // Start stop procedure using TIMER 2
-//    }
-//    else if(!MAST_MIN_OK && oMastMinBlock)
-//    {
-//      //Do nothing, Mast has reached Min limit and is already blocked
-//    }
-//    else    //Mast MIN limit hasn't been reached
-//    {
-//      oEnableMastStopProcedure = 1;
-//    }
-//  }
-  mastDirMan = 0;
+  PRINTF("MastManualStop\r\n");
+  //LED_STATUS_ON;
+  //oEnableMastStopProcedure = 1;     // Start stop procedure using TIMER 2
+  oEnableMastStopProcedure = 0;     //Debug mast pulse problem by removing the slow stop and just setting PWM' back to zero
+  //LED_STATUS_TOGGLE;
 
   // DRIVE B
   //==========================================================
   if (USE_DRIVE_B == 1)
   {
     WriteDrive(DRVB, STATUS_Mastw);   // Reset any errors at the drive
+    Pwm.SetDutyCycle(PWM_2, 500);
+    Pwm.SetDutyCycle(PWM_3, 500);
+    DRVB_SLEEP = 0;
   }
   //==========================================================
 
@@ -383,6 +280,9 @@ void MastManualStop (void)
   if (USE_DRIVE_A == 1)
   {
     WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors at the drive
+    Pwm.SetDutyCycle(PWM_4, 500);
+    Pwm.SetDutyCycle(PWM_5, 500);
+    DRVA_SLEEP = 0;
   }
   //==========================================================
 }
@@ -391,15 +291,15 @@ void MastManualStop (void)
 //==============================================================================
 // Buttons functions
 //==============================================================================
-void AssessButtons (void)   // Since we dont decode steering messages containing all the button states anymore, the following code should be cleaned
+void AssessButtons (void)
 {
-  sUartLineBuffer_t buffer;
   // <editor-fold defaultstate="collapsed" desc="Check changes on board">
   // <editor-fold defaultstate="collapsed" desc="Change on SW1 on board">
   if (buttons.buttons.bits.boardSw1 != SW1)
   {
     buttons.buttons.bits.boardSw1    = SW1;
     buttons.chng.bits.boardSw1       =   1;
+
   }
   // </editor-fold>
 
@@ -468,6 +368,7 @@ void AssessButtons (void)   // Since we dont decode steering messages containing
         else if (oManualMode && !oEnableMastStopProcedure)
         {
           oManualMastLeft = 1;
+          LED_DEBUG0_ON;
           oManualFlagChng = 1;
         }
       }
@@ -493,6 +394,7 @@ void AssessButtons (void)   // Since we dont decode steering messages containing
           if (oManualMastLeft)
           {
             oManualMastLeft = 0;
+            LED_DEBUG0_OFF;
             oManualFlagChng = 1;
           }
         }
@@ -525,6 +427,7 @@ void AssessButtons (void)   // Since we dont decode steering messages containing
         else if (oManualMode && !oEnableMastStopProcedure)
         {
           oManualMastRight = 1;
+          LED_DEBUG1_ON;
           oManualFlagChng = 1;
         }
       }
@@ -550,6 +453,7 @@ void AssessButtons (void)   // Since we dont decode steering messages containing
           if (oManualMastRight)
           {
             oManualMastRight = 0;
+            LED_DEBUG1_OFF;
             oManualFlagChng = 1;
           }
         }
@@ -557,193 +461,153 @@ void AssessButtons (void)   // Since we dont decode steering messages containing
     }
     // </editor-fold>
 
-    //    // <editor-fold defaultstate="collapsed" desc="SW1 on steering wheel">
-//    if (buttons.chng.bits.steerWheelSw1)
-//    {
-//      buttons.chng.bits.steerWheelSw1 = 0;
-//
-//      if (buttons.buttons.bits.steerWheelSw1)       // If left switch on steering wheel is pressed
-//      {
-//        if (buttons.buttons.bits.steerWheelSw10)    // And right switch on steering wheel is pressed
-//        {
-//          oCountTimeToChngMode = 1;                 // Start procedure to change manual mode
-//          Timer.Reset(TIMER_5);
-//          Timer.EnableInterrupt(TIMER_5);
-//          oTimerChngMode = 0;
-//
-//          oManualMastLeft  = 0;                     // Stop moving
-//          oManualMastRight = 0;
-//
-//          if (oManualMode)
-//          {
-//            oManualFlagChng = 1;
-//          }
-//        }
-//        else if (oManualMode && !oEnableMastStopProcedure)
-//        {
-//          oManualMastLeft = 1;
-//          oManualFlagChng = 1;
-//        }
-//      }
-//      else                          // If left switch on steering wheel is not pressed
-//      {
-//        if (oCountTimeToChngMode)   // And the procedure ot change mode was occuring
-//        {
-//          Timer.DisableInterrupt(TIMER_5);
-//          oCountTimeToChngMode = 0;
-//
-//          if (oTimerChngMode)              // If at least one second has passed
-//          {
-//            oManualMode ^= 1;       // Change mode
-//            if (mastCurrentSpeed != 0)
-//            {
-//              MastManualStop();
-//            }
-//            SEND_MODE_TO_STEERING_WHEEL;  // Send change of mode to the steering wheel
-//          }
-//        }
-//        else if (oManualMode)
-//        {
-//          if (oManualMastLeft)
-//          {
-//            oManualMastLeft = 0;
-//            oManualFlagChng = 1;
-//          }
-//        }
-//      }
-//    }
-//    // </editor-fold>
-//
-    //    // <editor-fold defaultstate="collapsed" desc="SW4 on steering wheel">
-//    if (buttons.chng.bits.steerWheelSw4)
-//    {
-//      buttons.chng.bits.steerWheelSw4 = 0;
-//
-//      if (buttons.buttons.bits.steerWheelSw4)     // If SW1 is pressed
-//      {
-////        mastAngle.currentValue = 0;
-////        mastAngle.previousValue = 0;
-////        
-////#ifdef USE_POTENTIOMETER
-////        potValues.zeroInBits = potValues.lastAverage;
-////        potValues.potStepValue = POT_TO_MOTOR_RATIO >> 1;
-////#endif
-////
-////        WriteMastPos2Eeprom (); // Write zero to EEPROM
-////
-////        SEND_CALIB_DONE;  // Confirm that the calib is done
-//        
-////        SetZeroFromSteeringWheel();
-//        
-//        oTimerSetZero = 1;
-//        
-//      }
-//      else
-//      {
-//        oTimerSetZero = 0;
-//        setZeroCounter = 0;
-//        oSetZeroCounterOccured = 0;
-//      }
-//    }
-//    // </editor-fold>
-//
-    //    // <editor-fold defaultstate="collapsed" desc="SW10 on steering wheel">
-//    if (buttons.chng.bits.steerWheelSw10)
-//    {
-//      buttons.chng.bits.steerWheelSw10 = 0;
-//
-//      if (buttons.buttons.bits.steerWheelSw10)      // If right switch on steering wheel is pressed
-//      {
-//        if (buttons.buttons.bits.steerWheelSw1)     // And left switch on steering wheel is pressed
-//        {
-//          oCountTimeToChngMode = 1;                 // Start procedure to change manual mode
-//          Timer.Reset(TIMER_5);
-//          Timer.EnableInterrupt(TIMER_5);
-//          oTimerChngMode = 0;
-//
-//          oManualMastLeft  = 0;                     // Stop moving
-//          oManualMastRight = 0;
-//
-//          if (oManualMode)
-//          {
-//            oManualFlagChng = 1;
-//          }
-//        }
-//        else if (oManualMode && !oEnableMastStopProcedure)
-//        {
-//          oManualMastRight = 1;
-//          oManualFlagChng = 1;
-//        }
-//      }
-//      else                          // If right switch on steering wheel is not pressed
-//      {
-//        if (oCountTimeToChngMode)   // And the procedure ot change mode was occuring
-//        {
-//          Timer.DisableInterrupt(TIMER_5);
-//          oCountTimeToChngMode = 0;
-//
-//          if (oTimerChngMode)              // If at least one second has passed
-//          {
-//            oManualMode ^= 1;       // Change mode
-//            if (mastCurrentSpeed != 0)
-//            {
-//              MastManualStop();
-//            }
-//            SEND_MODE_TO_STEERING_WHEEL;  // Send change of mode to the steering wheel
-//          }
-//        }
-//        else if (oManualMode)
-//        {
-//          if (oManualMastRight)
-//          {
-//            oManualMastRight = 0;
-//            oManualFlagChng = 1;
-//          }
-//        }
-//      }
-//    }
-//    // </editor-fold>
-    }
-  
-// <editor-fold defaultstate="collapsed" desc="Potentiometer of steering wheel">
-  if (steeringpotentiometer.chng)
-  {
-    oManualFlagChng = 1;
-    steeringpotentiometer.chng = 0;
-
-    if (oManualMode /*&& !oEnableMastStopProcedure*/)
+    // <editor-fold defaultstate="collapsed" desc="SW1 on steering wheel">
+    if (buttons.chng.bits.steerWheelSw1)
     {
-      if ( (steeringpotentiometer.value < MAST_L_POT_MIN) && (steeringpotentiometer.value > MAST_L_POT_MAX) )
+      buttons.chng.bits.steerWheelSw1 = 0;
+
+      if (buttons.buttons.bits.steerWheelSw1)       // If left switch on steering wheel is pressed
       {
-//        oManualMastRight = 1;
+        if (buttons.buttons.bits.steerWheelSw10)    // And right switch on steering wheel is pressed
+        {
+          oCountTimeToChngMode = 1;                 // Start procedure to change manual mode
+          Timer.Reset(TIMER_5);
+          Timer.EnableInterrupt(TIMER_5);
+          oTimerChngMode = 0;
+
+          oManualMastLeft  = 0;                     // Stop moving
+          oManualMastRight = 0;
+
+          if (oManualMode)
+          {
+            oManualFlagChng = 1;
+          }
+        }
+        else if (oManualMode && !oEnableMastStopProcedure)
+        {
           oManualMastLeft = 1;
-//        oManualFlagChng = 1;
-//        buffer.length = sprintf(buffer.buffer, "Manual R\r\n\n");
-//        Uart.PutTxFifoBuffer(UART6, &buffer);
+          oManualFlagChng = 1;
+        }
       }
-      else if ( (steeringpotentiometer.value > MAST_R_POT_MIN) && (steeringpotentiometer.value < MAST_R_POT_MAX) )
+      else                          // If left switch on steering wheel is not pressed
       {
-        oManualMastRight = 1;
-//        oManualMastLeft = 1;
-//        oManualFlagChng = 1;
-//        buffer.length = sprintf(buffer.buffer, "Manual L\r\n\n");
-//        Uart.PutTxFifoBuffer(UART6, &buffer);
+        if (oCountTimeToChngMode)   // And the procedure ot change mode was occuring
+        {
+          Timer.DisableInterrupt(TIMER_5);
+          oCountTimeToChngMode = 0;
+
+          if (oTimerChngMode)              // If at least one second has passed
+          {
+            oManualMode ^= 1;       // Change mode
+            if (mastCurrentSpeed != 0)
+            {
+              MastManualStop();
+            }
+            SEND_MODE_TO_STEERING_WHEEL;  // Send change of mode to the steering wheel
+          }
+        }
+        else if (oManualMode)
+        {
+          if (oManualMastLeft)
+          {
+            oManualMastLeft = 0;
+            oManualFlagChng = 1;
+          }
+        }
+      }
+    }
+    // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="SW4 on steering wheel">
+    if (buttons.chng.bits.steerWheelSw4)
+    {
+      buttons.chng.bits.steerWheelSw4 = 0;
+
+      if (buttons.buttons.bits.steerWheelSw4)     // If SW1 is pressed
+      {
+//        mastAngle.currentValue = 0;
+//        mastAngle.previousValue = 0;
+//        
+//#ifdef USE_POTENTIOMETER
+//        potValues.zeroInBits = potValues.lastAverage;
+//        potValues.potStepValue = POT_TO_MOTOR_RATIO >> 1;
+//#endif
+//
+//        WriteMastPos2Eeprom (); // Write zero to EEPROM
+//
+//        SEND_CALIB_DONE;  // Confirm that the calib is done
+        
+//        SetZeroFromSteeringWheel();
+        
+        oTimerSetZero = 1;
+        
       }
       else
       {
-//        if ( oManualMastLeft || oManualMastRight)
-//        {
-//          oEnableMastStopProcedure = 1;
-//          MastStop(); // Mast action is only made in StateManual
-        //oManualMastLeft = 0;
-        //oManualMastRight = 0;
-//        buffer.length = sprintf(buffer.buffer, "oManualMast dropped\r\n\n");
-//        Uart.PutTxFifoBuffer(UART6, &buffer);
-//        }
+        oTimerSetZero = 0;
+        setZeroCounter = 0;
+        oSetZeroCounterOccured = 0;
       }
     }
-  }
     // </editor-fold>
+
+    // <editor-fold defaultstate="collapsed" desc="SW10 on steering wheel">
+    if (buttons.chng.bits.steerWheelSw10)
+    {
+      buttons.chng.bits.steerWheelSw10 = 0;
+
+      if (buttons.buttons.bits.steerWheelSw10)      // If right switch on steering wheel is pressed
+      {
+        if (buttons.buttons.bits.steerWheelSw1)     // And left switch on steering wheel is pressed
+        {
+          oCountTimeToChngMode = 1;                 // Start procedure to change manual mode
+          Timer.Reset(TIMER_5);
+          Timer.EnableInterrupt(TIMER_5);
+          oTimerChngMode = 0;
+
+          oManualMastLeft  = 0;                     // Stop moving
+          oManualMastRight = 0;
+
+          if (oManualMode)
+          {
+            oManualFlagChng = 1;
+          }
+        }
+        else if (oManualMode && !oEnableMastStopProcedure)
+        {
+          oManualMastRight = 1;
+          oManualFlagChng = 1;
+        }
+      }
+      else                          // If right switch on steering wheel is not pressed
+      {
+        if (oCountTimeToChngMode)   // And the procedure ot change mode was occuring
+        {
+          Timer.DisableInterrupt(TIMER_5);
+          oCountTimeToChngMode = 0;
+
+          if (oTimerChngMode)              // If at least one second has passed
+          {
+            oManualMode ^= 1;       // Change mode
+            if (mastCurrentSpeed != 0)
+            {
+              MastManualStop();
+            }
+            SEND_MODE_TO_STEERING_WHEEL;  // Send change of mode to the steering wheel
+          }
+        }
+        else if (oManualMode)
+        {
+          if (oManualMastRight)
+          {
+            oManualMastRight = 0;
+            oManualFlagChng = 1;
+          }
+        }
+      }
+    }
+    // </editor-fold>
+  }
   // </editor-fold>
   
   if (oTimerSetZero && oSetZeroCounterOccured)
@@ -755,14 +619,11 @@ void AssessButtons (void)   // Since we dont decode steering messages containing
   }
 }
 
-void SetZeroFromSteeringWheel (void)  // Was used on Chinook6, for absolute mast angle regulation ie when the wind vane was installed on front of car
+void SetZeroFromSteeringWheel (void)
 {
   mastAngle.currentValue = 0;
   mastAngle.previousValue = 0;
         
-  oMastMinBlock = 0;
-  oMastMaxBlock = 0;
-  
 #ifdef USE_POTENTIOMETER
   potValues.zeroInBits = potValues.lastAverage;
   potValues.potStepValue = POT_TO_MOTOR_RATIO >> 1;
