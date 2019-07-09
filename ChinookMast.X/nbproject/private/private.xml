@@ -4,10 +4,19 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/GitHub/ChinookMast/ChinookMast.X/source/CommandFunctions.c</file>
-            <file>file:/C:/GitHub/ChinookMast/ChinookMast.X/source/StateMachine.c</file>
-            <file>file:/C:/GitHub/ChinookMast/ChinookMast.X/source/Setup.c</file>
-            <file>file:/C:/GitHub/ChinookMast/ChinookMast.X/source/Interrupts.c</file>
+            <file>file:/Users/Marc/Chinook_Mast_compé2018/ChinookMast.X/source/DRV8711_Para.c</file>
+            <file>file:/Users/Marc/Chinook_Mast_compé2018/ChinookMast.X/headers/StateFunctions.h</file>
+            <file>file:/Users/Marc/Chinook_Mast_compé2018/ChinookMast.X/source/main.c</file>
+            <file>file:/Users/Marc/Chinook_Mast_compé2018/ChinookMast.X/source/StateMachine.c</file>
+            <file>file:/Users/Marc/Chinook_Mast_compé2018/ChinookMast.X/source/CommandFunctions.c</file>
+            <file>file:/Users/Marc/Chinook_Mast_compé2018/ChinookMast.X/source/Interrupts.c</file>
+            <file>file:/Users/Marc/Chinook_Mast_compé2018/ChinookMast.X/headers/Interrupts.h</file>
+            <file>file:/Users/Marc/Chinook_Mast_compé2018/ChinookMast.X/headers/StateMachine.h</file>
+            <file>file:/Users/Marc/Chinook_Mast_compé2018/ChinookMast.X/headers/CommandFunctions.h</file>
+            <file>file:/Users/Marc/Chinook_Mast_compé2018/ChinookMast.X/source/SkadiFunctions.c</file>
+            <file>file:/Users/Marc/Chinook_Mast_compé2018/ChinookMast.X/source/Setup.c</file>
+            <file>file:/Users/Marc/Chinook_Mast_compé2018/ChinookMast.X/source/Potentiometer.c</file>
+            <file>file:/Users/Marc/Chinook_Mast_compé2018/ChinookMast.X/source/StateFunctions.c</file>
         </group>
     </open-files>
 </project-private>

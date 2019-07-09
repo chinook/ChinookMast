@@ -5,8 +5,8 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //
 // File    : Setup.c
-// Author  : Frederic Chasse
-// Date    : 2015-01-03
+// Author  : Frederic Chasse, Jerome Pare-Lepine
+// Date    : 2015-01-03, 2018-03-20
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 //
@@ -25,12 +25,13 @@
 //           TimerInit is a LED on the MAX32 development board. Developpers
 //           should test for errors by the means (hardware of software) they
 //           judge are the best.
+// TODO    : Fix CAN utils dependency problems @ initCan
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#include "..\headers\Setup.h"
-#include "..\headers\Interrupts.h"
-#include "..\headers\SkadiFunctions.h"
+#include "Setup.h"
+#include "Interrupts.h"
+#include "SkadiFunctions.h"
 
 
 //==============================================================================
@@ -416,6 +417,9 @@ void InitCan(void)
   
   Can.SetChannel(CAN1, CAN_CHANNEL4, 8, RX);
   Can.SetChannelMask(CAN1, CAN_CHANNEL4, CAN_FILTER3, VOLANT_MAST_MODE, CAN_FILTER_MASK0, 0x7FF);
+  
+  Can.SetChannel(CAN1, CAN_CHANNEL5, 8, RX);
+  Can.SetChannelMask(CAN1, CAN_CHANNEL5, CAN_FILTER4, 0x56, CAN_FILTER_MASK0, 0x7FF);
   
   Can.ConfigInterrupt(CAN1, CAN1_INTERRUPT_PRIORITY, CAN1_INTERRUPT_SUBPRIORITY);
 }

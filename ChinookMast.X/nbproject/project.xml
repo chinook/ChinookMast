@@ -3,7 +3,7 @@
     <type>com.microchip.mplab.nbide.embedded.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>ChinookMast</name>
+            <name>Mast_compe_2018</name>
             <creation-uuid>eaa2613f-4bd4-46c6-b9be-6dbc03a7d1a7</creation-uuid>
             <make-project-type>0</make-project-type>
             <c-extensions>c</c-extensions>
@@ -14,6 +14,19 @@
             <make-dep-projects>
                 <make-dep-project>../../ChinookLib/ChinookLib.X</make-dep-project>
             </make-dep-projects>
+            <sourceRootList>
+                <sourceRootElem>source</sourceRootElem>
+                <sourceRootElem>headers</sourceRootElem>
+            </sourceRootList>
+            <confList>
+                <confElem>
+                    <name>default</name>
+                    <type>2</type>
+                </confElem>
+            </confList>
+            <formatting>
+                <project-formatting-style>false</project-formatting-style>
+            </formatting>
         </data>
     </configuration>
 </project>

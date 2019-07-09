@@ -20,9 +20,9 @@
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#include "..\headers\CommandFunctions.h"
-#include "..\headers\StateFunctions.h"
-#include "..\headers\Potentiometer.h"
+#include "CommandFunctions.h"
+#include "StateFunctions.h"
+#include "Potentiometer.h"
 
 
 //==============================================================================
@@ -35,7 +35,7 @@ extern volatile UINT32 rxWindAngle;
 //=====================================
 
 extern sPotValues_t potValues;
-float tempFuck = 0;
+float overDeadBand = 0;
 
 // Used for the average of the wind angle
 //========================================
@@ -524,11 +524,7 @@ void Regulator (void)
 
 void RelativeWAngleRegulator(void)
 {
-  float tempWind
-//        ,tempRpm
-        ,windAngleError
-        ;
-//  sUartLineBuffer_t buffer;
+  float tempWind, windAngleError;
   
   if (nTurbineRpmSamples > 0)
   {
@@ -537,21 +533,9 @@ void RelativeWAngleRegulator(void)
     nTurbineRpmSamples = 0;
     
     // Sets the wind angle tolerance
-    
     windAngleError = WIND_ANGLE_ERROR_LO_WIND;
-    
-//    buffer.length = sprintf(buffer.buffer, "Rpm %f\r\n\n", tempRpm);
-//    Uart.PutTxFifoBuffer(UART6, &buffer);
-    
-//    if (tempRpm >= TURBINE_HIGH_RPM)
-//    {
-//      windAngleError = WIND_ANGLE_ERROR_HI_WIND;
-//    }
-//    else
-//    {
-//      windAngleError = WIND_ANGLE_ERROR_LO_WIND;
-//    }
   }
+  
   // Compute Wind Angle from sensor
   if (nWindAngleSamples >= WIND_ANGLE_AVG_N)
   {
@@ -563,46 +547,29 @@ void RelativeWAngleRegulator(void)
     buffer.length = sprintf(buffer.buffer, "Ang %f\r\n\n", tempWind);
     Uart.PutTxFifoBuffer(UART6, &buffer);
     
-    tempFuck = (tempWind >= WIND_ANGLE_ERROR_LO_WIND);
+    overDeadBand = (tempWind >= WIND_ANGLE_ERROR_LO_WIND);
 //        
-    buffer.length = sprintf(buffer.buffer, "test =  %f\r\n\n", tempFuck);
+    buffer.length = sprintf(buffer.buffer, "test =  %f\r\n\n", overDeadBand);
     Uart.PutTxFifoBuffer(UART6, &buffer);
-//  }
-//  else  // If no new sample was received
-//  {
-//    tempWind = windAngle.previousValue;   // Keep previous value as current value
-//  }
   
-  // Wind Angle processing
-//  if (tempRpm >= TURBINE_HIGH_RPM)
-//  {
-//    if (tempWind != WIND_ANGLE_ZERO)
-//    {
-//      if ( abs(tempWind) >= WIND_ANGLE_ERROR_LO_WIND/*windAngleError*/)
-//      {
-  
-
-  
-        if ( (tempWind >= WIND_ANGLE_ERROR_LO_WIND) )
-        {
-          MastManualLeft();
-          buffer.length = sprintf(buffer.buffer, "Mast L\r\n\n");
-          Uart.PutTxFifoBuffer(UART6, &buffer);
-        }
-        else if (tempWind <= -(WIND_ANGLE_ERROR_LO_WIND) )
-        {
-          MastManualRight();
-          buffer.length = sprintf(buffer.buffer, "Mast R\r\n\n");
-          Uart.PutTxFifoBuffer(UART6, &buffer);
-  //        MastManualLeft();
-        }
-//      }
-//    }
-        else
-        {
-        MastStop();
-        buffer.length = sprintf(buffer.buffer, "Mastop\r\n\n");
-        Uart.PutTxFifoBuffer(UART6, &buffer);
+	if ( (tempWind >= WIND_ANGLE_ERROR_LO_WIND) )
+	{
+	  MastManualRight();
+//      MastManualLeft();
+	  buffer.length = sprintf(buffer.buffer, "Mast L\r\n\n");
+	  Uart.PutTxFifoBuffer(UART6, &buffer);
+	}
+	else if (tempWind <= -(WIND_ANGLE_ERROR_LO_WIND) )
+	{
+	  MastManualLeft();
+//      MastManualRight();
+	  buffer.length = sprintf(buffer.buffer, "Mast R\r\n\n");
+	  Uart.PutTxFifoBuffer(UART6, &buffer);
+	}
+	else{
+	  MastStop();
+	  buffer.length = sprintf(buffer.buffer, "Mastop\r\n\n");
+	  Uart.PutTxFifoBuffer(UART6, &buffer);
     }
   }
 }
@@ -663,7 +630,7 @@ void AssessMastValues (void)
         }
         else
         {
-          mastCurrentSpeed = MOTOR_DEG_PER_PULSE / (mastTime * MAST_MOTOR_RATIO);
+            mastCurrentSpeed = MOTOR_DEG_PER_PULSE / (mastTime * MAST_MOTOR_RATIO);
         }
       }
       else

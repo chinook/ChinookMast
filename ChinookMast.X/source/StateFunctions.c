@@ -20,9 +20,9 @@
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#include "..\headers\StateFunctions.h"
-#include "..\headers\CommandFunctions.h"
-#include "..\headers\Potentiometer.h"
+#include "StateFunctions.h"
+#include "CommandFunctions.h"
+#include "Potentiometer.h"
 
 // Private functions prototypes
 void SetZeroFromSteeringWheel (void);
@@ -735,8 +735,8 @@ void AssessButtons (void)   // Since we dont decode steering messages containing
 //        {
 //          oEnableMastStopProcedure = 1;
 //          MastStop(); // Mast action is only made in StateManual
-        oManualMastLeft = 0;
-        oManualMastRight = 0;
+        //oManualMastLeft = 0;
+        //oManualMastRight = 0;
 //        buffer.length = sprintf(buffer.buffer, "oManualMast dropped\r\n\n");
 //        Uart.PutTxFifoBuffer(UART6, &buffer);
 //        }

@@ -20,11 +20,11 @@
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#include "..\headers\SkadiFunctions.h"
-#include "..\headers\CommandFunctions.h"
-#include "..\headers\StateFunctions.h"
-#include "..\headers\Potentiometer.h"
-#include "..\headers\DRV8711_Para.h"
+#include "SkadiFunctions.h"
+#include "CommandFunctions.h"
+#include "StateFunctions.h"
+#include "Potentiometer.h"
+#include "DRV8711_Para.h"
 
 
 

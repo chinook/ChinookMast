@@ -33,7 +33,7 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%
 // ChinookLib files
 //%%%%%%%%%%%%%%%%%%%%%%%%%
-#include "..\..\..\ChinookLib\ChinookLib.X\headers\ChinookLib.h"
+#include "ChinookLib.h"
 
 //==============================================================================
 // ChinookLib functions

@@ -145,7 +145,7 @@ typedef union
 #define UART6_INTERRUPT_PRIORITY        1           // Used in ChinookLib function
 #define U6_INTERRUPT_PRIORITY           ipl1auto    // Used in ISR
 
-#define UART6_INTERRUPT_SUBPRIORITY     0           // Lowest subpriority
+#define UART6_INTERRUPT_SUBPRIORITY     1//0           // Lowest subpriority
 //===============================================
 
 

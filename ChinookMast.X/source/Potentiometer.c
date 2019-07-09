@@ -16,8 +16,8 @@
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-#include "..\headers\Potentiometer.h"
-#include "..\headers\CommandFunctions.h"
+#include "Potentiometer.h"
+#include "CommandFunctions.h"
 
 
 //==============================================================================

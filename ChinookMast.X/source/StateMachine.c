@@ -18,12 +18,12 @@
 //
 //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#include "..\headers\StateMachine.h"
-#include "..\headers\DRV8711_Para.h"
-#include "..\headers\Interrupts.h"
-#include "..\headers\StateFunctions.h"
-#include "..\headers\CommandFunctions.h"
-#include "..\headers\Potentiometer.h"
+#include "StateMachine.h"
+#include "DRV8711_Para.h"
+#include "Interrupts.h"
+#include "StateFunctions.h"
+#include "CommandFunctions.h"
+#include "Potentiometer.h"
 
 extern volatile sButtonStates_t buttons;
 
@@ -261,7 +261,7 @@ void StateScheduler(void)
       pStateMast = &StateClose;    // Stay in current state
     }
   }
-
+  
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   // Current state = StateIdle
   //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -543,10 +543,12 @@ void StateGetMastData(void)
 //===============================================================
 void StateReg(void)
 {
-//  oTimerReg = 0;
-//
-//  Regulator();
-RelativeWAngleRegulator();
+  // DO NOT TEST REGULATOR ALONE. SERIOUSLY, SCARY SHIT.
+  //oTimerReg = 0;
+  //Regulator();
+    
+    
+    RelativeWAngleRegulator();
 }
 
 
