@@ -8,11 +8,9 @@
       <itemPath>headers/HardwareProfile.h</itemPath>
       <itemPath>headers/Interrupts.h</itemPath>
       <itemPath>headers/Setup.h</itemPath>
-      <itemPath>headers/SkadiFunctions.h</itemPath>
       <itemPath>headers/StateMachine.h</itemPath>
       <itemPath>headers/CommandFunctions.h</itemPath>
       <itemPath>headers/StateFunctions.h</itemPath>
-      <itemPath>headers/Potentiometer.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -24,12 +22,10 @@
       <itemPath>source/DRV8711_Para.c</itemPath>
       <itemPath>source/Interrupts.c</itemPath>
       <itemPath>source/Setup.c</itemPath>
-      <itemPath>source/SkadiFunctions.c</itemPath>
       <itemPath>source/main.c</itemPath>
       <itemPath>source/StateMachine.c</itemPath>
       <itemPath>source/CommandFunctions.c</itemPath>
       <itemPath>source/StateFunctions.c</itemPath>
-      <itemPath>source/Potentiometer.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

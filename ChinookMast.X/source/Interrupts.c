@@ -219,31 +219,7 @@ void __ISR(_TIMER_2_VECTOR, T2_INTERRUPT_PRIORITY) Timer2InterruptHandler(void)
           Pwm.SetDutyCycle(PWM_5, 500);
         }
         //==========================================================
-
-//#ifdef USE_POTENTIOMETER
-//        oWaitAfterStop = 1;
-//#else
-        //mastCurrentSpeed = 0;
-        //oEnableMastStopProcedure = 0;
-        //iMastStop = 0;
-        //mastDir   = 0;
-//#endif
-//      }
-//      else
-//      {
-//        if (waitAfterStopCounter < 10)
-//        {
-//          waitAfterStopCounter++;
-//        }
-//        else
-//        {
-//          waitAfterStopCounter = 0;
-//          oWaitAfterStop = 0;
-//          oEnableMastStopProcedure = 0;
-//          iMastStop = 0;
-//          mastDir   = 0;
-//        }
-//      }
+        
       buffer.length = sprintf(buffer.buffer, "Stop- Max?%u Min?%u \r\n\n", oMastMaxBlock,oMastMinBlock);
       Uart.PutTxFifoBuffer(UART6, &buffer);      
     }
@@ -263,7 +239,7 @@ void __ISR(_TIMER_3_VECTOR, T3_INTERRUPT_PRIORITY) Timer3InterruptHandler(void)
 
   // Increment the number of overflows from this timer. Used primarily by Input Capture
   Timer.Var.nOverflows[2]++;
-
+  
   mT3ClearIntFlag();
 }
 
@@ -794,44 +770,6 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
     LED_CAN_TOGGLE;
 
     CANRxMessageBuffer *message;
-
-//    /*      // Steering wheel now only send clear commands SID instead of all of buttons states
-//     * CHANNEL 1 = SWITCHES STATES
-//     */
-//    if (CANGetPendingEventCode(CAN1) == CAN_CHANNEL1_EVENT)
-//    {
-//
-//      CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
-//
-//      message = CANGetRxMessage(CAN1, CAN_CHANNEL1);
-//
-//      CanSwitches_t switches;
-//      switches.bytes.low  = message->data[0];
-//      switches.bytes.high = message->data[1];
-//
-//      if (buttons.buttons.bits.steerWheelSw1  != switches.bits.sw1 )
-//      {
-//        buttons.buttons.bits.steerWheelSw1  = switches.bits.sw1;
-//        buttons.chng.bits.steerWheelSw1     = 1;
-//      }
-//
-//      if (buttons.buttons.bits.steerWheelSw4  != switches.bits.sw4 )
-//      {
-//        buttons.buttons.bits.steerWheelSw4  = switches.bits.sw4;
-//        buttons.chng.bits.steerWheelSw4     = 1;
-//      }
-//
-//      if (buttons.buttons.bits.steerWheelSw10 != switches.bits.sw10)
-//      {
-//        buttons.buttons.bits.steerWheelSw10 = switches.bits.sw10;
-//        buttons.chng.bits.steerWheelSw10    = 1;
-//      }
-//
-//      LED_CAN_TOGGLE;
-//      CANUpdateChannel(CAN1, CAN_CHANNEL1);
-//      CANEnableChannelEvent(CAN1, CAN_CHANNEL1, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
-//
-//    }
      /*
      * CHANNEL 1 = TURBINE RPM
      */
@@ -870,8 +808,6 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 
       CANUpdateChannel(CAN1, CAN_CHANNEL2);
       CANEnableChannelEvent(CAN1, CAN_CHANNEL2, CAN_RX_CHANNEL_NOT_EMPTY, TRUE);
-//      buffer.length = sprintf(buffer.buffer, "Ang %f\r\n\n", rxWindAngle);
-//      Uart.PutTxFifoBuffer(UART6, &buffer);
     }
     
     /*
@@ -914,9 +850,7 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
 
       CANEnableChannelEvent(CAN1, CAN_CHANNEL4, CAN_RX_CHANNEL_NOT_EMPTY, FALSE);
 
-//      message = CANGetRxMessage(CAN1, CAN_CHANNEL4);
-
-//      memcpy((void *) &steeringpotentiometer.value, &message->data[0], 4);
+      message = CANGetRxMessage(CAN1, CAN_CHANNEL4);
 
       oManualMode ^= 1;   // Toggle mode
 //      oManualFlagChng = 1;
@@ -957,15 +891,11 @@ void __ISR(_CAN_1_VECTOR, CAN1_INT_PRIORITY) Can1InterruptHandler(void)
           movement = 1;
           MastManualLeft();
         }
-        //else
-        //{
-        //    MastStop();
-        //}
-        //else if(movement)
-        //{
+        else if(movement)
+        {
             movement = 0;
             MastStop();
-        //}
+        }
       }
       
       //oCmdAutoMast = 1;

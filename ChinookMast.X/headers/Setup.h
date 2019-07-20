@@ -71,7 +71,6 @@ void InitCan          (void);
 void InitSpi          (void);
 void InitUart         (void);
 void InitI2c          (void);
-void InitSkadi        (void);
 void InitWdt          (void);
 void InitInputCapture (void);
 void StartInterrupts  (void);
@@ -88,7 +87,6 @@ void StartInterrupts  (void);
 #define INIT_SPI            InitSpi()
 #define INIT_UART           InitUart()
 #define INIT_I2C            InitI2c()
-#define INIT_SKADI          InitSkadi()
 #define INIT_WDT            InitWdt()
 #define INIT_INPUT_CAPTURE  InitInputCapture()
 #define START_INTERRUPTS    StartInterrupts()
@@ -302,28 +300,29 @@ BYTE Can1MessageFifoArea [ CAN_NB_CHANNELS     // Space used by CAN
                          * CAN_TX_RX_MESSAGE_SIZE_BYTES
                          ];
 
-#define MAST_BOARD_SID                0x30
-#define MAST_DISCONNECT_SID           0x31
-#define MAST_DIRECTION_SID            0x32
-#define MAST_MODE_SID                 0x33
-#define MAST_CALIB_DONE_SID           0x34
+#define MAST_BOARD_SID                0x50//0x30
+#define MAST_DISCONNECT_SID           0x51//0x31
+#define MAST_DIRECTION_SID            0x52//0x32
+#define MAST_MODE_SID                 0x53//0x33
+#define MAST_CALIB_DONE_SID           0x54//0x34
+#define MAST_MODE_OUT_SID             0x55
 #define IDENTIFICATION_TO_BACKPLANE   0x70
 #define DISCONNECT_FROM_BACKPLANE     0x71
 
 // Message 0 : Identification
-#define SEND_ID_TO_BACKPLANE          Can.SendByte(CAN1, IDENTIFICATION_TO_BACKPLANE, MAST_BOARD_SID)
+#define SEND_ID_TO_BACKPLANE          //Can.SendByte(CAN1, IDENTIFICATION_TO_BACKPLANE, MAST_BOARD_SID)
 
 // Message 1 : Disconnect
-#define SEND_DISCONNECT_TO_BACKPLANE  Can.SendByte(CAN1, DISCONNECT_FROM_BACKPLANE, MAST_DISCONNECT_SID)
+#define SEND_DISCONNECT_TO_BACKPLANE  //Can.SendByte(CAN1, DISCONNECT_FROM_BACKPLANE, MAST_DISCONNECT_SID)
 
 // Message 2 : Mast orientation
-#define SEND_MAST_DIRECTION           Can.SendFloat(CAN1, MAST_DIRECTION_SID, mastAngle.currentValue)
+#define SEND_MAST_DIRECTION           //Can.SendFloat(CAN1, MAST_DIRECTION_SID, mastAngle.currentValue)
 
 // Message 3 : Mast mode of operation
-#define SEND_MODE_TO_STEERING_WHEEL   Can.SendByte(CAN1, MAST_MODE_SID, (BYTE) oManualMode)
+#define SEND_MODE_TO_STEERING_WHEEL   Can.SendByte(CAN1, MAST_MODE_OUT_SID, (BYTE) oManualMode)
 
 // Message 4 : Mast calib done
-#define SEND_CALIB_DONE               Can.SendByte(CAN1, MAST_CALIB_DONE_SID, 1)
+#define SEND_CALIB_DONE               //Can.SendByte(CAN1, MAST_CALIB_DONE_SID, 1)
 
 
 #endif	/* __SETUP_H__ */

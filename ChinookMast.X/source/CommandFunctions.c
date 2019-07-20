@@ -247,8 +247,6 @@ void SetPwm (float cmd)
         WriteDrive(DRVA, STATUS_Mastw);   // Reset any errors
       }
       //==========================================================
-      
-      WriteMastPos2Eeprom();
 
       if (oPrintData)   // Used for debugging with skadi
       {
@@ -402,7 +400,7 @@ void Regulator (void)
 //Mast Speed Update
 //========================//
 #ifdef USE_POTENTIOMETER
-  MastGetSpeed(&potValues, T);
+  //MastGetSpeed(&potValues, T);
   mastCurrentSpeed = potValues.speed->currentValue;
 #else
   mastSpeed.previousValue = mastSpeed.currentValue;
@@ -544,32 +542,20 @@ void RelativeWAngleRegulator(void)
     meanWindAngle = 0;
     nWindAngleSamples = 0;
     
-    buffer.length = sprintf(buffer.buffer, "Ang %f\r\n\n", tempWind);
-    Uart.PutTxFifoBuffer(UART6, &buffer);
-    
     overDeadBand = (tempWind >= WIND_ANGLE_ERROR_LO_WIND);
-//        
-    buffer.length = sprintf(buffer.buffer, "test =  %f\r\n\n", overDeadBand);
-    Uart.PutTxFifoBuffer(UART6, &buffer);
   
 	if ( (tempWind >= WIND_ANGLE_ERROR_LO_WIND) )
 	{
 	  MastManualRight();
 //      MastManualLeft();
-	  buffer.length = sprintf(buffer.buffer, "Mast L\r\n\n");
-	  Uart.PutTxFifoBuffer(UART6, &buffer);
 	}
 	else if (tempWind <= -(WIND_ANGLE_ERROR_LO_WIND) )
 	{
 	  MastManualLeft();
 //      MastManualRight();
-	  buffer.length = sprintf(buffer.buffer, "Mast R\r\n\n");
-	  Uart.PutTxFifoBuffer(UART6, &buffer);
 	}
 	else{
 	  MastStop();
-	  buffer.length = sprintf(buffer.buffer, "Mastop\r\n\n");
-	  Uart.PutTxFifoBuffer(UART6, &buffer);
     }
   }
 }

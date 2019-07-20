@@ -32,6 +32,7 @@
 #include "CommandFunctions.h"
 #include "StateFunctions.h"
 
+volatile BOOL  oManualMode;
 
 //==============================================================================
 // MAIN CODE
@@ -81,6 +82,8 @@ void main(void)
 //============================
 	pStateMast = &StateInit;
 //============================
+    
+    SEND_MODE_TO_STEERING_WHEEL;
   
 
 	while(1)  //infinite loop

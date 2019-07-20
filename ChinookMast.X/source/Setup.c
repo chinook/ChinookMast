@@ -38,28 +38,6 @@
 //	INIT FUNCTIONS
 //==============================================================================
 
-/***********************************
- * Table of functions used in Skadi
- **********************************/
-sSkadiCommand_t skadiCommandTable[] =
-{
-//  User call       Function    args                     Description
-   {"setwind"     , SetWind     , 1 , "\t| Set wind angle [deg].\t\t\t\t| 1 arg : Min = -179.0, Max = 179.0"            }
-  ,{"setpos"      , SetPos      , 1 , "\t| Set mast angle [deg].\t\t\t\t| 1 arg : Min = -179.0, Max = 179.0"            }
-  ,{"setmode"     , SetMode     , 1 , "\t| Set mast mode of operation.\t\t\t| 1 arg : 1 = Manual, 0 = Auto"             }
-  ,{"setparam"    , SetParam    , 2 , "\t| Set K, KI, KP, PWM_MAX, PWM_MIN and ERROR.\t| 2 args : var and val\n"        }
-  ,{"setzero"     , SetZero     , 0 , "\t| Set current pos as zero\t| 0 args.\n"                                        }
-  ,{"getwind"     , GetWind     , 0 , "\t| Read the wind current angle [deg].\t\t| No arg needed"                       }
-  ,{"getpos"      , GetPos      , 0 , "\t| Read the mast current position [deg].\t\t| 0 arg"                            }
-  ,{"getmode"     , GetMode     , 0 , "\t| Get the mast current mode of operation.\t| 0 arg"                            }
-  ,{"getspeed"    , GetSpeed    , 0 , "\t| Read the mast current speed [deg/s].\t\t| 0 arg"                             }
-  ,{"getparam"    , GetParam    , 0 , "\t| Print K, KI, KP, PWM_MAX, PWM_MIN and ERROR.\t| 0 arg\n"                     }
-  ,{"writestatus" , WriteStatus , 0 , "\t| Write STATUS msg to drive.\t\t\t| 0 arg"                                     }
-  ,{"readstatus" , ReadStatus , 0 , "\t| Read STATUS from drive. Make sure the drive is well selected\t\t\t| 0 arg"     }
-  ,{"writemem"    , WriteMastInfo, 0, "\t| Write mast info to EEPROM.\t\t\t| 0 arg"                                     }
-  ,{"setprint"    , SetPrint    , 1 , "\t| Print or not data from regulation.\t\t| 1 arg : 1 = Print, 0 = Don't print"  }
-  ,{"clc"         , ClearScreen , 0 , "\t\t| Clear terminal window.\t\t\t| 0 arg"                                       }
-};
 
 //===========================
 //	INIT TIMERS
@@ -136,14 +114,6 @@ void InitAdc(void)
   Adc.Open(samplingClk, configHardware, configPort, configScan);
 
   Adc.ConfigInterrupt(ADC_INTERRUPT_PRIORITY, ADC_INTERRUPT_SUBPRIORITY);
-}
-
-//===========================
-//	INIT SKADI
-//===========================
-void InitSkadi(void)
-{
-  Skadi.Init(skadiCommandTable, sizeof(skadiCommandTable)/sizeof(sSkadiCommand_t), UART6, TRUE);  // TRUE ==> Use interrupts with UART
 }
 
 //===========================
@@ -410,7 +380,7 @@ void InitCan(void)
 
   Can.SetChannel(CAN1, CAN_CHANNEL2, 8, RX);
   Can.SetChannelMask(CAN1, CAN_CHANNEL2, CAN_FILTER1, WIND_DIRECTION_ID, CAN_FILTER_MASK0, 0x7FF);
-
+  
   // Data from steering wheel
   Can.SetChannel(CAN1, CAN_CHANNEL3, 8, RX);
   Can.SetChannelMask(CAN1, CAN_CHANNEL3, CAN_FILTER2, VOLANT_MAST_DIR, CAN_FILTER_MASK0, 0x7FF);
