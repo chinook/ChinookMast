@@ -303,7 +303,7 @@ void AssessButtons (void)   // Since we dont decode steering messages containing
         potValues.potStepValue = POT_TO_MOTOR_RATIO >> 1;
 #endif
 
-        SEND_CALIB_DONE;  // Confirm that the calib is done
+        //SEND_CALIB_DONE;  // Confirm that the calib is done
       }
     }
     // </editor-fold>

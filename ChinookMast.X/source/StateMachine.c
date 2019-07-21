@@ -563,7 +563,7 @@ void StateSendData(void)
 
   static UINT8 iCounterToTwoSec = 0;
   
-  SEND_MAST_DIRECTION;  // Via CAN bus
+  //SEND_MAST_DIRECTION;  // Via CAN bus
 
   // DRIVE B
   //==========================================================
