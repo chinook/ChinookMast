@@ -319,7 +319,7 @@ BYTE Can1MessageFifoArea [ CAN_NB_CHANNELS     // Space used by CAN
 #define SEND_MAST_DIRECTION           //Can.SendFloat(CAN1, MAST_DIRECTION_SID, mastAngle.currentValue)
 
 // Message 3 : Mast mode of operation
-#define SEND_MODE_TO_STEERING_WHEEL   Can.SendByte(CAN1, MAST_MODE_OUT_SID, (BYTE) oManualMode)
+#define SEND_MODE_TO_STEERING_WHEEL   Can.SendData(CAN1, MAST_MODE_OUT_SID, oManualMode)
 
 // Message 4 : Mast calib done
 #define SEND_CALIB_DONE               //Can.SendByte(CAN1, MAST_CALIB_DONE_SID, 1)

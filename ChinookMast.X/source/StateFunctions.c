@@ -138,7 +138,7 @@ void MastManualRight (void)
   //==========================================================
   if (USE_DRIVE_A == 1)
   {
-    DRVA_SLEEP = 0;
+    DRVA_SLEEP = 1;
 
     Pwm.SetDutyCycle(PWM_4, 415);
     Pwm.SetDutyCycle(PWM_5, 585);
